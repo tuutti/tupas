@@ -1,0 +1,176 @@
+<?php
+
+/**
+ * @file tupas_test.module
+ * Module for testing TUPAS authentication
+ * 
+ */
+
+/**
+ * Implemementation of hook_perm()
+ *
+ * @return array An array of permissions defined by the module
+ * 
+ */
+function tupas_test_perm() {
+	return array('administer tupas_test, access tupas_test');
+}
+
+
+/**
+ * Implementation of hook_menu()
+ * 
+ * Provides a list of menu items enabled by the module
+ *
+ * @return array $items List of menu items
+ * 
+ */
+function tupas_test_menu() {
+	
+	$items = array(
+		
+		// front page with the bank buttons etc.
+		'tupas' => array(
+			'title' => 'TUPAS authentication',
+			'description' => 'TUPAS authentication',
+			'page callback' => 'tupas_front',
+			'access arguments' => array('access tupas'),
+			'type' => MENU_NORMAL_ITEM
+		),
+		
+		// return on success
+		'tupas_test_return' => array(
+			'title' => 'TUPAS authentication successful',
+			'describe' => 'tupas test return',
+			'page callback' => 'tupas_test_return',
+			'page arguments' => array(1, 2),
+			'access arguments' => array('access tupas'),
+			'type' => MENU_CALLBACK
+		),
+		
+		// return on cancel
+		'tupas_test_return_can' => array(
+			'title' => 'TUPAS authentication canceled',
+			'page callback' => 'tupas_test_return_can',
+			'access arguments' => array('access tupas'),
+			'type' => MENU_CALLBACK
+		),
+		
+		// return on failure
+		'tupas_test_return_rej' => array(
+			'title' => 'TUPAS authentication failed',
+			'page callback' => 'tupas_test_return_rej',
+			'access arguments' => array('access tupas'),
+			'type' => MENU_CALLBACK
+		),
+		
+		// test page for authenticated users
+		'tupas_test' => array(
+			'title' => 'Test page for TUPAS authenticated users',
+			'description' => 'Test page for TUPAS authenticated users',
+			'page callback' => 'tupas_test',
+			'access arguments' => array('access areas requiring tupas authentication'),
+			'type' => MENU_NORMAL_ITEM
+		)
+	
+	);
+	
+	return $items;
+	
+}
+
+
+/**
+ * Front page showing the bank buttons etc.
+ *
+ * @param integer $transaction_id Optional transaction ID
+ * @return string Themed HTML output
+ * 
+ */
+function tupas_front($transaction_id = '') {
+	
+	$transaction_id = rand(100000, 999999); //TODO
+	
+	global $user;
+	
+	// if the user is already authenticated with TUPAS
+	if (user_access('access areas requiring tupas authentication') && $user->uid != 1) {
+		
+		// desperately trying to avoid double messages
+		if (count($_SESSION['messages']['warning']) == 0) {
+			drupal_set_message(t('You have already authenticated'), 'warning');
+		}
+	
+		drupal_goto(variable_get('authenticated_goto', '')); //FIXME
+	}
+	
+	$query = "SELECT * FROM {tupas_bank} WHERE enabled = 1";
+	
+	$result = db_query($query);
+	
+	$banks = array();
+	
+	while ($bank = db_fetch_array($result)) {
+		$banks[] = drupal_get_form('tupas_form', $bank, $transaction_id);
+	}
+	
+	return theme('item_list', $banks); //TODO use a proper theme/template
+}
+
+
+/**
+ * Return handler
+ *
+ * @param integer $bank_id Bank ID
+ * @param integer $transaction_id Optional transaction ID
+ * @return unknown
+ * 
+ */
+function tupas_test_return($bank_id, $transaction_id = '') {
+	
+	if($data = tupas_return($bank_id, $transaction_id)) {
+		logg($data);
+		
+		//TODO do whatever you please with the data
+		
+		drupal_set_message('TUPAS authentication successful');
+		
+		drupal_set_message($data['B02K_CUSTNAME'].', '.$data['B02K_CUSTID']);
+		
+	}
+	else {
+		drupal_set_message('TUPAS authentication failed', 'error');
+	}
+	
+	return theme_placeholder('');
+	
+}
+
+
+/**
+ * Return on cancel
+ *
+ * @return unknown
+ */
+function tupas_test_return_can($transaction_id = '') {
+	drupal_set_message(t('TUPAS authentication canceled'), 'warning');
+	
+	return theme_placeholder('');
+}
+
+
+/**
+ * Return on failure
+ *
+ * @return unknown
+ */
+function tupas_test_return_rej($transaction_id = '') {
+	drupal_set_message(t('TUPAS authentication rejected'), 'error');
+	
+	return theme_placeholder('');
+}
+
+
+function tupas_test() {
+	return theme_placeholder("You should see this only if you are a TUPAS authenticated user (or an admin).");
+}
