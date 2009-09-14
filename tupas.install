@@ -1,155 +1,152 @@
 <?php
+// $Id$
 
+/**
+ * @file
+ * Install, update and uninstall functions for the TUPAS module.
+ */
+
+/**
+ * Defines the database schema used by the module
+ *
+ * @return array $schema Database schema as an array
+ */
 function tupas_schema() {
-	
-	$schema = array();
-	
-	// bank table
-	$schema['tupas_bank'] = array(
-		'description' => 'Banks supported by the TUPAS module',
-	
-		'fields' => array(
-	
-			'id' => array(
-				'description' => 'bank id',
-				'type' => 'serial',
-				'unsigned' => true,
-				'not null' => true
-			),
-			
-			'shortname' => array(
-				'description' => 'machine readable name of the bank',
-				'type' => 'text'
-			),
-			
-			'longname' => array(
-				'description' => 'original name of the bank',
-				'type' => 'text'
-			),
-			
-			'enabled' => array(
-				'description' => 'enable/disable the bank',
-				'type' => 'int'
-			),
-			
-			'action_url' => array(
-				'description' => 'form action URL',
-				'type' => 'text'
-			),
-			
-			'cert_version' => array(
-				'description' => 'certificate version',
-				'type' => 'text'
-			),
-			
-			'rcv_id' => array(
-				'description' => 'receiver id',
-				'type' => 'text'
-			),
-			
-			'rcv_key' => array(
-				'description' => 'receiver key',
-				'type' => 'text'
-			),
-			
-			'keyvers' => array(
-				'description' => 'key version',
-				'type' => 'text'
-			),
-			
-			'encryption_alg' => array(
-				'description' => 'encryption algorithm',
-				'type' => 'text'
-			),
-			
-			'image_button' => array(
-				'description' => 'image button filename',
-				'type' => 'text'
-			)
-		),
-		
-		'primary key' => array('id')
-	);
-	
-	// user table
-	$schema['tupas_user'] = array(
-		
-		'description' => 'TUPAS users',
-	
-		'fields' => array(
-			
-			'id' => array(
-				'description' => 'tupas user id',
-				'type' => 'serial',
-				'unsigned' => true,
-				'not null' => true
-			),
-			
-			'uid' => array(
-				'description' => 'drupal user id',
-				'type' => 'int',
-				'unsigned' => true,
-				'not null' => true
-			),
-			
-			'transaction_id' => array(
-				'description' => 'transaction id',
-				'type' => 'int',
-				'size' => 'medium'
-			),
-			
-			'tupas_expiration_timestamp' => array(
-				'description' => 'tupas authentication expiration timestamp',
-				'type' => 'text'
-			)
-	
-		),
-		
-		'unique keys' => array(
-			'uid' => array('uid'),
-			'transaction_id' => array('transaction_id')
-		),
-		
-		'primary key' => array('id')
-	
-	);
-	
-	return $schema;
-	
+
+  $schema = array();
+
+  // bank table
+  $schema['tupas_bank'] = array(
+    'description' => 'Banks supported by the TUPAS module',
+    'fields' => array(
+      'id' => array(
+        'description' => 'bank id',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'shortname' => array(
+        'description' => 'machine readable name of the bank',
+        'type' => 'text',
+      ),
+      'longname' => array(
+        'description' => 'original name of the bank',
+        'type' => 'text',
+      ),
+      'enabled' => array(
+        'description' => 'enable/disable the bank',
+        'type' => 'int',
+      ),
+      'action_url' => array(
+        'description' => 'form action URL',
+        'type' => 'text',
+      ),
+      'cert_version' => array(
+        'description' => 'certificate version',
+        'type' => 'text',
+      ),
+      'rcv_id' => array(
+        'description' => 'receiver id',
+        'type' => 'text',
+      ),
+      'rcv_key' => array(
+        'description' => 'receiver key',
+        'type' => 'text',
+      ),
+      'keyvers' => array(
+        'description' => 'key version',
+        'type' => 'text',
+      ),
+      'encryption_alg' => array(
+        'description' => 'encryption algorithm',
+        'type' => 'text',
+      ),
+      'image_button' => array(
+        'description' => 'image button filename',
+        'type' => 'text',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  // user table
+  $schema['tupas_user'] = array(
+    'description' => 'TUPAS users',
+    'fields' => array(
+      'id' => array(
+        'description' => 'tupas user id',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'drupal user id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'transaction_id' => array(
+        'description' => 'transaction id',
+        'type' => 'int',
+        'size' => 'medium',
+      ),
+      'tupas_expiration_timestamp' => array(
+        'description' => 'tupas authentication expiration timestamp',
+        'type' => 'text',
+      ),
+    ),
+    'unique keys' => array(
+      'uid' => array('uid'),
+      'transaction_id' => array('transaction_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
 }
 
-
+/**
+ * Installs the database schema and adds some default values to the tables
+ *
+ */
 function tupas_install() {
-	drupal_install_schema('tupas');
-	
-	// add banks
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('handelsbanken', 'Handelsbanken', 1, 'https://tunnistepalvelu.samlink.fi/TupasTunnistus/SHBtupas.html', '0002', '1111111111111', '11111111111111111111', '0001', '01', '');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('nordea', 'Nordea', 1, 'https://solo3.nordea.fi/cgi-bin/SOLO3011', '0002', '87654321', 'LEHTI', '0001', '01', 'nordea_button_60x60px.gif');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('osuuspankki', 'Osuuspankit', 1, 'https://kultaraha.op.fi/cgi-bin/krcgi', '0003', 'Esittelymyyja', 'Esittelykauppiaansalainentunnus', '0001', '02', 'op_white_bgr-14.gif');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('sampo', 'Sampo pankki', 0, 'https://verkkopankki.sampopankki.fi/SP/tupaha/TupahaApp', '0003', '000000000000', 'jumCLB4T2ceZWGJ9ztjuhn5FaeZnTm5HpfDXWU2APRqfDcsrBs8mqkFARzm7uXKd', '0001', '02', 'logo.gif');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('saastopankit', 'Säästöpankit ja paikallisosuuspankit', 1, 'https://tunnistepalvelu.samlink.fi/TupasTunnistus/TupasServlet', '0002', '1111111111111', '11111111111111111111', '0001', '01', 'sppopmaksu.gif');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('tapiola', 'Tapiola pankki', 1, 'https://pankki.tapiola.fi/service/identify', '0002', 'TAPTUPASID', 'PAPAKAIJU', '0001', '01', '60x60_Tapiola_maksupainike.gif');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('alandsbanken', 'Ålandsbanken', 0, '', '', '', '', '0001', '', '');");
-	db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('spankki', 'S-Pankki', 1, 'https://online.s-pankki.fi/service/identify', '0002', 'SPANKKITUPAS', 'SPANKKI', '0001', '01', '');");
-	
-	// add role
-	db_query("INSERT INTO {role} (name) VALUES ('tupas authenticated user');");
-	
-	// add permissions
-	$role_id = db_last_insert_id('{role}', 'rid');
-	$query = "INSERT INTO {permission} (rid, perm) VALUES (%d, 'access tupas, access areas requiring tupas authentication')";
-	db_query($query, array($role_id));
+  drupal_install_schema('tupas');
+
+  // add banks
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('handelsbanken', 'Handelsbanken', 1, 'https://tunnistepalvelu.samlink.fi/TupasTunnistus/SHBtupas.html', '0002', '1111111111111', '11111111111111111111', '0001', '01', '');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('nordea', 'Nordea', 1, 'https://solo3.nordea.fi/cgi-bin/SOLO3011', '0002', '87654321', 'LEHTI', '0001', '01', 'nordea_button_60x60px.gif');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('osuuspankki', 'Osuuspankit', 1, 'https://kultaraha.op.fi/cgi-bin/krcgi', '0003', 'Esittelymyyja', 'Esittelykauppiaansalainentunnus', '0001', '02', 'op_white_bgr-14.gif');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('sampo', 'Sampo pankki', 0, 'https://verkkopankki.sampopankki.fi/SP/tupaha/TupahaApp', '0003', '000000000000', 'jumCLB4T2ceZWGJ9ztjuhn5FaeZnTm5HpfDXWU2APRqfDcsrBs8mqkFARzm7uXKd', '0001', '02', 'logo.gif');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('saastopankit', 'Säästöpankit ja paikallisosuuspankit', 1, 'https://tunnistepalvelu.samlink.fi/TupasTunnistus/TupasServlet', '0002', '1111111111111', '11111111111111111111', '0001', '01', 'sppopmaksu.gif');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('tapiola', 'Tapiola pankki', 1, 'https://pankki.tapiola.fi/service/identify', '0002', 'TAPTUPASID', 'PAPAKAIJU', '0001', '01', '60x60_Tapiola_maksupainike.gif');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('alandsbanken', 'Ålandsbanken', 0, '', '', '', '', '0001', '', '');");
+  db_query("INSERT INTO {tupas_bank} (shortname, longname, enabled, action_url, cert_version, rcv_id, rcv_key, keyvers, encryption_alg, image_button) VALUES ('spankki', 'S-Pankki', 1, 'https://online.s-pankki.fi/service/identify', '0002', 'SPANKKITUPAS', 'SPANKKI', '0001', '01', '');");
+
+  // add role
+  db_query("INSERT INTO {role} (name) VALUES ('tupas authenticated user');");
+
+  // add permissions
+  $role_id = db_last_insert_id('{role}', 'rid');
+  $query = "INSERT INTO {permission} (rid, perm) VALUES (%d, 'access tupas, access areas requiring tupas authentication')";
+  db_query($query, array($role_id));
+
+  // notify the admin
+  drupal_set_message(st("TUPAS settings are available under !link and !link2",
+      array('!link' => l('Administer > Site configuration > TUPAS general settings', 'admin/settings/tupas/general'), '!link2' => l('Administer > Site configuration > TUPAS bank settings', 'admin/settings/tupas/banks'))
+  ));
 }
 
-
+/**
+ * Uninstalls the database schema and removes some values
+ *
+ */
 function tupas_uninstall() {
-	drupal_uninstall_schema('tupas');
-	
-	// delete role
-	db_query("DELETE FROM {role} WHERE name = 'tupas authenticated user';");
-	
-	// delete permissions
-	db_query("DELETE FROM {permission} WHERE perm LIKE '%access areas requiring tupas authentication%'");
+  drupal_uninstall_schema('tupas');
+
+  // delete role
+  db_query("DELETE FROM {role} WHERE name = 'tupas authenticated user';");
+
+  // delete permissions
+  db_query("DELETE FROM {permission} WHERE perm LIKE '%access areas requiring tupas authentication%'");
 }
 
-?>
