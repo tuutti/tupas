@@ -1,0 +1,36 @@
+
+tupas_test.front:
+  path: '/tupas'
+  defaults:
+    _controller: '\Drupal\tupas_test\Controller\TupasTestController::front'
+    _title: 'TUPAS authentication'
+  requirements:
+    _permission: 'access tupas'
+tupas_test.return:
+  path: '/tupas_test_return'
+  defaults:
+    _controller: '\Drupal\tupas_test\Controller\TupasTestController::returnTo'
+    _title: 'TUPAS authentication successful'
+  requirements:
+    _permission: 'access tupas'
+tupas_test.cancel:
+  path: '/tupas_test_return_can'
+  defaults:
+    _controller: '\Drupal\tupas_test\Controller\TupasTestController::cancel'
+    _title: 'TUPAS authentication canceled'
+  requirements:
+    _permission: 'access tupas'
+tupas_test.rejected:
+  path: '/tupas_test_rej'
+  defaults:
+    _controller: '\Drupal\tupas_test\Controller\TupasTestController::rejected'
+    _title: 'TUPAS authentication failed'
+  requirements:
+    _permission: 'access tupas'
+tupas_test.test:
+  path: '/tupas_test'
+  defaults:
+    _controller: '\Drupal\tupas_test\Controller\TupasTestController::test'
+    _title: 'Test page for TUPAS authenticated users'
+  requirements:
+    _permission: 'access areas requiring tupas authentication'

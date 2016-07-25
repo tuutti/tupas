@@ -1,0 +1,8 @@
+
+tupas_registration.tupas_registration_controller_register:
+  path: '/user/tupas'
+  defaults:
+    _controller: '\Drupal\tupas_registration\Controller\TupasRegistrationController::register'
+    _title: 'TUPAS authentication'
+  requirements:
+    _access: 'TRUE'

@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the TUPAS module.
+ */
+
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_install().
+ */
+function tupas_install() {
+  Role::create(['id' => 'tupas_authenticated_user', 'label' => 'tupas authenticated user'])
+    ->grantPermission('access tupas')
+    ->grantPermission('access areas requiring tupas authentication')
+    ->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tupas_uninstall() {
+  $role = Role::load('tupas_authenticated_user');
+
+  if ($role instanceof Role) {
+    $role->delete();
+  }
+}

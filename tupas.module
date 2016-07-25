@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains tupas.module..
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function tupas_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the tupas module.
+    case 'help.page.tupas':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Enables the TUPAS authentication functionality') . '</p>';
+      return $output;
+
+    default:
+  }
+}

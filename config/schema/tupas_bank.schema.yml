@@ -1,0 +1,26 @@
+tupas.tupas_bank.*:
+  type: config_entity
+  label: 'Tupas bank config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    status:
+      type: boolean
+    action_url:
+      type: string
+    cert_version:
+      type: string
+    rcv_id:
+      type: string
+    rcv_key:
+      type: string
+    key_version:
+      type: string
+    encryption_alg:
+      type: string

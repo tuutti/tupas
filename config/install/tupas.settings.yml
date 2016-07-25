@@ -1,0 +1,8 @@
+tupas_session_length: '30'
+idtype: '12'
+authenticated_goto: tupas_test.return
+canceled_goto: tupas_test.cancel
+rejected_goto: tupas_test.return
+expired_goto: tupas_test.front
+_core:
+  default_config_hash: I47vrQ8AofKNh6AT2Pwlov2E0tAgEWhGesn5mP5kNPU

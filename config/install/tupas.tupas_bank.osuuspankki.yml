@@ -1,0 +1,12 @@
+uuid: 9b495985-1cc1-4ec1-b8df-eec6c9af1c72
+langcode: en
+status: true
+dependencies: {  }
+id: osuuspankki
+label: Osuuspankki
+action_url: 'https://kultaraha.op.fi/cgi-bin/krcgi'
+cert_version: '0003'
+rcv_id: Esittelymyyja
+rcv_key: Esittelykauppiaansalainentunnus
+key_version: '0001'
+encryption_alg: '02'

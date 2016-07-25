@@ -1,0 +1,12 @@
+uuid: 6c8fa051-a9b9-430a-ac4e-61e74e8b8dfd
+langcode: en
+status: true
+dependencies: {  }
+id: nordea
+label: Nordea
+action_url: 'https://solo3.nordea.fi/cgi-bin/SOLO3011'
+cert_version: '0002'
+rcv_id: '87654321'
+rcv_key: LEHTI
+key_version: '0001'
+encryption_alg: '01'

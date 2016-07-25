@@ -1,0 +1,10 @@
+
+tupas.tupas_settings_form:
+  path: '/admin/config/people/tupas'
+  defaults:
+    _form: '\Drupal\tupas\Form\TupasSettingsForm'
+    _title: 'TUPAS authentication'
+  requirements:
+    _permission: 'administer tupas'
+  options:
+    _admin_route: TRUE

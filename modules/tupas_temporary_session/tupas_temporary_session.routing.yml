@@ -1,0 +1,11 @@
+
+tupas_temporary_session.settings_form:
+  path: '/admin/config/people/tupas/session'
+  defaults:
+    _form: '\Drupal\tupas_temporary_session\Form\SettingsForm'
+    _title: 'TUPAS temporary session'
+  requirements:
+    _permission: 'administer tupas'
+  options:
+    _admin_route: TRUE
+
