@@ -94,16 +94,15 @@ class SessionController extends ControllerBase {
       throw new HttpException(502, 'Hash validation failed');
     }
     // Allow message to be customized.
-    $message = $this->eventDispatcher
-      ->dispatch(TemporarySessionEvents::RETURN_MESSAGE_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication succesful.')));
+    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.
     if ($message) {
       drupal_set_message($message);
     }
 
     // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher
-      ->dispatch(TemporarySessionEvents::RETURN_REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
+    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
+
     return $this->redirect($uri);
   }
 
@@ -111,12 +110,36 @@ class SessionController extends ControllerBase {
    * Callback for /user/tupas/cancel path.
    */
   public function cancel() {
+    // Allow message to be customized.
+    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_CANCEL_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication was canceled by used.')));
+
+    // Allow message to be disabled.
+    if ($message) {
+      drupal_set_message($message);
+    }
+
+    // Allow  redirect path to be customized.
+    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_CANCEL_ALTER, new ReturnRedirectAlterEvent('<front>'));
+
+    return $this->redirect($uri);
   }
 
   /**
    * Callback for /user/tupas/rejected path.
    */
   public function rejected() {
+    // Allow message to be customized.
+    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_REJECTED_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication was rejected.')));
+
+    // Allow message to be disabled.
+    if ($message) {
+      drupal_set_message($message);
+    }
+
+    // Allow  redirect path to be customized.
+    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_REJECTED_ALTER, new ReturnRedirectAlterEvent('<front>'));
+
+    return $this->redirect($uri);
   }
 
 }
