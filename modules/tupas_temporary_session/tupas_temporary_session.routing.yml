@@ -9,3 +9,33 @@ tupas_temporary_session.settings_form:
   options:
     _admin_route: TRUE
 
+
+tupas_temporary_session.front:
+  path: '/user/tupas/login'
+  defaults:
+    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::front'
+    _title: 'TUPAS authentication'
+  requirements:
+    _access: 'TRUE'
+tupas_temporary_session.canceled:
+  path: '/user/tupas/cancel'
+  defaults:
+    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::cancel'
+    _title: 'Canceled TUPAS authentication'
+  requirements:
+    _access: 'TRUE'
+tupas_temporary_session.rejected:
+  path: '/user/tupas/rejected'
+  defaults:
+    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::rejected'
+    _title: 'Rejected TUPAS authentication'
+  requirements:
+    _access: 'TRUE'
+tupas_temporary_session.return:
+  path: '/user/tupas/authenticated'
+  defaults:
+    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::returnTo'
+    _title: 'TUPAS authenticated'
+  requirements:
+    _access: 'TRUE'
+

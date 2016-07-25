@@ -1,8 +1,6 @@
 <?php
 namespace Drupal\tupas;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Url;
-use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\Exception\TupasHashMatchException;
@@ -80,6 +78,10 @@ class TupasService implements TupasServiceInterface {
     foreach ($settings as $key => $setting) {
       $this->set($key, $setting);
     }
+    // Fallback to english.
+    if (!in_array(strtoupper($settings['language']), $this->allowed_languages)) {
+      $this->set('language', 'EN');
+    }
   }
 
   /**
@@ -120,7 +122,7 @@ class TupasService implements TupasServiceInterface {
    * {@inheritdoc}
    */
   public function getLanguage() {
-    return $this->language;
+    return strtoupper($this->language);
   }
 
   /**
@@ -196,7 +198,7 @@ class TupasService implements TupasServiceInterface {
    * @return string
    */
   public function checksum(array $parts) {
-    return implode('&', $parts) . '&';
+    return $this->hashMac(implode('&', $parts) . '&');
   }
 
   /**
@@ -207,9 +209,7 @@ class TupasService implements TupasServiceInterface {
    * @return bool
    */
   public function hashMatch($mac, $parts) {
-    $generated_mac = $this->hashMac($this->checksum($parts));
-
-    return $generated_mac === $mac;
+    return $this->checksum($parts) === $mac;
   }
 
   /**
