@@ -9,7 +9,6 @@ tupas_temporary_session.settings_form:
   options:
     _admin_route: TRUE
 
-
 tupas_temporary_session.front:
   path: '/user/tupas/login'
   defaults:

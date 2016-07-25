@@ -1,5 +1,7 @@
 <?php
 namespace Drupal\tupas;
+
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\tupas\Exception\TupasGenericException;
@@ -154,10 +156,7 @@ class TupasService implements TupasServiceInterface {
   }
 
   /**
-   * Url helper to generate internal return uris.
-   *
-   * Url must contain bank_id and transaction_id arguments, like
-   * /tupas/{bank_id}/{transaction_id}.
+   * Helper to generate (absolute) internal URLs.
    *
    * @param $key
    * @return \Drupal\Core\Url
@@ -221,7 +220,10 @@ class TupasService implements TupasServiceInterface {
    * @throws \Drupal\tupas\Exception\TupasHashMatchException
    */
   public function isValid(Request $request) {
-    $mac_order = [
+    // Make sure url arguments are processed in correct order.
+    // @see https://www.drupal.org/node/2669274 (tupas)
+    // @see https://www.drupal.org/node/2374777 (tupas_registration)
+    $parameters = [
       'B02K_VERS',
       'B02K_TIMESTMP',
       'B02K_IDNBR',
@@ -233,8 +235,7 @@ class TupasService implements TupasServiceInterface {
       'B02K_CUSTTYPE',
     ];
     $parts = [];
-
-    foreach ($mac_order as $key) {
+    foreach ($parameters as $key) {
       if (!$request->query->get($key)) {
         throw new TupasGenericException(sprintf('Missing %s argument', $key));
       }
@@ -247,5 +248,32 @@ class TupasService implements TupasServiceInterface {
       throw new TupasHashMatchException('Mac hash does not match with B02K_MAC.');
     }
     return TRUE;
+  }
+
+  /**
+   * Hash SSN.
+   *
+   * @param $payload
+   *   The value SSN to be hashed that must contain sign of century (-, +, or A).
+   * @param $salt
+   * @return string
+   * @throws \Drupal\tupas\Exception\TupasGenericException
+   */
+  public function hashSsn($payload, $salt) {
+    $pieces = preg_split("/(\+|\-|A)/", $payload);
+    if (empty($pieces[1])) {
+      throw new TupasGenericException('SSN must contain sign of century.');
+    }
+    $hashing_algorithm = '$2a$';
+    $log2_level = 13;
+
+    // Create salt specific for the SSN.
+    $salt = hash_hmac('sha512', Settings::getHashSalt(), $pieces[0]);
+
+    // SSN hashed with a salt generated from the site specific salt and the
+    // birthdate.
+    $hashed_ssn = crypt($payload, $hashing_algorithm . $log2_level . '$' . $salt . '$');
+
+    return $hashed_ssn;
   }
 }

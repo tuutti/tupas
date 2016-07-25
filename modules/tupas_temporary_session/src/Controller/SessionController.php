@@ -4,6 +4,7 @@ namespace Drupal\tupas_temporary_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\TupasService;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class SessionController.
@@ -43,6 +44,26 @@ class SessionController extends ControllerBase {
   }
 
   /**
+   * Callback for /user/tupas/authenticated path.
+   */
+  public function returnTo(Request $request) {
+    $bank = $this->entityManager()
+      ->getStorage('tupas_bank')
+      ->load($request->query->get('bank_id'));
+
+    if (!$bank instanceof TupasBank) {
+      throw new HttpException(502, 'Bank not found');
+    }
+    $hash_match = $this->tupas->isValid($request);
+
+    if (!$hash_match) {
+      throw new HttpException(502, 'Hash validation failed');
+    }
+    drupal_set_message()
+    return $this->redirect('<front>');
+  }
+
+  /**
    * Callback for /user/tupas/cancel path.
    */
   public function cancel() {
@@ -52,12 +73,6 @@ class SessionController extends ControllerBase {
    * Callback for /user/tupas/rejected path.
    */
   public function rejected() {
-  }
-
-  /**
-   * Callback for /user/tupas/authenticated path.
-   */
-  public function returnTo() {
   }
 
 }
