@@ -95,14 +95,15 @@ class SessionController extends ControllerBase {
     }
     // Allow message to be customized.
     $message = $this->eventDispatcher
-      ->dispatch(TemporarySessionEvents::RETURN_MESSAGE_ALTER, new ReturnMessageAlterEvent(t('TUPAS authentication succesful.')));
-
-    drupal_set_message($message);
+      ->dispatch(TemporarySessionEvents::RETURN_MESSAGE_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication succesful.')));
+    // Allow message to be disabled.
+    if ($message) {
+      drupal_set_message($message);
+    }
 
     // Allow  redirect path to be customized.
     $uri = $this->eventDispatcher
       ->dispatch(TemporarySessionEvents::RETURN_REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
-
     return $this->redirect($uri);
   }
 
