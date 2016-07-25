@@ -4,6 +4,11 @@ namespace Drupal\tupas_temporary_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\TupasService;
+use Drupal\tupas_temporary_session\Event\ReturnMessageAlterEvent;
+use Drupal\tupas_temporary_session\Event\ReturnRedirectAlterEvent;
+use Drupal\tupas_temporary_session\Event\TemporarySessionEvents;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -12,6 +17,32 @@ use Symfony\Component\HttpFoundation\Request;
  * @package Drupal\tupas_temporary_session\Controller
  */
 class SessionController extends ControllerBase {
+
+  /**
+   * Event dispatcher service.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
+   * SessionController constructor.
+   *
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   Event dispatcher service.
+   */
+  public function __construct(EventDispatcherInterface $event_dispatcher) {
+    $this->eventDispatcher = $event_dispatcher;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('event_dispatcher')
+    );
+  }
 
   /**
    * Callback for /user/tupas/login path.
@@ -45,6 +76,9 @@ class SessionController extends ControllerBase {
 
   /**
    * Callback for /user/tupas/authenticated path.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
    */
   public function returnTo(Request $request) {
     $bank = $this->entityManager()
@@ -59,8 +93,17 @@ class SessionController extends ControllerBase {
     if (!$hash_match) {
       throw new HttpException(502, 'Hash validation failed');
     }
-    drupal_set_message()
-    return $this->redirect('<front>');
+    // Allow message to be customized.
+    $message = $this->eventDispatcher
+      ->dispatch(TemporarySessionEvents::RETURN_MESSAGE_ALTER, new ReturnMessageAlterEvent(t('TUPAS authentication succesful.')));
+
+    drupal_set_message($message);
+
+    // Allow  redirect path to be customized.
+    $uri = $this->eventDispatcher
+      ->dispatch(TemporarySessionEvents::RETURN_REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
+
+    return $this->redirect($uri);
   }
 
   /**
