@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\tupas_temporary_session\Form;
+namespace Drupal\tupas_session\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Class settingsForm.
  *
- * @package Drupal\tupas_temporary_session\Form
+ * @package Drupal\tupas_session\Form
  */
 class SettingsForm extends ConfigFormBase {
 
@@ -17,7 +17,7 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'tupas_temporary_session.settings',
+      'tupas_session.settings',
     ];
   }
 
@@ -32,7 +32,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('tupas_temporary_session.settings');
+    $config = $this->config('tupas_session.settings');
 
     $form['tupas_session_length'] = [
       '#type' => 'textfield',
@@ -86,7 +86,7 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config('tupas_temporary_session.settings')
+    $this->config('tupas_session.settings')
       ->set('tupas_session_length', $form_state->getValue('tupas_session_length'))
       ->set('authenticated_goto', $form_state->getValue('authenticated_goto'))
       ->set('canceled_goto', $form_state->getValue('canceled_goto'))

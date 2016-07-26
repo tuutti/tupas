@@ -1,0 +1,62 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the TUPAS module.
+ */
+
+use Drupal\user\Entity\Role;
+
+/**
+ * Implements hook_schema().
+ */
+function tupas_session_schema() {
+  $schema = [];
+
+  $schema['tupas_sessions'] = [
+    'description' => 'TUPAS users',
+    'fields' => [
+      'id' => [
+        'description' => 'tupas user id',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'transaction_id' => [
+        'description' => 'transaction id',
+        'type' => 'int',
+        'size' => 'medium',
+      ],
+      'tupas_expiration_timestamp' => [
+        'description' => 'tupas authentication expiration timestamp',
+        'type' => 'text',
+      ],
+    ],
+    'unique keys' => [
+      'transaction_id' => ['transaction_id'],
+    ],
+    'primary key' => ['id'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function tupas_session_install() {
+  Role::create(['id' => 'tupas_authenticated_user', 'label' => 'tupas authenticated user'])
+    ->grantPermission('access tupas')
+    ->grantPermission('access areas requiring tupas authentication')
+    ->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tupas_session_uninstall() {
+  $role = Role::load('tupas_authenticated_user');
+
+  if ($role instanceof Role) {
+    $role->delete();
+  }
+}

@@ -1,5 +1,0 @@
-tupas_session_length: '30'
-authenticated_goto: tupas_temporary_session.return
-canceled_goto: tupas_temporary_session.canceled
-rejected_goto: tupas_temporary_session.rejected
-expired_goto: tupas_temporary_session.front

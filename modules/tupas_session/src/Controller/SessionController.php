@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\tupas_temporary_session\Controller;
+namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\TupasService;
-use Drupal\tupas_temporary_session\Event\ReturnMessageAlterEvent;
-use Drupal\tupas_temporary_session\Event\ReturnRedirectAlterEvent;
-use Drupal\tupas_temporary_session\Event\TemporarySessionEvents;
+use Drupal\tupas_session\Event\ReturnMessageAlterEvent;
+use Drupal\tupas_session\Event\ReturnRedirectAlterEvent;
+use Drupal\tupas_session\Event\TemporarySessionEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class SessionController.
  *
- * @package Drupal\tupas_temporary_session\Controller
+ * @package Drupal\tupas_session\Controller
  */
 class SessionController extends ControllerBase {
 
@@ -58,7 +58,7 @@ class SessionController extends ControllerBase {
       '#type' => 'container',
       '#attributes' => ['class' => ['tupas-bank-items']],
     ];
-    $config = $this->config('tupas_temporary_session.settings');
+    $config = $this->config('tupas_session.settings');
 
     foreach ($banks as $bank) {
       $tupas = new TupasService($bank, [

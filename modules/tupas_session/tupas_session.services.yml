@@ -1,0 +1,9 @@
+services:
+  tupas_session._session:
+    class: Drupal\tupas_session\TupasTemporarySessionService
+    arguments: ["@config.factory"]
+
+  tupas_session.session:
+    class: Drupal\tupas_session\TupasSessionService
+    arguments: ["@database"]
+

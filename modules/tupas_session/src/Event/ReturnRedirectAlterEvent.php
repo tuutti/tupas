@@ -1,12 +1,12 @@
 <?php
-namespace Drupal\tupas_temporary_session\Event;
+namespace Drupal\tupas_session\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class ReturnRedirectAlterEvent
  *
- * @package Drupal\tupas_temporary_session\Event
+ * @package Drupal\tupas_session\Event
  */
 class ReturnRedirectAlterEvent extends Event {
 

@@ -1,5 +1,0 @@
-name: tupas_temporary_session
-type: module
-description: TUPAS temporary session.
-core: 8.x
-package: TUPAS

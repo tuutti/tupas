@@ -1,0 +1,6 @@
+tupas_session.settings_form:
+  title: 'TUPAS session'
+  route_name: tupas_session.settings_form
+  description: 'General settings of the TUPAS authentication module'
+  base_route: tupas.tupas_settings_form
+  weight: 0

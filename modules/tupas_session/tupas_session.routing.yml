@@ -1,39 +1,39 @@
 
-tupas_temporary_session.settings_form:
+tupas_session.settings_form:
   path: '/admin/config/people/tupas/session'
   defaults:
-    _form: '\Drupal\tupas_temporary_session\Form\SettingsForm'
+    _form: '\Drupal\tupas_session\Form\SettingsForm'
     _title: 'TUPAS temporary session'
   requirements:
     _permission: 'administer tupas'
   options:
     _admin_route: TRUE
 
-tupas_temporary_session.front:
+tupas_session.front:
   path: '/user/tupas/login'
   defaults:
-    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::front'
+    _controller: '\Drupal\tupas_session\Controller\SessionController::front'
     _title: 'TUPAS authentication'
   requirements:
     _access: 'TRUE'
-tupas_temporary_session.canceled:
+tupas_session.canceled:
   path: '/user/tupas/cancel'
   defaults:
-    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::cancel'
+    _controller: '\Drupal\tupas_session\Controller\SessionController::cancel'
     _title: 'Canceled TUPAS authentication'
   requirements:
     _access: 'TRUE'
-tupas_temporary_session.rejected:
+tupas_session.rejected:
   path: '/user/tupas/rejected'
   defaults:
-    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::rejected'
+    _controller: '\Drupal\tupas_session\Controller\SessionController::rejected'
     _title: 'Rejected TUPAS authentication'
   requirements:
     _access: 'TRUE'
-tupas_temporary_session.return:
+tupas_session.return:
   path: '/user/tupas/authenticated'
   defaults:
-    _controller: '\Drupal\tupas_temporary_session\Controller\SessionController::returnTo'
+    _controller: '\Drupal\tupas_session\Controller\SessionController::returnTo'
     _title: 'TUPAS authenticated'
   requirements:
     _access: 'TRUE'
