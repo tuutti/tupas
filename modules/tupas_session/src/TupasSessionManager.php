@@ -70,12 +70,28 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     }
     $expire = (int) $config->get('tupas_session_length') * 60 + REQUEST_TIME;
     $this->tupasSession->save($account, $transaction_id, $expire);
+
+    // Grant user role.
+    $account->addRole('tupas_authenticated_user')
+      ->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function destroy($uid) {
+    $config = $this->configFactory->get('tupas_session.settings');
+
+    if (!$account = $this->load($uid)) {
+      return FALSE;
+    }
+    // Remove tupas authenticated role.
+    // @todo Should we always remove role when destroying session or just when
+    // tupas_session_length is enabled?
+    if (!empty($config->get('tupas_session_length'))) {
+      $account->removeRole('tupas_authenticated_user')
+        ->save();
+    }
     $this->tupasSession->delete($uid);
   }
 

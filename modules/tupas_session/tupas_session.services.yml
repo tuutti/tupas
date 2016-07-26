@@ -7,3 +7,7 @@ services:
     class: Drupal\tupas_session\TupasSession
     arguments: ["@database"]
 
+  tupas_session.expiration_subscriber:
+    class: Drupal\tupas_session\EventSubscriber\TupasExpirationSubscriber
+    tags:
+      - { name: event_subscriber }
