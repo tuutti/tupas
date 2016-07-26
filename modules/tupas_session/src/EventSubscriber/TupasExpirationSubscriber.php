@@ -67,10 +67,10 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
     $session = $this->sessionManager->getSession($account->id());
 
     // No session found or has not expired.
-    if (empty($session->expire) || $session->expire > REQUEST_TIME) {
+    if (!isset($session->expire) || $session->expire > REQUEST_TIME) {
       return;
     }
-    $session->destroy($account->id());
+    $this->sessionManager->destroy($account->id());
   }
 
 }

@@ -46,7 +46,7 @@ class TupasSession {
         'user_id' => $account->id(),
       ])
       ->fields([
-        'tupas_expiration_timestamp' => $expiration,
+        'expire' => $expiration,
         'transaction_id' => $transaction_id,
       ])
       ->execute();

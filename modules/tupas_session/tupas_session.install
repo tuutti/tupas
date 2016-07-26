@@ -26,9 +26,9 @@ function tupas_session_schema() {
         'type' => 'int',
         'size' => 'medium',
       ],
-      'tupas_expiration_timestamp' => [
+      'expire' => [
         'description' => 'tupas authentication expiration timestamp',
-        'type' => 'text',
+        'type' => 'int',
       ],
       'user_id' => [
         'description' => 'user id',
