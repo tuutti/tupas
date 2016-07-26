@@ -6,11 +6,11 @@ use Drupal\Core\Database\Connection;
 use Drupal\user\UserInterface;
 
 /**
- * Class TupasSessionService.
+ * Class TupasSession.
  *
  * @package Drupal\tupas_session
  */
-class TupasSessionService {
+class TupasSession {
 
   /**
    * Drupal\Core\Database\Connection definition.
