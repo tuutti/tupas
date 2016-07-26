@@ -3,8 +3,6 @@
 namespace Drupal\tupas_registration\Controller;
 
 use Drupal\tupas_session\Controller\SessionController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\tupas\TupasService;
 
 /**
  * Class TupasRegistrationController.
@@ -14,48 +12,26 @@ use Drupal\tupas\TupasService;
 class RegistrationController extends SessionController {
 
   /**
-   * Drupal\tupas\TupasService definition.
-   *
-   * @var \Drupal\tupas\TupasService
-   */
-  protected $tupas;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(TupasService $tupas) {
-    $this->tupas = $tupas;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('tupas')
-    );
-  }
-
-  /**
-   * Page callback displaying the bank buttons.
+   * Page callback for /user/tupas/register.
    *
    * @return array
-   *   Render array containing the bank buttons markup.
    */
   public function register() {
-    $banks = $this->entityManager()
-      ->getStorage('tupas_bank')
-      ->getEnabled();
-
-    $content['tupas_bank_items'] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['tupas-bank-items']],
-    ];
-    foreach ($banks as $bank) {
-      $content['tupas_bank_items'][] = $this->formBuilder()
-        ->getForm('\Drupal\tupas\Form\TupasForm', $bank);
+    if ($this->currentUser()->isAuthenticated()) {
+      return $this->formBuilder()
+        ->getForm('\Drupal\tupas_registration\Form\MapTupasConfirmForm');
     }
-    return $content;
+    return $this->formBuilder()
+      ->getForm('\Drupal\tupas_registration\Form\RegisterForm');
+  }
+
+  /**
+   * Override return url on bank buttons.
+   *
+   * @return string
+   */
+  public function getAuthenticatedGoto() {
+    return 'tupas_registration.register';
   }
 
 }
