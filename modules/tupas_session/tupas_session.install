@@ -15,7 +15,7 @@ function tupas_session_schema() {
   $schema['tupas_sessions'] = [
     'description' => 'TUPAS users',
     'fields' => [
-      'id' => [
+      'user_id' => [
         'description' => 'tupas user id',
         'type' => 'serial',
         'unsigned' => TRUE,
@@ -33,8 +33,8 @@ function tupas_session_schema() {
     ],
     'unique keys' => [
       'transaction_id' => ['transaction_id'],
+      'user_id' => ['user_id'],
     ],
-    'primary key' => ['id'],
   ];
 
   return $schema;

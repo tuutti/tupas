@@ -32,8 +32,8 @@ class TupasSession {
    * {@inheritdoc}
    */
   public function delete($uid) {
-    $this->connection->delete('tupas_session')
-      ->condition('uid', $uid)
+    $this->connection->delete('tupas_sessions')
+      ->condition('user_id', $uid)
       ->execute();
   }
 
@@ -41,9 +41,9 @@ class TupasSession {
    * {@inheritdoc}
    */
   public function save(UserInterface $account, $transaction_id, $expiration) {
-    $this->connection->merge('tupas_session')
+    $this->connection->merge('tupas_sessions')
       ->keys([
-        'uid' => $account->id(),
+        'user_id' => $account->id(),
         'transaction_id' => $transaction_id,
       ])
       ->fields([
@@ -56,9 +56,9 @@ class TupasSession {
    * {@inheritdoc}
    */
   public function get($uid) {
-    $session = $this->connection->select('tupas_session', 'ts')
-      ->fields('ts', ['tupas_session'])
-      ->condition('uid', $uid)
+    $session = $this->connection->select('tupas_sessions', 'ts')
+      ->fields('ts')
+      ->condition('user_id', $uid)
       ->range(0, 1)
       ->execute()
       ->fetchObject();
