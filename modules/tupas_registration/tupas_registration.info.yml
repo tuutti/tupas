@@ -1,7 +1,8 @@
-name: tupas_registration
+name: TUPAS registration
 type: module
 description: Provides the TUPAS registration functionality
 core: 8.x
 package: TUPAS
 dependencies:
   - tupas
+  - tupas_session

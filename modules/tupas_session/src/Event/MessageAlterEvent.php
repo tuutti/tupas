@@ -16,12 +16,19 @@ class MessageAlterEvent extends Event {
   protected $message;
 
   /**
+   * @var string
+   */
+  protected $type;
+
+  /**
    * MessageAlterEvent constructor.
    *
    * @param $message
+   * @param string $type
    */
-  public function __construct($message) {
+  public function __construct($message, $type = 'status') {
     $this->message = $message;
+    $this->type = $type;
   }
 
   /**
@@ -42,5 +49,25 @@ class MessageAlterEvent extends Event {
    */
   public function getMessage() {
     return $this->message;
+  }
+
+  /**
+   * Set message type.
+   *
+   * @param $type
+   * @return $this
+   */
+  public function setType($type) {
+    $this->type = $type;
+    return $this;
+  }
+
+  /**
+   * Get message type.
+   *
+   * @return string
+   */
+  public function getType() {
+    return $this->type;
   }
 }

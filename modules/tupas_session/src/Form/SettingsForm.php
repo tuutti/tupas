@@ -42,27 +42,6 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['authenticated_goto'] = [
-      '#type' => 'textfield',
-      '#title' => t('Location of the return handler function'),
-      '#description' => t('Use a Drupal menu path. Bank ID and (optional) transaction ID will be appended to the URL as parameters.'),
-      '#default_value' => $config->get('authenticated_goto'),
-    ];
-
-    $form['canceled_goto'] = [
-      '#type' => 'textfield',
-      '#title' => t('Landing page after canceled TUPAS authentication'),
-      '#description' => t('Use a Drupal menu path. Leave empty to use the front page.'),
-      '#default_value' => $config->get('canceled_goto'),
-    ];
-
-    $form['rejected_goto'] = [
-      '#type' => 'textfield',
-      '#title' => t('Landing page after rejected TUPAS authentication'),
-      '#description' => t('Use a Drupal menu path. Leave empty to use the front page.'),
-      '#default_value' => $config->get('rejected_goto'),
-    ];
-
     $form['expired_goto'] = [
       '#type' => 'textfield',
       '#title' => t('Landing page after expired TUPAS authentication'),
@@ -88,9 +67,6 @@ class SettingsForm extends ConfigFormBase {
 
     $this->config('tupas_session.settings')
       ->set('tupas_session_length', $form_state->getValue('tupas_session_length'))
-      ->set('authenticated_goto', $form_state->getValue('authenticated_goto'))
-      ->set('canceled_goto', $form_state->getValue('canceled_goto'))
-      ->set('rejected_goto', $form_state->getValue('rejected_goto'))
       ->set('expired_goto', $form_state->getValue('expired_goto'))
       ->save();
   }

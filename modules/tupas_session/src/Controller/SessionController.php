@@ -73,19 +73,42 @@ class SessionController extends ControllerBase {
       '#type' => 'container',
       '#attributes' => ['class' => ['tupas-bank-items']],
     ];
-    $config = $this->config('tupas_session.settings');
-
     foreach ($banks as $bank) {
       $content['tupas_bank_items'][] = $this->formBuilder()
         ->getForm('\Drupal\tupas\Form\TupasFormBase', new TupasService($bank, [
           'language' => 'FI',
-          'return_url' => $config->get('authenticated_goto'),
-          'cancel_url' => $config->get('canceled_goto'),
-          'rejected_url' => $config->get('rejected_goto'),
+          'return_url' => $this->getAuthenticatedGoto(),
+          'cancel_url' => $this->getCancelGoto(),
+          'rejected_url' => $this->getRejectedGoto(),
           'transaction_id' => rand(100000, 999999),
         ]));
     }
     return $content;
+  }
+
+  /**
+   * Get authenticated path.
+   *
+   * @return string
+   */
+  public function getAuthenticatedGoto() {
+    return 'tupas_session.return';
+  }
+
+  /**
+   * Get canceled path.
+   *
+   * @return string
+   */
+  public function getCancelGoto() {
+    return 'tupas_session.canceled';
+  }
+
+  /**
+   * Get rejected path.
+   */
+  public function getRejectedGoto() {
+    return 'tupas_session.return';
   }
 
   /**
@@ -120,8 +143,8 @@ class SessionController extends ControllerBase {
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.
-    if ($message) {
-      drupal_set_message($message->getMessage());
+    if ($message->getMessage()) {
+      drupal_set_message($message->getMessage(), $message->getType());
     }
 
     // Start tupas session.
@@ -138,11 +161,11 @@ class SessionController extends ControllerBase {
    */
   public function cancel() {
     // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_CANCEL_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was canceled by used.')));
+    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_CANCEL_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was canceled by used.'), 'warning'));
 
     // Allow message to be disabled.
-    if ($message) {
-      drupal_set_message($message->getMessage());
+    if ($message->getMessage()) {
+      drupal_set_message($message->getMessage(), $message->getType());
     }
 
     // Allow  redirect path to be customized.
@@ -156,11 +179,11 @@ class SessionController extends ControllerBase {
    */
   public function rejected() {
     // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_REJECTED_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was rejected.')));
+    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_REJECTED_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was rejected.'), 'warning'));
 
     // Allow message to be disabled.
-    if ($message) {
-      drupal_set_message($message->getMessage());
+    if ($message->getMessage()) {
+      drupal_set_message($message->getMessage(), $message->getType());
     }
 
     // Allow  redirect path to be customized.

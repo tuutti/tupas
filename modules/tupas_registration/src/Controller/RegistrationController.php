@@ -2,7 +2,7 @@
 
 namespace Drupal\tupas_registration\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
+use Drupal\tupas_session\Controller\SessionController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\tupas\TupasService;
 
@@ -11,7 +11,7 @@ use Drupal\tupas\TupasService;
  *
  * @package Drupal\tupas_registration\Controller
  */
-class TupasRegistrationController extends ControllerBase {
+class RegistrationController extends SessionController {
 
   /**
    * Drupal\tupas\TupasService definition.

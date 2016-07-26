@@ -4,8 +4,11 @@ namespace Drupal\tupas_session\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 /**
@@ -14,6 +17,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  * @package Drupal\tupas_session
  */
 class TupasExpirationSubscriber implements EventSubscriberInterface {
+
+  use StringTranslationTrait;
 
   /**
    * @var \Drupal\Core\Session\AccountProxyInterface
@@ -70,7 +75,12 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
     if (!isset($session->expire) || $session->expire > REQUEST_TIME) {
       return;
     }
+    drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
+
     $this->sessionManager->destroy($account->id());
+    // Redirect to expired page.
+    $url = Url::fromRoute($this->config->get('expired_goto'));
+    $event->setResponse(new RedirectResponse($url->toString()));
   }
 
 }
