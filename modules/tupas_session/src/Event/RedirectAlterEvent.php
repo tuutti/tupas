@@ -4,11 +4,11 @@ namespace Drupal\tupas_session\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class ReturnRedirectAlterEvent
+ * Class RedirectAlterEvent
  *
  * @package Drupal\tupas_session\Event
  */
-class ReturnRedirectAlterEvent extends Event {
+class RedirectAlterEvent extends Event {
 
   /**
    * @var string
@@ -16,7 +16,7 @@ class ReturnRedirectAlterEvent extends Event {
   protected $path;
 
   /**
-   * ReturnRedirectAlterEvent constructor.
+   * RedirectAlterEvent constructor.
    *
    * @param $path
    */

@@ -4,9 +4,9 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\TupasService;
-use Drupal\tupas_session\Event\ReturnMessageAlterEvent;
-use Drupal\tupas_session\Event\ReturnRedirectAlterEvent;
-use Drupal\tupas_session\Event\TemporarySessionEvents;
+use Drupal\tupas_session\Event\MessageAlterEvent;
+use Drupal\tupas_session\Event\RedirectAlterEvent;
+use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -106,18 +106,19 @@ class SessionController extends ControllerBase {
       throw new HttpException(502, 'Hash validation failed');
     }
     // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication succesful.')));
+    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.
     if ($message) {
-      drupal_set_message($message);
+      drupal_set_message($message->getMessage());
     }
 
-    // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
     // Start tupas session.
     $this->sessionManager->start($this->currentUser()->id(), $request->query->get('transaction_id'));
 
-    return $this->redirect($uri);
+    // Allow  redirect path to be customized.
+    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
+
+    return $this->redirect($uri->getPath());
   }
 
   /**
@@ -125,17 +126,17 @@ class SessionController extends ControllerBase {
    */
   public function cancel() {
     // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_CANCEL_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication was canceled by used.')));
+    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_CANCEL_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was canceled by used.')));
 
     // Allow message to be disabled.
     if ($message) {
-      drupal_set_message($message);
+      drupal_set_message($message->getMessage());
     }
 
     // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_CANCEL_ALTER, new ReturnRedirectAlterEvent('<front>'));
+    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_CANCEL_ALTER, new RedirectAlterEvent('<front>'));
 
-    return $this->redirect($uri);
+    return $this->redirect($uri->getPath());
   }
 
   /**
@@ -143,17 +144,17 @@ class SessionController extends ControllerBase {
    */
   public function rejected() {
     // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(TemporarySessionEvents::MESSAGE_REJECTED_ALTER, new ReturnMessageAlterEvent($this->t('TUPAS authentication was rejected.')));
+    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_REJECTED_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was rejected.')));
 
     // Allow message to be disabled.
     if ($message) {
-      drupal_set_message($message);
+      drupal_set_message($message->getMessage());
     }
 
     // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_REJECTED_ALTER, new ReturnRedirectAlterEvent('<front>'));
+    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_REJECTED_ALTER, new RedirectAlterEvent('<front>'));
 
-    return $this->redirect($uri);
+    return $this->redirect($uri->getPath());
   }
 
 }

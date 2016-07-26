@@ -53,7 +53,6 @@ class TupasFormBase extends FormBase {
     // Language code (by ISO 639 definition: FI = Finnish, SV = Swedish, EN = English).
     $form['A01Y_LANGCODE'] = [
       '#type' => 'hidden',
-      // @todo make configurable
       '#value' => $tupas->getLanguage(),
     ];
 
@@ -100,11 +99,13 @@ class TupasFormBase extends FormBase {
 
     $parts = [];
     foreach ($form as $key => $element) {
-      if ($element['#type'] !== 'hidden') {
+      if (substr($key, 0, 4) !== 'A01Y') {
         continue;
       }
       $parts[] = $element['#value'];
     }
+    // Append bank's RCV key.
+    $parts[] = $tupas->getBank()->getRcvKey();
 
     $form['A01Y_MAC'] = [
       '#type' => 'hidden',

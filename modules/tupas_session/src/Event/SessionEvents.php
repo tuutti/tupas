@@ -2,11 +2,11 @@
 namespace Drupal\tupas_session\Event;
 
 /**
- * Class TemporarySessionEvents
+ * Class SessionEvents
  *
  * @package Drupal\tupas_session\Event
  */
-final class TemporarySessionEvents {
+final class SessionEvents {
 
   /**
    * Allow redirect (succesful tupas authentication) path to be altered.

@@ -4,11 +4,11 @@ namespace Drupal\tupas_session\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class ReturnMessageAlterEvent
+ * Class MessageAlterEvent
  *
  * @package Drupal\tupas_session\Event
  */
-class ReturnMessageAlterEvent extends Event {
+class MessageAlterEvent extends Event {
 
   /**
    * @var string
@@ -16,7 +16,7 @@ class ReturnMessageAlterEvent extends Event {
   protected $message;
 
   /**
-   * ReturnMessageAlterEvent constructor.
+   * MessageAlterEvent constructor.
    *
    * @param $message
    */
