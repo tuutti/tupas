@@ -5,7 +5,6 @@ namespace Drupal\tupas_session\EventSubscriber;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\tupas_session\TupasSessionManagerInterface;
-use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
@@ -65,12 +64,13 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
     if (empty($this->config->get('tupas_session_length')) || !$account->isAuthenticated()) {
       return;
     }
-    $account = User::load($account->id());
-    // If user does not have tupas authenticated role or temp storage exists,
-    // we can ignore this safely.
-    if (!$account->hasRole('tupas_authenticated_user') || $this->tempStore->get('tupas_session_active')) {
+    $session = $this->sessionManager->getSession($account->id());
+
+    // No session found or has not expired.
+    if (empty($session->expire) || $session->expire > REQUEST_TIME) {
       return;
     }
+    $session->destroy($account->id());
   }
 
 }

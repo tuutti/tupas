@@ -60,6 +60,17 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
+   * @param $uid
+   * @return bool|void
+   */
+  public function getSession($uid) {
+    if (!$this->load($uid)) {
+      return;
+    }
+    return $this->tupasSession->get($uid);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function start($uid, $transaction_id) {
