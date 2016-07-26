@@ -44,10 +44,10 @@ class TupasSession {
     $this->connection->merge('tupas_sessions')
       ->keys([
         'user_id' => $account->id(),
-        'transaction_id' => $transaction_id,
       ])
       ->fields([
         'tupas_expiration_timestamp' => $expiration,
+        'transaction_id' => $transaction_id,
       ])
       ->execute();
   }

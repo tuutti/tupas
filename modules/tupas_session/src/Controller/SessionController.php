@@ -4,6 +4,8 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas\Exception\TupasGenericException;
+use Drupal\tupas\Exception\TupasHashMatchException;
 use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
@@ -74,15 +76,14 @@ class SessionController extends ControllerBase {
     $config = $this->config('tupas_session.settings');
 
     foreach ($banks as $bank) {
-      $tupas = new TupasService($bank, [
-        'language' => 'FI',
-        'return_url' => $config->get('authenticated_goto'),
-        'cancel_url' => $config->get('canceled_goto'),
-        'rejected_url' => $config->get('rejected_goto'),
-        'transaction_id' => rand(100000, 999999),
-      ]);
       $content['tupas_bank_items'][] = $this->formBuilder()
-        ->getForm('\Drupal\tupas\Form\TupasFormBase', $tupas);
+        ->getForm('\Drupal\tupas\Form\TupasFormBase', new TupasService($bank, [
+          'language' => 'FI',
+          'return_url' => $config->get('authenticated_goto'),
+          'cancel_url' => $config->get('canceled_goto'),
+          'rejected_url' => $config->get('rejected_goto'),
+          'transaction_id' => rand(100000, 999999),
+        ]));
     }
     return $content;
   }
@@ -103,13 +104,19 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    $hash_match = $this->tupas->isValid($request);
+    $tupas = new TupasService($bank, [
+      'transaction_id' => $request->query->get('transaction_id'),
+    ]);
 
-    if (!$hash_match) {
+    try {
+      $tupas->validate($request);
+    }
+    catch (\Exception $e) {
       drupal_set_message($this->t('MAC validation failed'));
 
       return $this->redirect('<front>');
     }
+
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.

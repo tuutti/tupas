@@ -15,8 +15,8 @@ function tupas_session_schema() {
   $schema['tupas_sessions'] = [
     'description' => 'TUPAS users',
     'fields' => [
-      'user_id' => [
-        'description' => 'tupas user id',
+      'id' => [
+        'description' => 'id',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -30,11 +30,16 @@ function tupas_session_schema() {
         'description' => 'tupas authentication expiration timestamp',
         'type' => 'text',
       ],
+      'user_id' => [
+        'description' => 'user id',
+        'type' => 'int',
+      ],
     ],
     'unique keys' => [
       'transaction_id' => ['transaction_id'],
       'user_id' => ['user_id'],
     ],
+    'primary key' => ['id'],
   ];
 
   return $schema;

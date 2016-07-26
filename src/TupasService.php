@@ -81,8 +81,12 @@ class TupasService implements TupasServiceInterface {
       $this->set($key, $setting);
     }
     // Fallback to english.
-    if (!in_array(strtoupper($settings['language']), $this->allowed_languages)) {
-      $this->set('language', 'EN');
+    if (isset($settings['language'])) {
+      $language = strtoupper($settings['language']);
+
+      if (!in_array($language, $this->allowed_languages)) {
+        $this->set('language', 'EN');
+      }
     }
   }
 
@@ -219,7 +223,7 @@ class TupasService implements TupasServiceInterface {
    * @throws \Drupal\tupas\Exception\TupasGenericException
    * @throws \Drupal\tupas\Exception\TupasHashMatchException
    */
-  public function isValid(Request $request) {
+  public function validate(Request $request) {
     // Make sure url arguments are processed in correct order.
     // @see https://www.drupal.org/node/2669274 (tupas)
     // @see https://www.drupal.org/node/2374777 (tupas_registration)
