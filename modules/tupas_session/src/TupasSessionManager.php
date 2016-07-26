@@ -4,6 +4,7 @@ namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class TupasSessionManager.
@@ -34,6 +35,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $entityManager;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -42,11 +50,14 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    *   Tupas session.
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
    */
-  public function __construct(ConfigFactory $config_factory, TupasSession $tupas_session, EntityManagerInterface $entity_manager) {
+  public function __construct(ConfigFactory $config_factory, TupasSession $tupas_session, EntityManagerInterface $entity_manager, EventDispatcherInterface $event_dispatcher) {
     $this->configFactory = $config_factory;
     $this->tupasSession = $tupas_session;
     $this->entityManager = $entity_manager;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**

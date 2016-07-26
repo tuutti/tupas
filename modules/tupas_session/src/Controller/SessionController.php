@@ -7,6 +7,7 @@ use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\ReturnMessageAlterEvent;
 use Drupal\tupas_session\Event\ReturnRedirectAlterEvent;
 use Drupal\tupas_session\Event\TemporarySessionEvents;
+use Drupal\tupas_session\TupasSessionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,13 +27,23 @@ class SessionController extends ControllerBase {
   protected $eventDispatcher;
 
   /**
+   * Tupas session manager service.
+   *
+   * @var \Drupal\tupas_session\TupasSessionManagerInterface
+   */
+  protected $sessionManager;
+
+  /**
    * SessionController constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   Event dispatcher service.
+   * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
+   *   Tupas session manager service.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher) {
+  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager) {
     $this->eventDispatcher = $event_dispatcher;
+    $this->sessionManager = $session_manager;
   }
 
   /**
@@ -40,7 +51,8 @@ class SessionController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('event_dispatcher')
+      $container->get('event_dispatcher'),
+      $container->get('tupas_session.session_manager')
     );
   }
 
@@ -102,6 +114,8 @@ class SessionController extends ControllerBase {
 
     // Allow  redirect path to be customized.
     $uri = $this->eventDispatcher->dispatch(TemporarySessionEvents::REDIRECT_ALTER, new ReturnRedirectAlterEvent('<front>'));
+    // Start tupas session.
+    $this->sessionManager->start($this->currentUser()->id(), $request->query->get('transaction_id'));
 
     return $this->redirect($uri);
   }
