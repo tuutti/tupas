@@ -3,6 +3,7 @@
 namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
@@ -98,12 +99,16 @@ class SessionController extends ControllerBase {
       ->load($request->query->get('bank_id'));
 
     if (!$bank instanceof TupasBank) {
-      throw new HttpException(502, 'Bank not found');
+      drupal_set_message($this->t('Bank not found'));
+
+      return $this->redirect('<front>');
     }
     $hash_match = $this->tupas->isValid($request);
 
     if (!$hash_match) {
-      throw new HttpException(502, 'Hash validation failed');
+      drupal_set_message($this->t('MAC validation failed'));
+
+      return $this->redirect('<front>');
     }
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
