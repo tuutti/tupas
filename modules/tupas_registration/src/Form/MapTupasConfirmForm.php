@@ -4,8 +4,35 @@ namespace Drupal\tupas_registration\Form;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\externalauth\ExternalAuthInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class MapTupasConfirmForm extends ConfirmFormBase {
+
+  /**
+   * External auth service.
+   *
+   * @var \Drupal\externalauth\ExternalAuthInterface
+   */
+  protected $externalAuth;
+
+  /**
+   * MapTupasConfirmForm constructor.
+   *
+   * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
+   */
+  public function __construct(ExternalAuthInterface $external_auth) {
+    $this->externalAuth = $external_auth;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('externalauth.externalauth')
+    );
+  }
 
   /**
    * Returns the question to ask the user.
@@ -46,6 +73,6 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // TODO: Implement submitForm() method.
+    //$this->externalAuth->linkExistingAccount();
   }
 }

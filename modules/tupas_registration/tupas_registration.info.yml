@@ -6,3 +6,4 @@ package: TUPAS
 dependencies:
   - tupas
   - tupas_session
+  - externalauth

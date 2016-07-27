@@ -259,11 +259,10 @@ class TupasService implements TupasServiceInterface {
    *
    * @param $payload
    *   The value SSN to be hashed that must contain sign of century (-, +, or A).
-   * @param $salt
    * @return string
    * @throws \Drupal\tupas\Exception\TupasGenericException
    */
-  public function hashSsn($payload, $salt) {
+  public static function hashSsn($payload) {
     $pieces = preg_split("/(\+|\-|A)/", $payload);
     if (empty($pieces[1])) {
       throw new TupasGenericException('SSN must contain sign of century.');
