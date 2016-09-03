@@ -17,21 +17,19 @@ class RegistrationController extends SessionController {
    * @return array
    */
   public function register() {
+    // Make sure user has active TUPAS session.
+    if (!$this->sessionManager->getSession($this->currentUser()->id())) {
+      drupal_set_message($this->t('TUPAS session not found.'));
+
+      return $this->redirect('<front>');
+    }
+    // Show map account confirmation form if user is already logged in.
     if ($this->currentUser()->isAuthenticated()) {
       return $this->formBuilder()
         ->getForm('\Drupal\tupas_registration\Form\MapTupasConfirmForm');
     }
     return $this->formBuilder()
       ->getForm('\Drupal\tupas_registration\Form\RegisterForm');
-  }
-
-  /**
-   * Override return url on bank buttons.
-   *
-   * @return string
-   */
-  public function getAuthenticatedGoto() {
-    return 'tupas_registration.register';
   }
 
 }

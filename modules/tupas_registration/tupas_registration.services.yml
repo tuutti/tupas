@@ -1,0 +1,7 @@
+services:
+  tupas_registration.success_redirect:
+    class: Drupal\tupas_registration\EventSubscriber\TupasRegistrationRedirectSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }
+

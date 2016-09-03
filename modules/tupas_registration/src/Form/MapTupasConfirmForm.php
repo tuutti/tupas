@@ -5,6 +5,7 @@ use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class MapTupasConfirmForm extends ConfirmFormBase {
@@ -41,7 +42,9 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    *   The form question. The page title will be set to this value.
    */
   public function getQuestion() {
-    return $this->t('Do you want to associate your TUPAS with currently logged in account (%account)?', $this->currentUser()->getDisplayName());
+    return $this->t('Do you want to associate your TUPAS with currently logged in account (%account)?', [
+      '%account' => $this->currentUser()->getDisplayName(),
+    ]);
   }
 
   /**
@@ -73,6 +76,9 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    //$this->externalAuth->linkExistingAccount();
+    /** @var \Drupal\user\UserInterface $account */
+    $account = User::load($this->currentUser()->id());
+
+    $this->externalAuth->linkExistingAccount($account->getAccountName(), 'tupas_registration', $account);
   }
 }

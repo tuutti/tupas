@@ -158,36 +158,18 @@ class SessionController extends ControllerBase {
    * Callback for /user/tupas/cancel path.
    */
   public function cancel() {
-    // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_CANCEL_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was canceled by used.'), 'warning'));
+    drupal_set_message($this->t('TUPAS authentication was canceled by user.', 'warning'));
 
-    // Allow message to be disabled.
-    if ($message->getMessage()) {
-      drupal_set_message($message->getMessage(), $message->getType());
-    }
-
-    // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_CANCEL_ALTER, new RedirectAlterEvent('<front>'));
-
-    return $this->redirect($uri->getPath());
+    return $this->redirect('<front>');
   }
 
   /**
    * Callback for /user/tupas/rejected path.
    */
   public function rejected() {
-    // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_REJECTED_ALTER, new MessageAlterEvent($this->t('TUPAS authentication was rejected.'), 'warning'));
+    drupal_set_message($this->t('TUPAS authentication was rejected.'), 'warning');
 
-    // Allow message to be disabled.
-    if ($message->getMessage()) {
-      drupal_set_message($message->getMessage(), $message->getType());
-    }
-
-    // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_REJECTED_ALTER, new RedirectAlterEvent('<front>'));
-
-    return $this->redirect($uri->getPath());
+    return $this->redirect('<front>');
   }
 
 }
