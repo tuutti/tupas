@@ -4,8 +4,6 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
-use Drupal\tupas\Exception\TupasGenericException;
-use Drupal\tupas\Exception\TupasHashMatchException;
 use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
