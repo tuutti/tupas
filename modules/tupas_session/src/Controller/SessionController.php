@@ -61,6 +61,7 @@ class SessionController extends ControllerBase {
    * Callback for /user/tupas/login path.
    *
    * @return array
+   *   Render array.
    */
   public function front() {
     $banks = $this->entityManager()
@@ -75,9 +76,9 @@ class SessionController extends ControllerBase {
       $content['tupas_bank_items'][] = $this->formBuilder()
         ->getForm('\Drupal\tupas\Form\TupasFormBase', new TupasService($bank, [
           'language' => 'FI',
-          'return_url' => $this->getAuthenticatedGoto(),
-          'cancel_url' => $this->getCancelGoto(),
-          'rejected_url' => $this->getRejectedGoto(),
+          'return_url' => 'tupas_session.return',
+          'cancel_url' => 'tupas_session.canceled',
+          'rejected_url' => 'tupas_session.return',
           'transaction_id' => rand(100000, 999999),
         ]));
     }
@@ -85,35 +86,13 @@ class SessionController extends ControllerBase {
   }
 
   /**
-   * Get authenticated path.
-   *
-   * @return string
-   */
-  public function getAuthenticatedGoto() {
-    return 'tupas_session.return';
-  }
-
-  /**
-   * Get canceled path.
-   *
-   * @return string
-   */
-  public function getCancelGoto() {
-    return 'tupas_session.canceled';
-  }
-
-  /**
-   * Get rejected path.
-   */
-  public function getRejectedGoto() {
-    return 'tupas_session.return';
-  }
-
-  /**
    * Callback for /user/tupas/authenticated path.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   Redirect response.
    */
   public function returnTo(Request $request) {
     $bank = $this->entityManager()

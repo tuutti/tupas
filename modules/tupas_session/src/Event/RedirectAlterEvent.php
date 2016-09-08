@@ -1,16 +1,19 @@
 <?php
+
 namespace Drupal\tupas_session\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class RedirectAlterEvent
+ * Class RedirectAlterEvent.
  *
  * @package Drupal\tupas_session\Event
  */
 class RedirectAlterEvent extends Event {
 
   /**
+   * Redirect path.
+   *
    * @var string
    */
   protected $path;
@@ -18,7 +21,8 @@ class RedirectAlterEvent extends Event {
   /**
    * RedirectAlterEvent constructor.
    *
-   * @param $path
+   * @param string $path
+   *   Path to redirect to.
    */
   public function __construct($path) {
     $this->path = $path;
@@ -27,7 +31,9 @@ class RedirectAlterEvent extends Event {
   /**
    * Set path.
    *
-   * @param $path
+   * @param string $path
+   *   Path to redirect to.
+   *
    * @return $this
    */
   public function setPath($path) {
@@ -39,8 +45,10 @@ class RedirectAlterEvent extends Event {
    * Get path.
    *
    * @return mixed
+   *   Current redirect path.
    */
   public function getPath() {
     return $this->path;
   }
+
 }

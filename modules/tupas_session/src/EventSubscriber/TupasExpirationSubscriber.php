@@ -21,16 +21,22 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
   use StringTranslationTrait;
 
   /**
+   * Current user object.
+   *
    * @var \Drupal\Core\Session\AccountProxyInterface
    */
   protected $currentUser;
 
   /**
+   * The config object.
+   *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
   protected $config;
 
   /**
+   * Tupas session manager service.
+   *
    * @var \Drupal\tupas_session\TupasSessionManagerInterface
    */
   protected $sessionManager;
@@ -39,8 +45,11 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
    * Constructor.
    *
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
+   *   The tupas session manager service.
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   The currenct user service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    */
   public function __construct(TupasSessionManagerInterface $session_manager, AccountProxyInterface $current_user, ConfigFactoryInterface $config_factory) {
     $this->sessionManager = $session_manager;
@@ -51,17 +60,17 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  static public function getSubscribedEvents() {
     $events['kernel.request'] = ['checkExpiration'];
 
     return $events;
   }
 
   /**
-   * This method is called whenever the kernel.request event is
-   * dispatched.
+   * This method is called whenever the kernel.request event is dispatched.
    *
    * @param GetResponseEvent $event
+   *   Event to dispatch.
    */
   public function checkExpiration(GetResponseEvent $event) {
     $account = $this->currentUser->getAccount();

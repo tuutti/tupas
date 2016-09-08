@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\tupas_registration\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
@@ -8,6 +9,11 @@ use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Class MapTupasConfirmForm.
+ *
+ * @package Drupal\tupas_registration\Form
+ */
 class MapTupasConfirmForm extends ConfirmFormBase {
 
   /**
@@ -21,6 +27,7 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    * MapTupasConfirmForm constructor.
    *
    * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
+   *   The external auth service.
    */
   public function __construct(ExternalAuthInterface $external_auth) {
     $this->externalAuth = $external_auth;
@@ -33,6 +40,13 @@ class MapTupasConfirmForm extends ConfirmFormBase {
     return new static(
       $container->get('externalauth.externalauth')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return NULL;
   }
 
   /**

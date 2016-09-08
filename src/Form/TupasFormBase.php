@@ -86,7 +86,7 @@ class TupasFormBase extends FormBase {
       '#value' => $tupas->getRejectedUrl(),
     ];
 
-    // MAC key version
+    // MAC key version.
     $form['A01Y_KEYVERS'] = [
       '#type' => 'hidden',
       '#value' => $tupas->getBank()->getKeyVersion(),
@@ -121,8 +121,8 @@ class TupasFormBase extends FormBase {
   }
 
   /**
-    * {@inheritdoc}
-    */
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
   }

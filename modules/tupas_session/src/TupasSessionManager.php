@@ -73,7 +73,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function getSession($uid) {
     if (!$this->load($uid)) {
-      return;
+      return FALSE;
     }
     return $this->tupasSession->get($uid);
   }

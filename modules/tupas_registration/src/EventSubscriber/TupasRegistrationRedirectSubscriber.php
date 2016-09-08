@@ -16,13 +16,13 @@ class TupasRegistrationRedirectSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  static public function getSubscribedEvents() {
     $events[SessionEvents::REDIRECT_ALTER] = ['redirectAlter'];
     return $events;
   }
 
   /**
-   * Redirect to registration form on succesfull TUPAS authentication.
+   * Redirect to registration form on succesful TUPAS authentication.
    *
    * @param \Drupal\tupas_session\Event\RedirectAlterEvent $event
    *   The redirect alter event.

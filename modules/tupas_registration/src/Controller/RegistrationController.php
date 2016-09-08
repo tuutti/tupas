@@ -30,6 +30,7 @@ class RegistrationController extends SessionController {
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
    * @param \Drupal\externalauth\AuthmapInterface $authmap
+   *   The authmap service.
    */
   public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, AuthmapInterface $authmap) {
     parent::__construct($event_dispatcher, $session_manager);
@@ -52,6 +53,7 @@ class RegistrationController extends SessionController {
    * Page callback for /user/tupas/register.
    *
    * @return array
+   *   Formbuilder form object.
    */
   public function register() {
     if ($this->authmap->get($this->currentUser()->id(), 'tupas_registration')) {
