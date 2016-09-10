@@ -81,13 +81,12 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function start($transaction_id, $unique_id) {
     $config = $this->configFactory->get('tupas_session.settings');
+    $session_length = (int) $config->get('tupas_session_length');
     // Session length defaults to 1 in case session lenght is not enabled.
     // This is to make sure we create one time session that allow us to set
     // tupas_authenticated role later on.
-    $session_length = 1;
-
-    if ($config->get('tupas_session_length')) {
-      $session_length = (int) $config->get('tupas_session_length');
+    if (empty($session_length)) {
+      $session_length = 1;
     }
     $expire = $session_length * 60 + REQUEST_TIME;
 

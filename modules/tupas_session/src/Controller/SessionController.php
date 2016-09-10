@@ -112,7 +112,7 @@ class SessionController extends ControllerBase {
       $tupas->validate($request);
     }
     catch (\Exception $e) {
-      drupal_set_message($this->t('MAC validation failed'));
+      drupal_set_message($this->t('MAC validation failed'), 'error');
 
       return $this->redirect('<front>');
     }
