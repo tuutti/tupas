@@ -238,16 +238,16 @@ class TupasService implements TupasServiceInterface {
   /**
    * Validate mac from return parameters.
    *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request object.
+   * @param array $values
+   *    Array of validation parameters.
    *
-   * @return bool
-   *   TRUE if validation passed.
+   * @return bool TRUE if validation passed.
+   *    TRUE if validation passed.
    *
    * @throws \Drupal\tupas\Exception\TupasGenericException
    * @throws \Drupal\tupas\Exception\TupasHashMatchException
    */
-  public function validate(Request $request) {
+  public function validate(array $values) {
     // Make sure url arguments are processed in correct order.
     // @see https://www.drupal.org/node/2669274 (tupas)
     // @see https://www.drupal.org/node/2374777 (tupas_registration)
@@ -264,15 +264,15 @@ class TupasService implements TupasServiceInterface {
     ];
     $parts = [];
     foreach ($parameters as $key) {
-      if (!$request->query->get($key)) {
+      if (!isset($values[$key])) {
         throw new TupasGenericException(sprintf('Missing %s argument', $key));
       }
-      $parts[] = $request->query->get($key);
+      $parts[] = $values[$key];
     }
     // Append rcv key.
     $parts[] = $this->bank->getRcvKey();
 
-    if (!$this->hashMatch($request->query->get('B02K_MAC'), $parts)) {
+    if (!$this->hashMatch($values['B02K_MAC'], $parts)) {
       throw new TupasHashMatchException('Mac hash does not match with B02K_MAC.');
     }
     return TRUE;

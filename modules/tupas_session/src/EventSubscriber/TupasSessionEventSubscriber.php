@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  *
  * @package Drupal\tupas_session
  */
-class TupasExpirationSubscriber implements EventSubscriberInterface {
+class TupasSessionEventSubscriber implements EventSubscriberInterface {
 
   use StringTranslationTrait;
 
@@ -62,7 +62,7 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static public function getSubscribedEvents() {
-    $events['kernel.request'] = ['checkExpiration'];
+    $events['kernel.request'] = ['handleTupasSession'];
 
     return $events;
   }
@@ -96,7 +96,7 @@ class TupasExpirationSubscriber implements EventSubscriberInterface {
    * @param GetResponseEvent $event
    *   Event to dispatch.
    */
-  public function checkExpiration(GetResponseEvent $event) {
+  public function handleTupasSession(GetResponseEvent $event) {
     $account = $this->currentUser->getAccount();
 
     if (empty($this->config->get('tupas_session_length')) || !$account->isAuthenticated()) {

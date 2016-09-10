@@ -5,7 +5,6 @@ namespace Drupal\tupas_session;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\tupas\TupasService;
-use Drupal\user\Entity\User;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -82,7 +81,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   public function start($transaction_id, $unique_id) {
     $config = $this->configFactory->get('tupas_session.settings');
     $session_length = (int) $config->get('tupas_session_length');
-    // Session length defaults to 1 in case session lenght is not enabled.
+    // Session length defaults to 1 in case session length is not enabled.
     // This is to make sure we create one time session that allow us to set
     // tupas_authenticated role later on.
     if (empty($session_length)) {
@@ -103,7 +102,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function destroy() {
-    $this->tempStore->delete('tupas_session');
+    return $this->tempStore->delete('tupas_session');
   }
 
 }
