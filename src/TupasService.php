@@ -25,39 +25,11 @@ class TupasService implements TupasServiceInterface {
   protected $bank;
 
   /**
-   * Return url after succesfull TUPAS authentication.
+   * Array of tupas settings.
    *
-   * @var string
+   * @var array
    */
-  protected $returnUrl;
-
-  /**
-   * Url to return after cancel event.
-   *
-   * @var string
-   */
-  protected $cancelUrl;
-
-  /**
-   * Url to return after rejected event.
-   *
-   * @var string
-   */
-  protected $rejectedUrl;
-
-  /**
-   * Tupas language.
-   *
-   * @var string
-   */
-  protected $language;
-
-  /**
-   * Transaction id.
-   *
-   * @var int
-   */
-  protected $transactionId;
+  protected $settings;
 
   /**
    * List of allowed languages.
@@ -101,9 +73,8 @@ class TupasService implements TupasServiceInterface {
    * @return $this
    */
   public function set($key, $value) {
-    if (property_exists($this, $key)) {
-      $this->{$key} = $value;
-    }
+    $this->settings[$key] = $value;
+
     return $this;
   }
 
@@ -117,8 +88,8 @@ class TupasService implements TupasServiceInterface {
    *   Setting value or NULL if setting does not exists.
    */
   public function get($key) {
-    if (property_exists($this, $key)) {
-      return $this->{$key};
+    if (isset($this->settings[$key])) {
+      return $this->settings[$key];
     }
     return NULL;
   }
@@ -134,35 +105,35 @@ class TupasService implements TupasServiceInterface {
    * {@inheritdoc}
    */
   public function getLanguage() {
-    return strtoupper($this->language);
+    return strtoupper($this->get('language'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getReturnUrl() {
-    return $this->fromRoute($this->returnUrl);
+    return $this->fromRoute($this->get('return_url'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->fromRoute($this->cancelUrl);
+    return $this->fromRoute($this->get('cancel_url'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getRejectedUrl() {
-    return $this->fromRoute($this->rejectedUrl);
+    return $this->fromRoute($this->get('rejected_url'));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getTransactionId() {
-    return $this->transactionId;
+    return $this->get('transaction_id');
   }
 
   /**
@@ -177,7 +148,7 @@ class TupasService implements TupasServiceInterface {
   public function fromRoute($key) {
     $arguments = [
       'bank_id' => $this->bank->id(),
-      'transaction_id' => $this->transactionId,
+      'transaction_id' => $this->getTransactionId(),
     ];
     $url = new Url($key, $arguments, ['absolute' => TRUE]);
 
@@ -247,6 +218,9 @@ class TupasService implements TupasServiceInterface {
    * @throws \Drupal\tupas\Exception\TupasHashMatchException
    */
   public function validate(array $values) {
+    if (empty($values['B02K_MAC'])) {
+      throw new TupasGenericException('Missing B02K_MAC argument.');
+    }
     // Make sure url arguments are processed in correct order.
     // @see https://www.drupal.org/node/2669274 (tupas)
     // @see https://www.drupal.org/node/2374777 (tupas_registration)
