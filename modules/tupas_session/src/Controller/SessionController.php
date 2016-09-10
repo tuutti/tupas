@@ -116,7 +116,6 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.
@@ -125,7 +124,7 @@ class SessionController extends ControllerBase {
     }
 
     // Start tupas session.
-    $this->sessionManager->start($request->query->get('transaction_id'), );
+    $this->sessionManager->start($request->query->get('transaction_id'), $request->query->get('B02K_CUSTID'));
 
     // Allow  redirect path to be customized.
     $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));

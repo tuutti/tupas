@@ -4,6 +4,7 @@ namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\tupas\TupasService;
 use Drupal\user\Entity\User;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -66,6 +67,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * Return active session if possible.
    *
    * @return mixed
+   *   FALSE if no session found, session object if session available.
    */
   public function getSession() {
     if (!$session = $this->tempStore->get('tupas_session')) {
@@ -79,13 +81,22 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function start($transaction_id, $unique_id) {
     $config = $this->configFactory->get('tupas_session.settings');
+    // Session length defaults to 1 in case session lenght is not enabled.
+    // This is to make sure we create one time session that allow us to set
+    // tupas_authenticated role later on.
+    $session_length = 1;
 
-    $expire = (int) $config->get('tupas_session_length') * 60 + REQUEST_TIME;
+    if ($config->get('tupas_session_length')) {
+      $session_length = (int) $config->get('tupas_session_length');
+    }
+    $expire = $session_length * 60 + REQUEST_TIME;
 
-    $this->tempStore->set([
+    // Store tupas session.
+    $this->tempStore->set('tupas_session', [
       'transaction_id' => $transaction_id,
       'expire' => $expire,
-      'unique_id' => $unique_id,
+      // Hash social security number.
+      'unique_id' => TupasService::hashSsn($unique_id),
     ]);
   }
 
