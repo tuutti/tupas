@@ -79,7 +79,7 @@ class SessionController extends ControllerBase {
           'return_url' => 'tupas_session.return',
           'cancel_url' => 'tupas_session.canceled',
           'rejected_url' => 'tupas_session.return',
-          'transaction_id' => rand(100000, 999999),
+          'transaction_id' => random_int(100000, 999999),
         ]));
     }
     return $content;

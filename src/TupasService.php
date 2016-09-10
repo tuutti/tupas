@@ -7,7 +7,6 @@ use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\Exception\TupasHashMatchException;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class TupasService.
