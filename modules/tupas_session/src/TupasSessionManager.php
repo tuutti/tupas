@@ -4,6 +4,8 @@ namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\user\Entity\User;
+use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -21,13 +23,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $configFactory;
 
   /**
-   * Tupas session service.
-   *
-   * @var \Drupal\tupas_session\TupasSession
-   */
-  protected $tupasSession;
-
-  /**
    * Entity manager.
    *
    * @var \Drupal\Core\Entity\EntityManagerInterface
@@ -42,76 +37,63 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $eventDispatcher;
 
   /**
+   * The temporary storage service.
+   *
+   * @var \Drupal\user\PrivateTempStoreFactory
+   */
+  protected $tempStore;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The config factory.
-   * @param \Drupal\tupas_session\TupasSession $tupas_session
-   *   Tupas session.
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
+   * @param \Drupal\user\PrivateTempStoreFactory $temp_store
+   *   The temporary storage service.
    */
-  public function __construct(ConfigFactory $config_factory, TupasSession $tupas_session, EntityManagerInterface $entity_manager, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, EventDispatcherInterface $event_dispatcher, PrivateTempStoreFactory $temp_store) {
     $this->configFactory = $config_factory;
-    $this->tupasSession = $tupas_session;
     $this->entityManager = $entity_manager;
     $this->eventDispatcher = $event_dispatcher;
+    $this->tempStore = $temp_store;
   }
 
   /**
-   * {@inheritdoc}
+   * Return active session if possible.
+   *
+   * @return mixed
    */
-  public function load($uid) {
-    return $this->entityManager->getStorage('user')->load($uid);
-  }
-
-  /**
-   * @param $uid
-   * @return bool|void
-   */
-  public function getSession($uid) {
-    if (!$this->load($uid)) {
+  public function getSession() {
+    if (!$session = $this->tempStore->get('tupas_session')) {
       return FALSE;
     }
-    return $this->tupasSession->get($uid);
+    return $session;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function start($uid, $transaction_id) {
+  public function start($transaction_id, $unique_id) {
     $config = $this->configFactory->get('tupas_session.settings');
 
-    if (!$account = $this->load($uid)) {
-      return FALSE;
-    }
     $expire = (int) $config->get('tupas_session_length') * 60 + REQUEST_TIME;
-    $this->tupasSession->save($account, $transaction_id, $expire);
 
-    // Grant user role.
-    $account->addRole('tupas_authenticated_user');
-    $account->save();
+    $this->tempStore->set([
+      'transaction_id' => $transaction_id,
+      'expire' => $expire,
+      'unique_id' => $unique_id,
+    ]);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function destroy($uid) {
-    $config = $this->configFactory->get('tupas_session.settings');
-
-    if (!$account = $this->load($uid)) {
-      return FALSE;
-    }
-    // Remove tupas authenticated role.
-    // @todo Should we always remove role when destroying session or just when
-    // tupas_session_length is enabled?
-    if (!empty($config->get('tupas_session_length'))) {
-      $account->removeRole('tupas_authenticated_user');
-      $account->save();
-    }
-    $this->tupasSession->delete($uid);
+  public function destroy() {
+    $this->tempStore->delete('tupas_session');
   }
 
 }

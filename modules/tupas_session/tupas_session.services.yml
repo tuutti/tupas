@@ -1,14 +1,10 @@
 services:
   tupas_session.session_manager:
     class: Drupal\tupas_session\TupasSessionManager
-    arguments: ["@config.factory", "@tupas_session.session", "@entity.manager", "@event_dispatcher"]
+    arguments: ["@config.factory", "@entity.manager", "@event_dispatcher", "@user.private_tempstore"]
 
-  tupas_session.session:
-    class: Drupal\tupas_session\TupasSession
-    arguments: ["@database"]
-
-  tupas_session.expiration_subscriber:
-    class: Drupal\tupas_session\EventSubscriber\TupasExpirationSubscriber
+  tupas_session.event_subscriber:
+    class: Drupal\tupas_session\EventSubscriber\TupasSessionEventSubscriber
     arguments: ["@tupas_session.session_manager", "@current_user", "@config.factory"]
     tags:
       - { name: event_subscriber }

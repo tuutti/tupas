@@ -7,45 +7,6 @@
 use Drupal\user\Entity\Role;
 
 /**
- * Implements hook_schema().
- */
-function tupas_session_schema() {
-  $schema = [];
-
-  $schema['tupas_sessions'] = [
-    'description' => 'TUPAS users',
-    'fields' => [
-      'id' => [
-        'description' => 'id',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ],
-      'transaction_id' => [
-        'description' => 'transaction id',
-        'type' => 'int',
-        'size' => 'medium',
-      ],
-      'expire' => [
-        'description' => 'tupas authentication expiration timestamp',
-        'type' => 'int',
-      ],
-      'user_id' => [
-        'description' => 'user id',
-        'type' => 'int',
-      ],
-    ],
-    'unique keys' => [
-      'transaction_id' => ['transaction_id'],
-      'user_id' => ['user_id'],
-    ],
-    'primary key' => ['id'],
-  ];
-
-  return $schema;
-}
-
-/**
  * Implements hook_install().
  */
 function tupas_session_install() {

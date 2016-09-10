@@ -125,7 +125,7 @@ class SessionController extends ControllerBase {
     }
 
     // Start tupas session.
-    $this->sessionManager->start($this->currentUser()->id(), $request->query->get('transaction_id'));
+    $this->sessionManager->start($request->query->get('transaction_id'), );
 
     // Allow  redirect path to be customized.
     $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
