@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\tupas;
 
 use Drupal\Core\Site\Settings;
@@ -29,21 +30,21 @@ class TupasService implements TupasServiceInterface {
    *
    * @var string
    */
-  protected $return_url;
+  protected $returnUrl;
 
   /**
    * Url to return after cancel event.
    *
    * @var string
    */
-  protected $cancel_url;
+  protected $cancelUrl;
 
   /**
    * Url to return after rejected event.
    *
    * @var string
    */
-  protected $rejected_url;
+  protected $rejectedUrl;
 
   /**
    * Tupas language.
@@ -57,14 +58,14 @@ class TupasService implements TupasServiceInterface {
    *
    * @var int
    */
-  protected $transaction_id;
+  protected $transactionId;
 
   /**
    * List of allowed languages.
    *
    * @var array
    */
-  protected $allowed_languages = ['FI', 'EN', 'SV'];
+  protected $allowedLanguages = ['FI', 'EN', 'SV'];
 
   /**
    * Constructor.
@@ -84,7 +85,7 @@ class TupasService implements TupasServiceInterface {
     if (isset($settings['language'])) {
       $language = strtoupper($settings['language']);
 
-      if (!in_array($language, $this->allowed_languages)) {
+      if (!in_array($language, $this->allowedLanguages)) {
         $this->set('language', 'EN');
       }
     }
@@ -93,8 +94,11 @@ class TupasService implements TupasServiceInterface {
   /**
    * Set property.
    *
-   * @param $key
-   * @param $value
+   * @param string $key
+   *   Setting key.
+   * @param mixed $value
+   *   Setting value.
+   *
    * @return $this
    */
   public function set($key, $value) {
@@ -107,8 +111,11 @@ class TupasService implements TupasServiceInterface {
   /**
    * Get property.
    *
-   * @param $key
+   * @param string $key
+   *   Setting key.
+   *
    * @return mixed|null
+   *   Setting value or NULL if setting does not exists.
    */
   public function get($key) {
     if (property_exists($this, $key)) {
@@ -135,40 +142,43 @@ class TupasService implements TupasServiceInterface {
    * {@inheritdoc}
    */
   public function getReturnUrl() {
-    return $this->fromRoute($this->return_url);
+    return $this->fromRoute($this->returnUrl);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->fromRoute($this->cancel_url);
+    return $this->fromRoute($this->cancelUrl);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getRejectedUrl() {
-    return $this->fromRoute($this->rejected_url);
+    return $this->fromRoute($this->rejectedUrl);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getTransactionId() {
-    return $this->transaction_id;
+    return $this->transactionId;
   }
 
   /**
    * Helper to generate (absolute) internal URLs.
    *
-   * @param $key
-   * @return \Drupal\Core\Url
+   * @param string $key
+   *   Route.
+   *
+   * @return string
+   *   Absolute url to given route.
    */
   public function fromRoute($key) {
     $arguments = [
       'bank_id' => $this->bank->id(),
-      'transaction_id' => $this->transaction_id,
+      'transaction_id' => $this->transactionId,
     ];
     $url = new Url($key, $arguments, ['absolute' => TRUE]);
 
@@ -178,8 +188,11 @@ class TupasService implements TupasServiceInterface {
   /**
    * Hash mac based on encryption algorithm.
    *
-   * @param $mac
+   * @param string $mac
+   *   Plaintext mac.
+   *
    * @return string
+   *   Hashed MAC.
    */
   public function hashMac($mac) {
     if ($this->bank->getEncryptionAlg() === '01') {
@@ -197,8 +210,11 @@ class TupasService implements TupasServiceInterface {
   /**
    * Generate checksum.
    *
-   * @param $parts
+   * @param array $parts
+   *   Parts used to generate checksum.
+   *
    * @return string
+   *   Hashed checksum.
    */
   public function checksum(array $parts) {
     return $this->hashMac(implode('&', $parts) . '&');
@@ -207,9 +223,13 @@ class TupasService implements TupasServiceInterface {
   /**
    * Validate mac.
    *
-   * @param $mac
-   * @param $parts
+   * @param string $mac
+   *   Hash to compare with.
+   * @param array $parts
+   *   Parts to generate counterpart hash.
+   *
    * @return bool
+   *   TRUE if hashes matches.
    */
   public function hashMatch($mac, $parts) {
     return $this->checksum($parts) === $mac;
@@ -219,7 +239,11 @@ class TupasService implements TupasServiceInterface {
    * Validate mac from return parameters.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   *
    * @return bool
+   *   TRUE if validation passed.
+   *
    * @throws \Drupal\tupas\Exception\TupasGenericException
    * @throws \Drupal\tupas\Exception\TupasHashMatchException
    */
@@ -257,9 +281,12 @@ class TupasService implements TupasServiceInterface {
   /**
    * Hash SSN.
    *
-   * @param $payload
+   * @param string $payload
    *   The value SSN to be hashed that must contain sign of century (-, +, or A).
+   *
    * @return string
+   *   Hashed payload.
+   *
    * @throws \Drupal\tupas\Exception\TupasGenericException
    */
   public static function hashSsn($payload) {
@@ -279,4 +306,5 @@ class TupasService implements TupasServiceInterface {
 
     return $hashed_ssn;
   }
+
 }
