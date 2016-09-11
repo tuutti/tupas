@@ -26,13 +26,6 @@ class RegisterForm extends AccountForm {
   protected $sessionManager;
 
   /**
-   * The external auth service.
-   *
-   * @var \Drupal\externalauth\ExternalAuthInterface
-   */
-  protected $auth;
-
-  /**
    * RegisterForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
@@ -43,14 +36,11 @@ class RegisterForm extends AccountForm {
    *   The entitity query service.
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
-   * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
-   *   The external auth service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $external_auth) {
+  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager) {
     parent::__construct($entity_manager, $language_manager, $entity_query);
 
     $this->sessionManager = $session_manager;
-    $this->auth = $external_auth;
   }
 
   /**
@@ -61,8 +51,7 @@ class RegisterForm extends AccountForm {
       $container->get('entity.manager'),
       $container->get('language_manager'),
       $container->get('entity.query'),
-      $container->get('tupas_session.session_manager'),
-      $container->get('externalauth.externalauth')
+      $container->get('tupas_session.session_manager')
     );
   }
 
@@ -105,15 +94,16 @@ class RegisterForm extends AccountForm {
 
       return $form_state->setRedirect('<front>');
     }
-    if ($account = $this->auth->loginRegister($session['unique_id'], 'tupas_registration')) {
-      drupal_set_message($this->t('Registration successful. You are now logged in.'));
+    // Create new user and migrate existing session.
+    $status = $this->sessionManager->migrateLoginRegister($session, [
+      'name' => $form_state->getValue('name'),
+      'mail' => $form_state->getValue('mail'),
+    ]);
 
-      // Update account details.
-      $account->setUsername($form_state->getValue('name'))
-        ->setEmail($form_state->getValue('mail'))
-        ->setPassword(user_password(20));
-      $account->save();
+    if ($status) {
+      drupal_set_message($this->t('Registration successful. You are now logged in.'));
     }
+
     $form_state->setRedirect('<front>');
   }
 

@@ -5,6 +5,7 @@ namespace Drupal\tupas_session;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\SessionManagerInterface;
+use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\TupasService;
 use Drupal\user\PrivateTempStoreFactory;
 
@@ -44,6 +45,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $sessionManager;
 
   /**
+   * The external auth service.
+   *
+   * @var \Drupal\externalauth\ExternalAuthInterface
+   */
+  protected $auth;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -54,12 +62,15 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    *   The temporary storage service.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session manager service.
+   * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
+   *   The external auth service.
    */
-  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager) {
+  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager, ExternalAuthInterface $external_auth) {
     $this->configFactory = $config_factory;
     $this->entityManager = $entity_manager;
     $this->sessionManager = $session_manager;
     $this->tempStore = $temp_store->get('tupas_registration');
+    $this->auth = $external_auth;
   }
 
   /**
@@ -80,7 +91,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function start($transaction_id, $unique_id) {
     // Start an actual session.
-    if (!$this->sessionManager->isStarted()) {
+    if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
       // Drupal does not start session unless we store something in $_SESSION
       // and we need session to make session data to persist longer than one request.
       $_SESSION['session_stared'] = TRUE;
@@ -108,13 +119,39 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
-   * Migrate storage to new account.
+   * Migrate storage to new account and handle registration.
+   *
+   * Temp store does not handle session migrations, so we have
+   * to do this manually.
    *
    * @param array $session
    *   Session storage from anonymous account.
+   * @param array $values
+   *   Account arguments.
+   *
+   * @return bool
+   *   TRUE on success, FALSE on failure.
    */
-  public function migrateStorage($session) {
+  public function migrateLoginRegister($session, array $values) {
+    if (!isset($values['name'], $values['mail'])) {
+      return FALSE;
+    }
+    // Delete existing tupas session data.
+    $this->destroy();
 
+    if (!$account = $this->auth->loginRegister($session['unique_id'], 'tupas_registration')) {
+      return FALSE;
+    }
+    // Update account details.
+    $account->setUsername($values['name'])
+      ->setEmail($values['mail'])
+      ->setPassword(empty($values['pass']) ? user_password(20) : $values['pass']);
+    $account->save();
+
+    // Start new 'session' with our newly logged-in user.
+    $this->start($session['transaction_id'], $session['unique_id']);
+
+    return TRUE;
   }
 
   /**
