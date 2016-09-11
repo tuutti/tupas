@@ -116,15 +116,15 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
+    // Start tupas session.
+    $this->sessionManager->start($request->query->get('transaction_id'), $request->query->get('B02K_CUSTID'), $request->query->get('B02K_CUSTNAME'));
+
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
     // Allow message to be disabled.
     if ($message->getMessage()) {
       drupal_set_message($message->getMessage(), $message->getType());
     }
-
-    // Start tupas session.
-    $this->sessionManager->start($request->query->get('transaction_id'), $request->query->get('B02K_CUSTID'));
 
     // Allow  redirect path to be customized.
     $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
@@ -136,7 +136,7 @@ class SessionController extends ControllerBase {
    * Callback for /user/tupas/cancel path.
    */
   public function cancel() {
-    drupal_set_message($this->t('TUPAS authentication was canceled by user.', 'warning'));
+    drupal_set_message($this->t('TUPAS authentication was canceled by user.'), 'warning');
 
     return $this->redirect('<front>');
   }

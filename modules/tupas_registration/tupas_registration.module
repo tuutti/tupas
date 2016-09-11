@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Contains Tupas registration module.
+ */
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Add our custom registration form to User entity handlers.
+ *
+ * @param array $entity_info
+ *   Entity info.
+ */
+function tupas_registration_entity_type_alter(&$entity_info) {
+  $handlers = $entity_info['user']->get('handlers');
+  $handlers['form']['tupas_registration'] = 'Drupal\tupas_registration\Form\RegisterForm';
+  $entity_info['user']->set('handlers', $handlers);
+}

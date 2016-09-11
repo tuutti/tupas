@@ -109,6 +109,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       return;
     }
     // Attempt to add role for current user.
+    // @todo replace this with rules/actions?
     $this->setRoles($account, 'set');
 
     if ($session->expire > REQUEST_TIME) {
@@ -116,6 +117,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     }
     drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
     // Attempt to remove tupas_authenticated role.
+    // @todo replace this with rules/actions?
     $this->setRoles($account, 'remove');
 
     $this->sessionManager->destroy();

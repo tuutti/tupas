@@ -4,9 +4,9 @@ namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\tupas\TupasService;
 use Drupal\user\PrivateTempStoreFactory;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class TupasSessionManager.
@@ -30,18 +30,18 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $entityManager;
 
   /**
-   * The event dispatcher.
-   *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
-   */
-  protected $eventDispatcher;
-
-  /**
    * The temporary storage service.
    *
    * @var \Drupal\user\PrivateTempStoreFactory
    */
   protected $tempStore;
+
+  /**
+   * The session manager service.
+   *
+   * @var \Drupal\Core\Session\SessionManagerInterface
+   */
+  protected $sessionManager;
 
   /**
    * Constructor.
@@ -50,16 +50,16 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    *   The config factory.
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
-   *   The event dispatcher.
    * @param \Drupal\user\PrivateTempStoreFactory $temp_store
    *   The temporary storage service.
+   * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
+   *   Session manager service.
    */
-  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, EventDispatcherInterface $event_dispatcher, PrivateTempStoreFactory $temp_store) {
+  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager) {
     $this->configFactory = $config_factory;
     $this->entityManager = $entity_manager;
-    $this->eventDispatcher = $event_dispatcher;
-    $this->tempStore = $temp_store;
+    $this->sessionManager = $session_manager;
+    $this->tempStore = $temp_store->get('tupas_registration');
   }
 
   /**
@@ -79,6 +79,10 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id) {
+    // Start an actual session.
+    if (!$this->sessionManager->isStarted()) {
+      $this->sessionManager->start();
+    }
     $config = $this->configFactory->get('tupas_session.settings');
     $session_length = (int) $config->get('tupas_session_length');
     // Session length defaults to 1 in case session length is not enabled.

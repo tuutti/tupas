@@ -3,8 +3,10 @@
 namespace Drupal\tupas_registration\Controller;
 
 use Drupal\externalauth\AuthmapInterface;
+use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Controller\SessionController;
 use Drupal\tupas_session\TupasSessionManagerInterface;
+use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -16,11 +18,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class RegistrationController extends SessionController {
 
   /**
-   * The authmap service.
+   * The external auth service.
    *
-   * @var \Drupal\externalauth\AuthmapInterface
+   * @var \Drupal\externalauth\ExternalAuthInterface
    */
-  protected $authmap;
+  protected $auth;
 
   /**
    * RegistrationController constructor.
@@ -29,13 +31,13 @@ class RegistrationController extends SessionController {
    *   The event dispatcher service.
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
-   * @param \Drupal\externalauth\AuthmapInterface $authmap
-   *   The authmap service.
+   * @param \Drupal\externalauth\ExternalAuthInterface $auth
+   *   The external auth service.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, AuthmapInterface $authmap) {
+  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth) {
     parent::__construct($event_dispatcher, $session_manager);
 
-    $this->authmap = $authmap;
+    $this->auth = $auth;
   }
 
   /**
@@ -45,7 +47,7 @@ class RegistrationController extends SessionController {
     return new static(
       $container->get('event_dispatcher'),
       $container->get('tupas_session.session_manager'),
-      $container->get('externalauth.authmap')
+      $container->get('externalauth.externalauth')
     );
   }
 
@@ -56,24 +58,40 @@ class RegistrationController extends SessionController {
    *   Formbuilder form object.
    */
   public function register() {
-    if ($this->authmap->get($this->currentUser()->id(), 'tupas_registration')) {
-      drupal_set_message($this->t('Your account is already connected'));
-
-      return $this->redirect('<front>');
-    }
+    $config = $this->config('tupas_session.settings');
     // Make sure user has active TUPAS session.
-    if (!$this->sessionManager->getSession($this->currentUser()->id())) {
+    if (!$session = $this->sessionManager->getSession()) {
       drupal_set_message($this->t('TUPAS session not found.'), 'error');
       // Return to tupas initialize page.
       return $this->redirect('tupas_session.front');
     }
+
+    // Check if user has already connected their account.
+    if (!empty($session['unique_id']) && $this->auth->load($session['unique_id'], 'tupas_registration')) {
+      if ($this->currentUser()->isAuthenticated()) {
+        // Show error message only if session length is not enabled.
+        // This allows users to refresh their tupas sessions without showing
+        // confusing error messages to them.
+        if (!$config->get('tupas_session_length') > 0) {
+          drupal_set_message($this->t('You have already connected your account with TUPAS service.'), 'warning');
+        }
+        return $this->redirect('<front>');
+      }
+      // User is not authenticated. Attempt to authenticate.
+      if ($this->auth->login($session['unique_id'], 'tupas_registration')) {
+        return $this->redirect('<front>');
+      }
+    }
+
     // Show map account confirmation form if user is already logged in.
     if ($this->currentUser()->isAuthenticated()) {
       return $this->formBuilder()
         ->getForm('\Drupal\tupas_registration\Form\MapTupasConfirmForm');
     }
-    return $this->formBuilder()
-      ->getForm('\Drupal\tupas_registration\Form\RegisterForm');
+    $entity = $this->entityManager()->getStorage('user')->create();
+    // Call our custom registration form.
+    return $this->entityFormBuilder()
+      ->getForm($entity, 'tupas_registration');
   }
 
 }

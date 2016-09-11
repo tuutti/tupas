@@ -11,16 +11,18 @@ interface TupasSessionManagerInterface {
   /**
    * Start tupas session.
    *
-   * @param $transaction_id
-   * @param $unique_id
-   * @return mixed
+   * @param int $transaction_id
+   *   Transaction id.
+   * @param string $unique_id
+   *   Unique identifier (SSN).
    */
   public function start($transaction_id, $unique_id);
 
   /**
    * Destroy tupas session.
    *
-   * @return mixed
+   * @return bool
+   *   Status of delete event.
    */
   public function destroy();
 }
