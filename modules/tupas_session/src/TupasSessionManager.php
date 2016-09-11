@@ -108,6 +108,16 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
+   * Migrate storage to new account.
+   *
+   * @param array $session
+   *   Session storage from anonymous account.
+   */
+  public function migrateStorage($session) {
+
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function destroy() {

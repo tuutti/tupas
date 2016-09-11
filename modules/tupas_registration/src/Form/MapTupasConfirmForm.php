@@ -6,6 +6,7 @@ use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -24,13 +25,23 @@ class MapTupasConfirmForm extends ConfirmFormBase {
   protected $externalAuth;
 
   /**
+   * The tupas session manager.
+   *
+   * @var \Drupal\tupas_session\TupasSessionManagerInterface
+   */
+  protected $sessionManager;
+
+  /**
    * MapTupasConfirmForm constructor.
    *
    * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
    *   The external auth service.
+   * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
+   *   The tupas session manager.
    */
-  public function __construct(ExternalAuthInterface $external_auth) {
+  public function __construct(ExternalAuthInterface $external_auth, TupasSessionManagerInterface $session_manager) {
     $this->externalAuth = $external_auth;
+    $this->sessionManager = $session_manager;
   }
 
   /**
@@ -90,9 +101,10 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $session = $this->sessionManager->getSession();
     /** @var \Drupal\user\UserInterface $account */
     $account = User::load($this->currentUser()->id());
 
-    $this->externalAuth->linkExistingAccount($account->getAccountName(), 'tupas_registration', $account);
+    $this->externalAuth->linkExistingAccount($session['unique_id'], 'tupas_registration', $account);
   }
 }

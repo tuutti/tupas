@@ -70,13 +70,13 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   /**
    * Attempt to change roles for given account.
    *
-   * @param \Drupal\Core\Session\AccountProxyInterface $account
+   * @param object $account
    *   Account to set roles to.
    * @param string $action
    *   Action to do.
    */
-  protected function setRoles(AccountProxyInterface $account, $action = 'set') {
-    if (!$account->isAuthenticated()) {
+  protected function setRoles($account, $action = 'set') {
+    if (!method_exists($account, 'id')) {
       return;
     }
     $active_user = User::load($account->id());
@@ -85,6 +85,9 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       $active_user->addRole('tupas_authenticated_user');
     }
     else {
+      if (!$active_user->hasRole('tupas_authenticated_user')) {
+        return;
+      }
       $active_user->removeRole('tupas_authenticated_user');
     }
     $active_user->save();
@@ -104,9 +107,9 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     }
     $session = $this->sessionManager->getSession();
 
-    // No session found.
+    // No session found. Attempt to remove tupas authenticated role.
     if (!isset($session->expire)) {
-      return;
+      return $this->setRoles($account, 'remove');
     }
     // Attempt to add role for current user.
     // @todo replace this with rules/actions?
