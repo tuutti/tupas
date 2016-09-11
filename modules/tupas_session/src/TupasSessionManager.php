@@ -81,8 +81,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   public function start($transaction_id, $unique_id) {
     // Start an actual session.
     if (!$this->sessionManager->isStarted()) {
+      // Drupal does not start session unless we store something in $_SESSION
+      // and we need session to make session data to persist longer than one request.
+      $_SESSION['session_stared'] = TRUE;
+
       $this->sessionManager->start();
     }
+
     $config = $this->configFactory->get('tupas_session.settings');
     $session_length = (int) $config->get('tupas_session_length');
     // Session length defaults to 1 in case session length is not enabled.

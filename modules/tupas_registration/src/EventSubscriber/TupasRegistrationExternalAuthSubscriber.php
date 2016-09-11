@@ -1,0 +1,41 @@
+<?php
+
+namespace Drupal\tupas_registration\EventSubscriber;
+
+use Drupal\Component\Utility\Random;
+use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
+use Drupal\externalauth\Event\ExternalAuthEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+/**
+ * Class TupasRegistrationExternalAuthSubscriber.
+ *
+ * @package Drupal\tupas_registration
+ */
+class TupasRegistrationExternalAuthSubscriber implements EventSubscriberInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  static public function getSubscribedEvents() {
+    $events[ExternalAuthEvents::AUTHMAP_ALTER][] = ['alterUsername'];
+
+    return $events;
+  }
+
+  /**
+   * Alter authmap username.
+   *
+   * @param \Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent $event
+   *   Event to dispatch.
+   */
+  public function alterUsername(ExternalAuthAuthmapAlterEvent $event) {
+    // By default externalauth module generates username from auth_service + authname.
+    // We use hashed SSN as authname so username is gonna be longer than allowed 60 characters.
+    // Username is gonna be overridden on registration form so it should be fine to generate
+    // random name to avoid EntityStorageException.
+    $random = new Random();
+    $event->setUsername($random->name(20));
+  }
+
+}
