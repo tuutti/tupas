@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\TupasService;
 use Drupal\user\PrivateTempStoreFactory;
 
@@ -109,13 +110,18 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     }
     $expire = $session_length * 60 + REQUEST_TIME;
 
-    // Store tupas session.
-    $this->tempStore->set('tupas_session', [
-      'transaction_id' => $transaction_id,
-      'expire' => $expire,
-      // Hash social security number.
-      'unique_id' => TupasService::hashSsn($unique_id),
-    ]);
+    try {
+      // Store tupas session.
+      $this->tempStore->set('tupas_session', [
+        'transaction_id' => $transaction_id,
+        'expire' => $expire,
+        // Hash social security number.
+        'unique_id' => TupasService::hashSsn($unique_id),
+      ]);
+    }
+    catch (TupasGenericException $e) {
+      // @todo Do something.
+    }
   }
 
   /**
