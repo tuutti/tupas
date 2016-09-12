@@ -105,6 +105,6 @@ class MapTupasConfirmForm extends ConfirmFormBase {
     /** @var \Drupal\user\UserInterface $account */
     $account = User::load($this->currentUser()->id());
 
-    $this->externalAuth->linkExistingAccount($session['unique_id'], 'tupas_registration', $account);
+    $this->externalAuth->linkExistingAccount($session->getUniqueId(), 'tupas_registration', $account);
   }
 }

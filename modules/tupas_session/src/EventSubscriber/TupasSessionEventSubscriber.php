@@ -108,14 +108,14 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     $session = $this->sessionManager->getSession();
 
     // No session found. Attempt to remove tupas authenticated role.
-    if (!isset($session['expire'])) {
+    if (empty($session->getExpire())) {
       return $this->setRoles($account, 'remove');
     }
     // Attempt to add role for current user.
     // @todo replace this with rules/actions?
     $this->setRoles($account, 'set');
 
-    if ($session['expire'] > REQUEST_TIME) {
+    if ($session->getExpire() > REQUEST_TIME) {
       return;
     }
     drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');

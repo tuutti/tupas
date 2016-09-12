@@ -150,4 +150,16 @@ class SessionAlterEvent extends Event {
     return $this->data;
   }
 
+  /**
+   * Create new static object from array.
+   *
+   * @param array $data
+   *   Array of data to populate constructor.
+   *
+   * @return static
+   */
+  static public function createFromArray(array $data) {
+    return new static($data['transaction_id'], $data['expire'], $data['unique_id'], $data['data']);
+  }
+
 }

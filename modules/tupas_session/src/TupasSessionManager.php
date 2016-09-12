@@ -85,7 +85,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->tempStore->get('tupas_session')) {
       return FALSE;
     }
-    return $session;
+    return SessionAlterEvent::createFromArray($session);
   }
 
   /**
@@ -132,7 +132,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * Temp store does not handle session migrations, so we have
    * to do this manually.
    *
-   * @param array $session
+   * @param SessionAlterEvent $session
    *   Session storage from anonymous account.
    * @param array $values
    *   Account arguments.
@@ -140,14 +140,14 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * @return bool
    *   TRUE on success, FALSE on failure.
    */
-  public function migrateLoginRegister($session, array $values) {
+  public function migrateLoginRegister(SessionAlterEvent $session, array $values) {
     if (!isset($values['name'], $values['mail'])) {
       return FALSE;
     }
     // Delete existing tupas session data.
     $this->destroy();
 
-    if (!$account = $this->auth->loginRegister($session['unique_id'], 'tupas_registration')) {
+    if (!$account = $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration')) {
       return FALSE;
     }
     // Update account details.
@@ -157,7 +157,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $account->save();
 
     // Start new 'session' with our newly logged-in user.
-    $this->start($session['transaction_id'], $session['unique_id']);
+    $this->start($session->getTransactionId(), $session->getUniqueId());
 
     return TRUE;
   }
