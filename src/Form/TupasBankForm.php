@@ -56,6 +56,12 @@ class TupasBankForm extends EntityForm {
       '#default_value' => $tupas_bank->getCertVersion(),
     ];
 
+    $form['id_type'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Id type (A01Y_IDTYPE)'),
+      '#default_value' => $tupas_bank->getIdType(),
+    ];
+
     $form['rcv_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Receiver ID (A01Y_RCVID)'),

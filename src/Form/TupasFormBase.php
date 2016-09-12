@@ -28,8 +28,6 @@ class TupasFormBase extends FormBase {
     if (!$tupas instanceof TupasServiceInterface) {
       return $form;
     }
-    $config = $this->config('tupas.settings');
-
     $form['#action'] = $tupas->getBank()->getActionUrl();
 
     // Message type (defaults to '701' on all banks).
@@ -65,7 +63,7 @@ class TupasFormBase extends FormBase {
     // Type of the personalization data (see the TUPAS documentation appendix 2).
     $form['A01Y_IDTYPE'] = [
       '#type' => 'hidden',
-      '#value' => $config->get('idtype'),
+      '#value' => $tupas->getBank()->getIdType(),
     ];
 
     // Return link on success.

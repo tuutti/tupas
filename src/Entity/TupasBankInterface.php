@@ -11,6 +11,7 @@ interface TupasBankInterface {
    * Get bank status (enabled/disabled).
    *
    * @return bool
+   *   Status.
    */
   public function getStatus();
 
@@ -18,6 +19,7 @@ interface TupasBankInterface {
    * Get bank action url.
    *
    * @return string
+   *   Action url.
    */
   public function getActionUrl();
 
@@ -25,6 +27,7 @@ interface TupasBankInterface {
    * Get bank cert version.
    *
    * @return string.
+   *   Cert version.
    */
   public function getCertVersion();
 
@@ -32,6 +35,7 @@ interface TupasBankInterface {
    * Get receiver id.
    *
    * @return string
+   *   Rcv id.
    */
   public function getRcvId();
 
@@ -39,6 +43,7 @@ interface TupasBankInterface {
    * Get receiver key.
    *
    * @return string
+   *   Rcv key.
    */
   public function getRcvKey();
 
@@ -46,6 +51,7 @@ interface TupasBankInterface {
    * Get key version.
    *
    * @return string
+   *   Key version.
    */
   public function getKeyVersion();
 
@@ -53,6 +59,16 @@ interface TupasBankInterface {
    * Get encryption algorithm.
    *
    * @return string
+   *   Encryption alg.
    */
   public function getEncryptionAlg();
+
+  /**
+   * Get id type of bank.
+   *
+   * @return string
+   *   Id type.
+   */
+  public function getIdType();
+
 }

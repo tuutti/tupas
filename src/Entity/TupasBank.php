@@ -49,6 +49,13 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
   protected $id;
 
   /**
+   * The Tupas bank id type.
+   *
+   * @var string
+   */
+  protected $id_type;
+
+  /**
    * The Tupas bank label.
    *
    * @var string
@@ -152,6 +159,13 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
    */
   public function getEncryptionAlg() {
     return $this->get('encryption_alg');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIdType() {
+    return $this->get('id_type');
   }
 
 }
