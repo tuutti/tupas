@@ -49,19 +49,11 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
   protected $id;
 
   /**
-   * The Tupas bank id type.
-   *
-   * @var string
-   */
-  protected $id_type;
-
-  /**
    * The Tupas bank label.
    *
    * @var string
    */
   protected $label;
-
 
   /**
    * The Tupas bank status.
@@ -111,6 +103,13 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
    * @var string
    */
   protected $encryption_alg;
+
+  /**
+   * The Tupas bank id type.
+   *
+   * @var string
+   */
+  protected $id_type;
 
   /**
    * {@inheritdoc}

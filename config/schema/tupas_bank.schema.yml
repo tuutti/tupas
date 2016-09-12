@@ -24,3 +24,5 @@ tupas.tupas_bank.*:
       type: string
     encryption_alg:
       type: string
+    id_type:
+      type: string
