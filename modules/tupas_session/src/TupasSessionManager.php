@@ -3,12 +3,13 @@
 namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\TupasService;
+use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\user\PrivateTempStoreFactory;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class TupasSessionManager.
@@ -23,13 +24,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * @var \Drupal\Core\Config\ConfigFactory
    */
   protected $configFactory;
-
-  /**
-   * Entity manager.
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
-   */
-  protected $entityManager;
 
   /**
    * The temporary storage service.
@@ -53,25 +47,32 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $auth;
 
   /**
+   * The event dispatcher service.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The config factory.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
    * @param \Drupal\user\PrivateTempStoreFactory $temp_store
    *   The temporary storage service.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session manager service.
    * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
    *   The external auth service.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher service.
    */
-  public function __construct(ConfigFactory $config_factory, EntityManagerInterface $entity_manager, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager, ExternalAuthInterface $external_auth) {
+  public function __construct(ConfigFactory $config_factory, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager, ExternalAuthInterface $external_auth, EventDispatcherInterface $event_dispatcher) {
     $this->configFactory = $config_factory;
-    $this->entityManager = $entity_manager;
     $this->sessionManager = $session_manager;
     $this->tempStore = $temp_store->get('tupas_registration');
     $this->auth = $external_auth;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -93,8 +94,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   public function start($transaction_id, $unique_id) {
     // Start an actual session.
     if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
-      // Drupal does not start session unless we store something in $_SESSION
-      // and we need session to make session data to persist longer than one request.
+      // Drupal does not start session unless we store something in $_SESSION.
       $_SESSION['session_stared'] = TRUE;
 
       $this->sessionManager->start();
@@ -111,12 +111,14 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $expire = $session_length * 60 + REQUEST_TIME;
 
     try {
+      // Allow session data to be altered.
+      $session_data = new SessionAlterEvent($transaction_id, $expire, TupasService::hashSsn($unique_id));
       // Store tupas session.
       $this->tempStore->set('tupas_session', [
-        'transaction_id' => $transaction_id,
-        'expire' => $expire,
-        // Hash social security number.
-        'unique_id' => TupasService::hashSsn($unique_id),
+        'transaction_id' => $session_data->getTransactionId(),
+        'expire' => $session_data->getExpire(),
+        'unique_id' => $session_data->getUniqueId(),
+        'data' => $session_data->getData(),
       ]);
     }
     catch (TupasGenericException $e) {

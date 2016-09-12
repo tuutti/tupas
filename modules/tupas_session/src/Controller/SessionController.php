@@ -100,7 +100,7 @@ class SessionController extends ControllerBase {
       ->load($request->query->get('bank_id'));
 
     if (!$bank instanceof TupasBank) {
-      drupal_set_message($this->t('Bank not found'));
+      drupal_set_message($this->t('Bank not found.'));
 
       return $this->redirect('<front>');
     }

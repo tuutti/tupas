@@ -254,6 +254,10 @@ class TupasService implements TupasServiceInterface {
   /**
    * Hash SSN.
    *
+   * This is copied directly from tupas_registration 7.x.1.x.
+   *
+   * @todo Check if we should use some other hashing method.
+   *
    * @param string $payload
    *   The value SSN to be hashed that must contain sign of century (-, +, or A).
    *

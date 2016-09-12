@@ -1,7 +1,7 @@
 services:
   tupas_session.session_manager:
     class: Drupal\tupas_session\TupasSessionManager
-    arguments: ["@config.factory", "@entity.manager", "@user.private_tempstore", "@session_manager", "@externalauth.externalauth"]
+    arguments: ["@config.factory", "@user.private_tempstore", "@session_manager", "@externalauth.externalauth"]
 
   tupas_session.event_subscriber:
     class: Drupal\tupas_session\EventSubscriber\TupasSessionEventSubscriber

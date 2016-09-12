@@ -1,8 +1,9 @@
 <?php
+
 namespace Drupal\tupas_session\Event;
 
 /**
- * Class SessionEvents
+ * Class SessionEvents.
  *
  * @package Drupal\tupas_session\Event
  */
@@ -18,8 +19,15 @@ final class SessionEvents {
   /**
    * Allow succesfull tupas authentication message to be altered.
    *
-   * @var string.
+   * @var string
    */
   const MESSAGE_ALTER = 'tupas_session.message_alter';
+
+  /**
+   * Allow session storage to be altered.
+   *
+   * @var string
+   */
+  const SESSION_ALTER = 'tupas_session.session_alter';
 
 }
