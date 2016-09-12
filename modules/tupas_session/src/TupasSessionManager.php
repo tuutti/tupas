@@ -8,6 +8,7 @@ use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -112,12 +113,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     try {
       // Allow session data to be altered.
       $session_data = new SessionAlterEvent($transaction_id, $expire, TupasService::hashSsn($unique_id));
+      $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
       // Store tupas session.
       $this->tempStore->set('tupas_session', [
-        'transaction_id' => $session_data->getTransactionId(),
-        'expire' => $session_data->getExpire(),
-        'unique_id' => $session_data->getUniqueId(),
-        'data' => $session_data->getData(),
+        'transaction_id' => $session->getTransactionId(),
+        'expire' => $session->getExpire(),
+        'unique_id' => $session->getUniqueId(),
+        'data' => $session->getData(),
       ]);
     }
     // Hash validation failed.
