@@ -32,10 +32,7 @@ class TupasRegistrationExternalAuthSubscriber implements EventSubscriberInterfac
   public function alterUsername(ExternalAuthAuthmapAlterEvent $event) {
     // By default externalauth module generates username from auth_service + authname.
     // We use hashed SSN as authname so username is gonna be longer than allowed 60 characters.
-    // Username is gonna be overridden on registration form so it should be fine to generate
-    // random name to avoid EntityStorageException.
-    $random = new Random();
-    $event->setUsername($random->name(20));
+    $event->setUsername($event->getAuthname());
   }
 
 }

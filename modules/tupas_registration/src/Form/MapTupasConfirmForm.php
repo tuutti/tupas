@@ -49,7 +49,8 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('externalauth.externalauth')
+      $container->get('externalauth.externalauth'),
+      $container->get('tupas_session.session_manager')
     );
   }
 
@@ -106,5 +107,7 @@ class MapTupasConfirmForm extends ConfirmFormBase {
     $account = User::load($this->currentUser()->id());
 
     $this->externalAuth->linkExistingAccount($session->getUniqueId(), 'tupas_registration', $account);
+    $form_state->setRedirect('<front>');
   }
+
 }
