@@ -32,13 +32,6 @@ class TupasService implements TupasServiceInterface {
   protected $settings;
 
   /**
-   * List of allowed languages.
-   *
-   * @var array
-   */
-  protected $allowedLanguages = ['FI', 'EN', 'SV'];
-
-  /**
    * Constructor.
    *
    * @param \Drupal\tupas\Entity\TupasBankInterface $bank
@@ -52,13 +45,13 @@ class TupasService implements TupasServiceInterface {
     foreach ($settings as $key => $setting) {
       $this->set($key, $setting);
     }
+    // Populate default allowed languages.
+    if (!$this->get('allowed_languages')) {
+      $this->set('allowed_languages', ['FI', 'EN', 'SV']);
+    }
     // Fallback to english.
-    if (isset($settings['language'])) {
-      $language = strtoupper($settings['language']);
-
-      if (!in_array($language, $this->allowedLanguages)) {
-        $this->set('language', 'EN');
-      }
+    if (!$this->get('language')) {
+      $this->set('language', 'EN');
     }
   }
 
@@ -105,6 +98,10 @@ class TupasService implements TupasServiceInterface {
    * {@inheritdoc}
    */
   public function getLanguage() {
+    // Fallback to english.
+    if (!in_array($this->get('language'), $this->get('allowed_languages'))) {
+      return 'EN';
+    }
     return strtoupper($this->get('language'));
   }
 

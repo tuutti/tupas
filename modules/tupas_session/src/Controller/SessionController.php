@@ -75,6 +75,7 @@ class SessionController extends ControllerBase {
     foreach ($banks as $bank) {
       $content['tupas_bank_items'][] = $this->formBuilder()
         ->getForm('\Drupal\tupas\Form\TupasFormBase', new TupasService($bank, [
+          // @todo Implement auto-detect.
           'language' => 'FI',
           'return_url' => 'tupas_session.return',
           'cancel_url' => 'tupas_session.canceled',

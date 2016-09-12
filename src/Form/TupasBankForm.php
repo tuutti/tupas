@@ -60,7 +60,7 @@ class TupasBankForm extends EntityForm {
       '#type' => 'textfield',
       '#title' => $this->t('Id type (A01Y_IDTYPE)'),
       '#default_value' => $tupas_bank->getIdType(),
-      '#description' => $this->t('If you are using TUPAS registration module, this must be set to "02".')
+      '#description' => $this->t('This must be set to "02" when using TUPAS registration module.'),
     ];
 
     $form['rcv_id'] = [
