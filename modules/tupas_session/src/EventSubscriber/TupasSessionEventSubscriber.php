@@ -76,13 +76,13 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
    * @param string $action
    *   Action to do.
    */
-  protected function setRoles($account, $action = 'set') {
+  protected function setRoles($account, $action = 'add') {
     if (!method_exists($account, 'id')) {
       return;
     }
     $active_user = User::load($account->id());
 
-    if ($action === 'set') {
+    if ($action === 'add') {
       $active_user->addRole('tupas_authenticated_user');
     }
     else {
@@ -96,6 +96,8 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
 
   /**
    * This method is called whenever the kernel.request event is dispatched.
+   *
+   * @todo replace this with rules/actions?
    *
    * @param GetResponseEvent $event
    *   Event to dispatch.
@@ -113,15 +115,13 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       return $this->setRoles($account, 'remove');
     }
     // Attempt to add role for current user.
-    // @todo replace this with rules/actions?
-    $this->setRoles($account, 'set');
+    $this->setRoles($account, 'add');
 
     if ($session->getExpire() > REQUEST_TIME) {
       return;
     }
     drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
     // Attempt to remove tupas_authenticated role.
-    // @todo replace this with rules/actions?
     $this->setRoles($account, 'remove');
 
     $this->sessionManager->destroy();

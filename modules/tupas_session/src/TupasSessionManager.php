@@ -92,9 +92,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id) {
-    // Start an actual session.
+    // Drupal does not start session unless we store something in $_SESSION.
     if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
-      // Drupal does not start session unless we store something in $_SESSION.
       $_SESSION['session_stared'] = TRUE;
 
       $this->sessionManager->start();
@@ -104,7 +103,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $session_length = (int) $config->get('tupas_session_length');
     // Session length defaults to 1 in case session length is not enabled.
     // This is to make sure we create one time session that allow us to set
-    // tupas_authenticated role later on.
+    // tupas_authenticated role later.
     if (empty($session_length)) {
       $session_length = 1;
     }
@@ -158,7 +157,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       ->setPassword(empty($values['pass']) ? user_password(20) : $values['pass']);
     $account->save();
 
-    // Start new 'session' with our newly logged-in user.
+    // Start new tupas session for our newly logged-in user.
     $this->start($session->getTransactionId(), $session->getUniqueId());
 
     return TRUE;
