@@ -89,7 +89,7 @@ class RegisterForm extends AccountForm {
     $session = $this->sessionManager->getSession();
 
     // Shouldn't be possible to be empty, but lets make sure just in case.
-    if (empty($session['unique_id'])) {
+    if (empty($session->getUniqueId())) {
       drupal_set_message($this->t('Registration failed. Please try again later.'));
 
       return $form_state->setRedirect('<front>');
