@@ -1,6 +1,6 @@
 status: true
-id: saastopankit
-label: 'Säästöpankit ja paikallisosuuspankit'
+id: aktia
+label: 'Aktia'
 action_url: 'https://auth.aktia.fi/tupastest'
 cert_version: '0003'
 rcv_id: '3333333333333'
