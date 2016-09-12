@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -108,7 +109,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     $session = $this->sessionManager->getSession();
 
     // No session found. Attempt to remove tupas authenticated role.
-    if (empty($session->getExpire())) {
+    if (!$session || empty($session->getExpire())) {
       return $this->setRoles($account, 'remove');
     }
     // Attempt to add role for current user.

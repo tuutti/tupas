@@ -1,0 +1,9 @@
+status: true
+id: alandsbanken
+label: Ålandsbanken
+action_url: 'https://online.alandsbanken.fi/service/identify'
+cert_version: '0002'
+rcv_id: AABTUPASID
+rcv_key: PAPAGAJA
+key_version: '0001'
+encryption_alg: '01'

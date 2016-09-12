@@ -1,0 +1,9 @@
+status: true
+id: spankki
+label: S-Pankki
+action_url: 'https://online.s-pankki.fi/service/identify'
+cert_version: '0002'
+rcv_id: SPANKKITUPAS
+rcv_key: SPANKKI
+key_version: '0001'
+encryption_alg: '01'
