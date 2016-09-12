@@ -121,6 +121,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
         'data' => $session_data->getData(),
       ]);
     }
+    // Hash validation failed.
     catch (TupasGenericException $e) {
       // @todo Do something.
     }
@@ -144,12 +145,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!isset($values['name'], $values['mail'])) {
       return FALSE;
     }
-    // Delete existing tupas session data.
-    $this->destroy();
 
     if (!$account = $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration')) {
       return FALSE;
     }
+    // Delete existing tupas session data.
+    $this->destroy();
+
     // Update account details.
     $account->setUsername($values['name'])
       ->setEmail($values['mail'])
