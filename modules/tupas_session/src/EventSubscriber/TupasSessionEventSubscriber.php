@@ -77,12 +77,19 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
    *   Action to do.
    */
   protected function setRoles($account, $action = 'add') {
-    if (!method_exists($account, 'id')) {
+    if (!method_exists($account, 'id') || $account->isAnonymous()) {
       return;
     }
-    $active_user = User::load($account->id());
+    $active_user = &drupal_static(__FUNCTION__ . $account->id());
+
+    if (!$active_user) {
+      $active_user = User::load($account->id());
+    }
 
     if ($action === 'add') {
+      if ($active_user->hasRole('tupas_authenticated_user')) {
+        return;
+      }
       $active_user->addRole('tupas_authenticated_user');
     }
     else {
@@ -105,7 +112,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   public function handleTupasSession(GetResponseEvent $event) {
     $account = $this->currentUser->getAccount();
 
-    if (empty($this->config->get('tupas_session_length')) || !$account->isAuthenticated()) {
+    if (empty($this->config->get('tupas_session_length'))) {
       return;
     }
     $session = $this->sessionManager->getSession();
