@@ -111,7 +111,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     $session = $this->sessionManager->getSession();
 
     // No session found. Attempt to remove tupas authenticated role.
-    if (!$session || empty($session->getExpire())) {
+    if (!$session) {
       return $this->setRoles($account, 'remove');
     }
     // Attempt to add role for current user.
@@ -126,8 +126,10 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
 
     $this->sessionManager->destroy();
     // Redirect to expired page.
-    $url = Url::fromRoute($this->config->get('expired_goto'));
-    $event->setResponse(new RedirectResponse($url->toString()));
+    if ($this->config->get('expired_goto')) {
+      $url = Url::fromRoute($this->config->get('expired_goto'));
+      $event->setResponse(new RedirectResponse($url->toString()));
+    }
   }
 
 }

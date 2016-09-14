@@ -45,7 +45,7 @@ class SettingsForm extends ConfigFormBase {
     $form['expired_goto'] = [
       '#type' => 'textfield',
       '#title' => t('Landing page after expired TUPAS authentication'),
-      '#description' => t('Use a Drupal menu path. Leave empty to use the front page.'),
+      '#description' => t('Use a Drupal menu path. Leave empty to disable.'),
       '#default_value' => $config->get('expired_goto'),
     ];
 

@@ -2,7 +2,6 @@
 
 namespace Drupal\tupas_registration\EventSubscriber;
 
-use Drupal\Component\Utility\Random;
 use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
 use Drupal\externalauth\Event\ExternalAuthEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
