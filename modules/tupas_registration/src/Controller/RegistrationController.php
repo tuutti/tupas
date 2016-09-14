@@ -76,7 +76,7 @@ class RegistrationController extends SessionController {
         return $this->redirect('<front>');
       }
       // User is not authenticated. Attempt to authenticate.
-      if ($this->auth->login($session->getUniqueId(), 'tupas_registration')) {
+      if ($this->sessionManager->login($session->getUniqueId(), 'tupas_registration')) {
         return $this->redirect('<front>');
       }
     }

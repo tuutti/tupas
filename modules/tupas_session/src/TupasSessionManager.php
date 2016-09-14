@@ -145,7 +145,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * @return bool
    *   TRUE on success, FALSE on failure.
    */
-  public function migrateLoginRegister(SessionAlterEvent $session, array $values) {
+  public function loginRegister(SessionAlterEvent $session, array $values) {
     if (!isset($values['name'], $values['mail'])) {
       return FALSE;
     }
@@ -166,6 +166,27 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $this->start($session->getTransactionId(), $session->getUniqueId());
 
     return TRUE;
+  }
+
+  /**
+   * Handle session migration for login event.
+   *
+   * @param \Drupal\tupas_session\Event\SessionAlterEvent $session
+   *   Session storage from anonymous account.
+   *
+   * @return bool
+   *   TRUE on success, FALSE on failure.
+   */
+  public function login(SessionAlterEvent $session) {
+    // Delete existing session data.
+    $this->destroy();
+
+    if ($this->auth->login($session->getUniqueId(), 'tupas_registration')) {
+      $this->start($session->getTransactionId(), $session->getUniqueId());
+
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**

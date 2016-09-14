@@ -95,7 +95,7 @@ class RegisterForm extends AccountForm {
       return $form_state->setRedirect('<front>');
     }
     // Create new user and migrate existing session.
-    $status = $this->sessionManager->migrateLoginRegister($session, [
+    $status = $this->sessionManager->loginRegister($session, [
       'name' => $form_state->getValue('name'),
       'mail' => $form_state->getValue('mail'),
     ]);
