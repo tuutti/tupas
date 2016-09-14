@@ -65,7 +65,7 @@ class RegistrationController extends SessionController {
     }
 
     // Check if user has already connected their account.
-    if (!empty($session->getUniqueId()) && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
+    if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
       if ($this->currentUser()->isAuthenticated()) {
         // Show error message only if session length is not enabled.
         // This allows users to refresh their tupas sessions without showing
@@ -76,7 +76,7 @@ class RegistrationController extends SessionController {
         return $this->redirect('<front>');
       }
       // User is not authenticated. Attempt to authenticate.
-      if ($this->sessionManager->login($session->getUniqueId(), 'tupas_registration')) {
+      if ($this->sessionManager->login($session, 'tupas_registration')) {
         return $this->redirect('<front>');
       }
     }
