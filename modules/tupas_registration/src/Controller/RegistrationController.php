@@ -88,6 +88,7 @@ class RegistrationController extends SessionController {
     }
     $entity = $this->entityManager()->getStorage('user')->create();
     // Call our custom registration form.
+    // @todo Allow users to register without filling the registration details.
     return $this->entityFormBuilder()
       ->getForm($entity, 'tupas_registration');
   }
