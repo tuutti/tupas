@@ -18,8 +18,10 @@ interface TupasSessionManagerInterface {
    *   Transaction id.
    * @param string $unique_id
    *   Unique identifier.
+   * @param array $data
+   *   Optional session data.
    */
-  public function start($transaction_id, $unique_id);
+  public function start($transaction_id, $unique_id, array $data = []);
 
   /**
    * Migrate session to new user.

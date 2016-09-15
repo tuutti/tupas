@@ -87,7 +87,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function start($transaction_id, $unique_id) {
+  public function start($transaction_id, $unique_id, array $data = []) {
     // Drupal does not start session unless we store something in $_SESSION.
     if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
       $_SESSION['session_stared'] = TRUE;
@@ -103,7 +103,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       $expire = $expire * 60 + REQUEST_TIME;
     }
     // Allow session data to be altered.
-    $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire);
+    $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire, $data);
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
     // Store tupas session.
     $this->tempStore->set('tupas_session', [

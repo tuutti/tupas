@@ -64,7 +64,11 @@ class RegistrationController extends SessionController {
       // Return to tupas initialize page.
       return $this->redirect('tupas_session.front');
     }
-
+    // Session data must contain bank id.
+    if (!$session->getData('bank')) {
+      drupal_set_message($this->t('Data validation failed.'), 'error');
+      return [];
+    }
     // Check if user has already connected their account.
     if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
       if ($this->currentUser()->isAuthenticated()) {
@@ -107,6 +111,7 @@ class RegistrationController extends SessionController {
       $random = new Random();
 
       // Generate unique username.
+      // @todo Attempt to use B02K_CUSTNAME as username?
       while (TRUE) {
         $name = $random->string(10);
 

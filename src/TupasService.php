@@ -4,6 +4,7 @@ namespace Drupal\tupas;
 
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\Exception\TupasHashMatchException;
@@ -249,22 +250,32 @@ class TupasService implements TupasServiceInterface {
   }
 
   /**
-   * Hash SSN.
+   * Validate id type.
    *
-   * This is copied directly from tupas_registration 7.x.1.x.
+   * @param \Drupal\tupas\Entity\TupasBank $bank
+   *   The bank entity.
+   */
+  public static function validateIdType(TupasBank $bank) {
+
+  }
+
+  /**
+   * Hash customer id.
    *
    * @todo Check if we should use some other hashing method.
    * @todo Generate hash based on idType (allow companies etc to register)
    *
    * @param string $payload
    *   The value SSN to be hashed that must contain sign of century (-, +, or A).
+   * @param string $id_type
+   *   Id type to check against.
    *
    * @return string
    *   Hashed payload.
    *
    * @throws \Drupal\tupas\Exception\TupasGenericException
    */
-  public static function hashSsn($payload) {
+  public static function hashResponseId($payload, $id_type) {
     $pieces = preg_split("/(\+|\-|A)/", $payload);
     if (empty($pieces[1])) {
       throw new TupasGenericException('SSN must contain sign of century.');

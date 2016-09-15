@@ -102,7 +102,7 @@ class SessionController extends ControllerBase {
       ->load($request->query->get('bank_id'));
 
     if (!$bank instanceof TupasBank) {
-      drupal_set_message($this->t('Bank not found.'));
+      drupal_set_message($this->t('Validation failed.'), 'error');
 
       return $this->redirect('<front>');
     }
@@ -119,12 +119,13 @@ class SessionController extends ControllerBase {
       return $this->redirect('<front>');
     }
     try {
-      // Hash SSN.
-      $customer_id = TupasService::hashSsn($request->get('B02K_CUSTID'));
+      // Hash customer id.
+      $customer_id = TupasService::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
 
       // Start tupas session.
-      $this->sessionManager->start($request->query->get('transaction_id'), $customer_id);
-
+      $this->sessionManager->start($request->query->get('transaction_id'), $customer_id, [
+        'bank' => $request->query->get('bank_id'),
+      ]);
       // Allow message to be customized.
       $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
       // Allow message to be disabled.

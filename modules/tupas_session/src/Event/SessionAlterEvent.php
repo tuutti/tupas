@@ -143,10 +143,16 @@ class SessionAlterEvent extends Event {
   /**
    * Get additional session data.
    *
+   * @param string $key
+   *   Fetch item by key.
+   *
    * @return array
    *   Session data.
    */
-  public function getData() {
+  public function getData($key = NULL) {
+    if ($key) {
+      return isset($this->data[$key]) ? $this->data[$key] : NULL;
+    }
     return $this->data;
   }
 
