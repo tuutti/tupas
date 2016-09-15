@@ -71,8 +71,6 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   /**
    * This method is called whenever the kernel.request event is dispatched.
    *
-   * @todo replace this with rules/actions?
-   *
    * @param GetResponseEvent $event
    *   Event to dispatch.
    */
@@ -92,9 +90,10 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     }
     // Allow users with permission to bypass session expiration check.
     if (!$this->currentUser->hasPermission('bypass tupas session expiration')) {
-      drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
       // Session has expired. Destroy session and log current user out.
       $this->sessionManager->destroy(TRUE);
+
+      drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
       // Redirect to expired page.
       if ($this->config->get('expired_goto')) {
         $url = Url::fromRoute($this->config->get('expired_goto'));

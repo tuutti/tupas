@@ -77,7 +77,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function renew() {
-    if ($session = $this->getSession()) {
+    // @todo Add some kind of lazy writing method.
+    if (!$session = $this->getSession()) {
       return FALSE;
     }
     $this->start($session->getTransactionId(), $session->getUniqueId());
@@ -87,9 +88,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id) {
-    // Destroy existing sessions before starting new session.
-    $this->destroy();
-
     // Drupal does not start session unless we store something in $_SESSION.
     if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
       $_SESSION['session_stared'] = TRUE;
