@@ -69,39 +69,6 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Attempt to change roles for given account.
-   *
-   * @param object $account
-   *   Account to set roles to.
-   * @param string $action
-   *   Action to do.
-   */
-  protected function setRoles($account, $action = 'add') {
-    if (!method_exists($account, 'id') || $account->isAnonymous()) {
-      return;
-    }
-    $active_user = &drupal_static(__FUNCTION__ . $account->id());
-
-    if (!$active_user) {
-      $active_user = User::load($account->id());
-    }
-
-    if ($action === 'add') {
-      if ($active_user->hasRole('tupas_authenticated_user')) {
-        return;
-      }
-      $active_user->addRole('tupas_authenticated_user');
-    }
-    else {
-      if (!$active_user->hasRole('tupas_authenticated_user')) {
-        return;
-      }
-      $active_user->removeRole('tupas_authenticated_user');
-    }
-    $active_user->save();
-  }
-
-  /**
    * This method is called whenever the kernel.request event is dispatched.
    *
    * @todo replace this with rules/actions?
@@ -110,21 +77,12 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
    *   Event to dispatch.
    */
   public function handleTupasSession(GetResponseEvent $event) {
-    return;
-    $account = $this->currentUser->getAccount();
-
     if (empty($this->config->get('tupas_session_length'))) {
       return;
     }
-    $session = $this->sessionManager->getSession();
-
-    // No session found. Attempt to remove tupas authenticated role.
-    if (!$session) {
-      return $this->setRoles($account, 'remove');
+    if (!$session = $this->sessionManager->getSession()) {
+      return;
     }
-    // Attempt to add role for current user.
-    $this->setRoles($account, 'add');
-
     if ($session->getExpire() > REQUEST_TIME) {
       // Automatically refresh expiration date.
       if ($this->config->get('tupas_session_renew')) {
@@ -133,10 +91,9 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       return;
     }
     drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
-    // Attempt to remove tupas_authenticated role.
-    $this->setRoles($account, 'remove');
-
+    // Session has expired.
     $this->sessionManager->destroy();
+
     // Redirect to expired page.
     if ($this->config->get('expired_goto')) {
       $url = Url::fromRoute($this->config->get('expired_goto'));
