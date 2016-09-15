@@ -159,7 +159,7 @@ class SessionAlterEvent extends Event {
    * @return static
    */
   static public function createFromArray(array $data) {
-    return new static($data['transaction_id'], $data['expire'], $data['unique_id'], $data['data']);
+    return new static($data['transaction_id'], $data['unique_id'], $data['expire'], $data['data']);
   }
 
 }

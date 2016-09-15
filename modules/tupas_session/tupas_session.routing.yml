@@ -16,6 +16,10 @@ tupas_session.front:
     _title: 'TUPAS authentication'
   requirements:
     _access: 'TRUE'
+  # @todo Review this. We need to generate unique transaction id's for every tupas
+  # form.
+  options:
+    no_cache: TRUE
 tupas_session.canceled:
   path: '/user/tupas/cancel'
   defaults:

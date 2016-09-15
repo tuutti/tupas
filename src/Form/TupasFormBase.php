@@ -28,12 +28,6 @@ class TupasFormBase extends FormBase {
     if (!$tupas instanceof TupasServiceInterface) {
       return $form;
     }
-    // @todo Figure out better caching mechanics.
-    // Disable caching for this form to make sure every user gets unique
-    // transaction id.
-    $form['#cache'] = [
-      'max-age' => 0,
-    ];
     $form['#action'] = $tupas->getBank()->getActionUrl();
 
     // Message type (defaults to '701' on all banks).

@@ -110,6 +110,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
    *   Event to dispatch.
    */
   public function handleTupasSession(GetResponseEvent $event) {
+    return;
     $account = $this->currentUser->getAccount();
 
     if (empty($this->config->get('tupas_session_length'))) {
