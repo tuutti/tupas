@@ -42,6 +42,12 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['tupas_session_renew'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Auto-renew TUPAS session'),
+      '#default_value' => $config->get('tupas_session_renew'),
+    ];
+
     $form['expired_goto'] = [
       '#type' => 'textfield',
       '#title' => t('Landing page after expired TUPAS authentication'),
@@ -68,6 +74,7 @@ class SettingsForm extends ConfigFormBase {
     $this->config('tupas_session.settings')
       ->set('tupas_session_length', $form_state->getValue('tupas_session_length'))
       ->set('expired_goto', $form_state->getValue('expired_goto'))
+      ->set('tupas_session_renew', $form_state->getValue('tupas_session_renew'))
       ->save();
   }
 

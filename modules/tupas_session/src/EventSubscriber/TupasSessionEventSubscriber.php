@@ -125,6 +125,10 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     $this->setRoles($account, 'add');
 
     if ($session->getExpire() > REQUEST_TIME) {
+      // Automatically refresh expiration date.
+      if ($this->config->get('tupas_session_renew')) {
+        $this->sessionManager->renew();
+      }
       return;
     }
     drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');

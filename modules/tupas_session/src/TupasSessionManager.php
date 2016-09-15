@@ -90,6 +90,19 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
+   * Automatically renew session.
+   *
+   * @return bool
+   *   TRUE on success, FALSE on failure.
+   */
+  public function renew() {
+    if ($session = $this->getSession()) {
+      return FALSE;
+    }
+    $this->start($session->getTransactionId(), $session->getUniqueId());
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id) {
@@ -115,7 +128,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
 
     try {
       // Allow session data to be altered.
-      $session_data = new SessionAlterEvent($transaction_id, $expire, TupasService::hashSsn($unique_id));
+      $session_data = new SessionAlterEvent($transaction_id, TupasService::hashSsn($unique_id), $expire);
       $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
       // Store tupas session.
       $this->tempStore->set('tupas_session', [
