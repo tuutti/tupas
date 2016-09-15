@@ -118,28 +118,30 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    // Start tupas session.
     try {
+      // Hash SSN.
       $customer_id = TupasService::hashSsn($request->get('B02K_CUSTID'));
+
+      // Start tupas session.
+      $this->sessionManager->start($request->query->get('transaction_id'), $customer_id);
+
+      // Allow message to be customized.
+      $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
+      // Allow message to be disabled.
+      if ($message->getMessage()) {
+        drupal_set_message($message->getMessage(), $message->getType());
+      }
+
+      // Allow  redirect path to be customized.
+      $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
+
+      return $this->redirect($uri->getPath());
     }
     catch (TupasGenericException $e) {
       drupal_set_message($this->t('Hash validation failed.'), 'error');
 
       return $this->redirect('<front>');
     }
-    $this->sessionManager->start($request->query->get('transaction_id'), $customer_id);
-
-    // Allow message to be customized.
-    $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));
-    // Allow message to be disabled.
-    if ($message->getMessage()) {
-      drupal_set_message($message->getMessage(), $message->getType());
-    }
-
-    // Allow  redirect path to be customized.
-    $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
-
-    return $this->redirect($uri->getPath());
   }
 
   /**

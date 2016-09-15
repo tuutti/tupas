@@ -125,22 +125,16 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     }
     $expire = $session_length * 60 + REQUEST_TIME;
 
-    try {
-      // Allow session data to be altered.
-      $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire);
-      $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
-      // Store tupas session.
-      $this->tempStore->set('tupas_session', [
-        'transaction_id' => $session->getTransactionId(),
-        'expire' => $session->getExpire(),
-        'unique_id' => $session->getUniqueId(),
-        'data' => $session->getData(),
-      ]);
-    }
-    // Hash validation failed.
-    catch (TupasGenericException $e) {
-      // @todo Do something.
-    }
+    // Allow session data to be altered.
+    $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire);
+    $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
+    // Store tupas session.
+    $this->tempStore->set('tupas_session', [
+      'transaction_id' => $session->getTransactionId(),
+      'expire' => $session->getExpire(),
+      'unique_id' => $session->getUniqueId(),
+      'data' => $session->getData(),
+    ]);
   }
 
   /**
