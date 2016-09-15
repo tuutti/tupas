@@ -75,8 +75,11 @@ class RegistrationController extends SessionController {
         }
         return $this->redirect('<front>');
       }
-      // User is not authenticated. Attempt to authenticate.
-      if ($this->sessionManager->login($session, 'tupas_registration')) {
+      // Create callback to call after session migrate is succesfull.
+      $callback = function ($session) {
+        return $this->auth->login($session->getUniqueId(), 'tupas_registration');
+      };
+      if ($this->sessionManager->migrate($session, $callback)) {
         return $this->redirect('<front>');
       }
     }

@@ -26,6 +26,13 @@ class RegisterForm extends AccountForm {
   protected $sessionManager;
 
   /**
+   * The external auth service.
+   *
+   * @var \Drupal\externalauth\ExternalAuthInterface
+   */
+  protected $auth;
+
+  /**
    * RegisterForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
@@ -36,11 +43,14 @@ class RegisterForm extends AccountForm {
    *   The entitity query service.
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
+   * @param \Drupal\externalauth\ExternalAuthInterface $auth
+   *   The external auth service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager) {
+  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth) {
     parent::__construct($entity_manager, $language_manager, $entity_query);
 
     $this->sessionManager = $session_manager;
+    $this->auth = $auth;
   }
 
   /**
@@ -51,7 +61,8 @@ class RegisterForm extends AccountForm {
       $container->get('entity.manager'),
       $container->get('language_manager'),
       $container->get('entity.query'),
-      $container->get('tupas_session.session_manager')
+      $container->get('tupas_session.session_manager'),
+      $container->get('externalauth.externalauth')
     );
   }
 
@@ -88,22 +99,18 @@ class RegisterForm extends AccountForm {
   public function save(array $form, FormStateInterface $form_state) {
     $session = $this->sessionManager->getSession();
 
-    // Shouldn't be possible to be empty, but lets make sure just in case.
-    if (empty($session->getUniqueId())) {
-      drupal_set_message($this->t('Registration failed. Please try again later.'));
-
-      return $form_state->setRedirect('<front>');
-    }
-    // Create new user and migrate existing session.
-    $status = $this->sessionManager->loginRegister($session, [
-      'name' => $form_state->getValue('name'),
-      'mail' => $form_state->getValue('mail'),
-    ]);
-
-    if ($status) {
+    $callback = function ($session) {
+      return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
+    };
+    if ($account = $this->sessionManager->migrate($session, $callback)) {
       drupal_set_message($this->t('Registration successful. You are now logged in.'));
-    }
 
+      // Save user details.
+      $account->setUsername($form_state->getValue('name'))
+        ->setEmail($form_state->getValue('mail'))
+        ->setPassword(user_password(20));
+      $account->save();
+    }
     $form_state->setRedirect('<front>');
   }
 
