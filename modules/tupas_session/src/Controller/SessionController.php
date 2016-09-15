@@ -4,6 +4,7 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
@@ -118,7 +119,15 @@ class SessionController extends ControllerBase {
       return $this->redirect('<front>');
     }
     // Start tupas session.
-    $this->sessionManager->start($request->query->get('transaction_id'), $request->query->get('B02K_CUSTID'));
+    try {
+      $customer_id = TupasService::hashSsn($request->get('B02K_CUSTID'));
+    }
+    catch (TupasGenericException $e) {
+      drupal_set_message($this->t('Hash validation failed.'), 'error');
+
+      return $this->redirect('<front>');
+    }
+    $this->sessionManager->start($request->query->get('transaction_id'), $customer_id);
 
     // Allow message to be customized.
     $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));

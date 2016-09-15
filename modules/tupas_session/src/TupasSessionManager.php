@@ -6,7 +6,6 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Exception\TupasGenericException;
-use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\PrivateTempStoreFactory;
@@ -128,7 +127,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
 
     try {
       // Allow session data to be altered.
-      $session_data = new SessionAlterEvent($transaction_id, TupasService::hashSsn($unique_id), $expire);
+      $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire);
       $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
       // Store tupas session.
       $this->tempStore->set('tupas_session', [
