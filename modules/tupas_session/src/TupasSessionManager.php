@@ -81,7 +81,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->getSession()) {
       return FALSE;
     }
-    $this->start($session->getTransactionId(), $session->getUniqueId());
+    $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
   }
 
   /**
@@ -127,7 +127,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       $return = $callback($session);
     }
     // Start new session for logged in user.
-    $this->start($session->getTransactionId(), $session->getUniqueId());
+    $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
 
     return $return;
   }

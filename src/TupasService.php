@@ -252,11 +252,16 @@ class TupasService implements TupasServiceInterface {
   /**
    * Validate id type.
    *
+   * @todo Implement this.
+   *
    * @param \Drupal\tupas\Entity\TupasBank $bank
    *   The bank entity.
+   *
+   * @return bool
+   *   TRUE on success, FALSE on failure.
    */
   public static function validateIdType(TupasBank $bank) {
-
+    return TRUE;
   }
 
   /**

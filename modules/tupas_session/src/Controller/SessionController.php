@@ -124,7 +124,7 @@ class SessionController extends ControllerBase {
 
       // Start tupas session.
       $this->sessionManager->start($request->query->get('transaction_id'), $customer_id, [
-        'bank' => $request->query->get('bank_id'),
+        'bank' => $bank->id(),
       ]);
       // Allow message to be customized.
       $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new MessageAlterEvent($this->t('TUPAS authentication succesful.')));

@@ -4,6 +4,8 @@ namespace Drupal\tupas_registration\Controller;
 
 use Drupal\Component\Utility\Random;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Controller\SessionController;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -64,10 +66,22 @@ class RegistrationController extends SessionController {
       // Return to tupas initialize page.
       return $this->redirect('tupas_session.front');
     }
+    $bank = $this->entityManager()
+      ->getStorage('tupas_bank')
+      ->load($session->getData('bank'));
+
+    if (!$bank instanceof TupasBank) {
+      drupal_set_message($this->t('Validation failed'), 'error');
+
+      return $this->redirect('<front>');
+    }
+    if (!TupasService::validateIdType($bank)) {
+      drupal_set_message($this->t('Current configuration does not allow users to register. Please contact site administrator.'), 'error');
+      return $this->redirect('<front>');
+    }
     // Session data must contain bank id.
-    if (!$session->getData('bank')) {
+    if (!$bank_id = $session->getData('bank')) {
       drupal_set_message($this->t('Data validation failed.'), 'error');
-      return [];
     }
     // Check if user has already connected their account.
     if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
