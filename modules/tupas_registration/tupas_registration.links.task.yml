@@ -1,0 +1,6 @@
+tupas_registration.settings_form:
+  title: 'TUPAS registration'
+  route_name: tupas_registration.settings_form
+  description: 'Settings for TUPAS registration'
+  base_route: tupas.tupas_settings_form
+  weight: 0

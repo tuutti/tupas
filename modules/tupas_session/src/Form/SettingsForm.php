@@ -36,8 +36,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['tupas_session_length'] = [
       '#type' => 'textfield',
-      '#title' => t('TUPAS authentication session length in minutes'),
-      '#description' => t('Set to 0 for no limit (expires only on logout)'),
+      '#title' => $this->t('TUPAS authentication session length in minutes'),
+      '#description' => $this->t('Set to 0 for no limit (expires only on logout)'),
       '#default_value' => $config->get('tupas_session_length'),
       '#required' => TRUE,
     ];
@@ -50,8 +50,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['expired_goto'] = [
       '#type' => 'textfield',
-      '#title' => t('Landing page after expired TUPAS authentication'),
-      '#description' => t('Use a Drupal menu path. Leave empty to disable.'),
+      '#title' => $this->t('Landing page after expired TUPAS authentication'),
+      '#description' => $this->t('Use a Drupal menu path. Leave empty to disable.'),
       '#default_value' => $config->get('expired_goto'),
     ];
 

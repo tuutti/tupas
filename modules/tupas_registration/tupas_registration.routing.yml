@@ -5,3 +5,14 @@ tupas_registration.register:
     _title: 'TUPAS authentication'
   requirements:
     _access: 'TRUE'
+
+tupas_registration.settings_form:
+  path: '/admin/config/people/tupas/tupas_registration'
+  defaults:
+    _form: '\Drupal\tupas_registration\Form\SettingsForm'
+    _title: 'TUPAS registration settings'
+  requirements:
+    _permission: 'administer tupas'
+  options:
+    _admin_route: TRUE
+

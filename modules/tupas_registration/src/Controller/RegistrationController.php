@@ -2,6 +2,7 @@
 
 namespace Drupal\tupas_registration\Controller;
 
+use Drupal\Component\Utility\Random;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Controller\SessionController;
 use Drupal\tupas_session\TupasSessionManagerInterface;
@@ -89,11 +90,36 @@ class RegistrationController extends SessionController {
       return $this->formBuilder()
         ->getForm('\Drupal\tupas_registration\Form\MapTupasConfirmForm');
     }
-    $entity = $this->entityManager()->getStorage('user')->create();
-    // Call our custom registration form.
-    // @todo Allow users to register without filling the registration details.
-    return $this->entityFormBuilder()
-      ->getForm($entity, 'tupas_registration');
+    // Show custom registration form if user is not allowed to register without
+    // filling the registration form.
+    if (!$this->config('tupas_registration.settings')->get('disable_form')) {
+      $entity = $this->entityManager()->getStorage('user')->create();
+
+      // Call our custom registration form.
+      return $this->entityFormBuilder()
+        ->getForm($entity, 'tupas_registration');
+    }
+    // Autoregister user without filling the registration form.
+    $callback = function ($session) {
+      return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
+    };
+    if ($account = $this->sessionManager->migrate($session, $callback)) {
+      $random = new Random();
+
+      // Generate unique username.
+      while (TRUE) {
+        $name = $random->string(10);
+
+        if (!user_load_by_name($name)) {
+          break;
+        }
+      }
+      // Save user details.
+      $account->setUsername($name)
+        ->setPassword(user_password(20));
+      $account->save();
+    }
+    return $this->redirect('<front>');
   }
 
 }
