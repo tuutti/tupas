@@ -1,0 +1,4 @@
+
+bypass tupas session expiration:
+  title: 'Bypass tupas session expiration'
+  description: 'Allow user to bypass tupas session expiration'

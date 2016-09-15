@@ -64,10 +64,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
-   * Return active session if possible.
-   *
-   * @return mixed
-   *   FALSE if no session found, session object if session available.
+   * {@inheritdoc}
    */
   public function getSession() {
     if (!$session = $this->tempStore->get('tupas_session')) {
@@ -77,10 +74,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
-   * Automatically renew session.
-   *
-   * @return bool
-   *   TRUE on success, FALSE on failure.
+   * {@inheritdoc}
    */
   public function renew() {
     if ($session = $this->getSession()) {
@@ -123,36 +117,33 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
-   * Migrate session to new user.
-   *
-   * @param \Drupal\tupas_session\Event\SessionAlterEvent $session
-   *   Session from previous user.
-   * @param callable $callback
-   *   Allow users to call function after session migrate.
-   *
-   * @return mixed
-   *   Status of callback result.
+   * {@inheritdoc}
    */
   public function migrate(SessionAlterEvent $session, callable $callback = NULL) {
-    $status = NULL;
+    $return = NULL;
     // Destroy current session.
     $this->destroy();
     // Attempt to call given callback. This is usually closure with
     // login / register logic.
     if (is_callable($callback)) {
-      $status = $callback($session);
+      $return = $callback($session);
     }
     // Start new session for logged in user.
     $this->start($session->getTransactionId(), $session->getUniqueId());
 
-    return $status;
+    return $return;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function destroy() {
-    return $this->tempStore->delete('tupas_session');
+  public function destroy($logout = FALSE) {
+    $status = $this->tempStore->delete('tupas_session');
+
+    if ($logout) {
+      user_logout();
+    }
+    return $status;
   }
 
 }

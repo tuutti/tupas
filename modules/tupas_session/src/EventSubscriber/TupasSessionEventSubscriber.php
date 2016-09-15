@@ -90,14 +90,16 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       }
       return;
     }
-    drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
-    // Session has expired.
-    $this->sessionManager->destroy();
-
-    // Redirect to expired page.
-    if ($this->config->get('expired_goto')) {
-      $url = Url::fromRoute($this->config->get('expired_goto'));
-      $event->setResponse(new RedirectResponse($url->toString()));
+    // Allow users with permission to bypass session expiration check.
+    if (!$this->currentUser->hasPermission('bypass tupas session expiration')) {
+      drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
+      // Session has expired. Destroy session and log current user out.
+      $this->sessionManager->destroy(TRUE);
+      // Redirect to expired page.
+      if ($this->config->get('expired_goto')) {
+        $url = Url::fromRoute($this->config->get('expired_goto'));
+        $event->setResponse(new RedirectResponse($url->toString()));
+      }
     }
   }
 
