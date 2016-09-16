@@ -81,6 +81,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     if (!$session = $this->sessionManager->getSession()) {
       return;
     }
+    // @todo Handle non-expirable sessions.
     if ($session->getExpire() > REQUEST_TIME) {
       // Automatically refresh expiration date.
       if ($this->config->get('tupas_session_renew')) {
