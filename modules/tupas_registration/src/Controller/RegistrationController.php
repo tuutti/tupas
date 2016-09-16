@@ -76,12 +76,8 @@ class RegistrationController extends SessionController {
       return $this->redirect('<front>');
     }
     if (!TupasService::validateIdType($bank)) {
-      drupal_set_message($this->t('Current configuration does not allow users to register. Please contact site administrator.'), 'error');
+      drupal_set_message($this->t('Current configuration does not allow users to register. Please contact the site administrator.'), 'error');
       return $this->redirect('<front>');
-    }
-    // Session data must contain bank id.
-    if (!$bank_id = $session->getData('bank')) {
-      drupal_set_message($this->t('Data validation failed.'), 'error');
     }
     // Check if user has already connected their account.
     if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {

@@ -250,9 +250,17 @@ class TupasService implements TupasServiceInterface {
   }
 
   /**
-   * Validate id type.
+   * Get list of hashable return codes.
    *
-   * @todo Implement this.
+   * @return array
+   *   List of return codes.
+   */
+  public static function getHashableTypes() {
+    return ['02', '12', '22', '32', '42'];
+  }
+
+  /**
+   * Validate id type.
    *
    * @param \Drupal\tupas\Entity\TupasBank $bank
    *   The bank entity.
@@ -261,6 +269,13 @@ class TupasService implements TupasServiceInterface {
    *   TRUE on success, FALSE on failure.
    */
   public static function validateIdType(TupasBank $bank) {
+    $hashable_types = static::getHashableTypes();
+    // List of available hashing methods.
+    $hashable_types = array_combine($hashable_types, $hashable_types);
+
+    if (!isset($hashable_types[$bank->getIdType()])) {
+      return FALSE;
+    }
     return TRUE;
   }
 
