@@ -61,7 +61,7 @@ class TupasBankForm extends EntityForm {
       '#type' => 'textfield',
       '#title' => $this->t('Id type (A01Y_IDTYPE)'),
       '#default_value' => $tupas_bank->getIdType(),
-      '#description' => $this->t('Note: Changing this value will break authentication for existing users when using TUPAS registration module. Available values when used with tupas_registration: @values', [
+      '#description' => $this->t('Note: Changing this value will break authentication for existing users.<br />Available values when used with tupas_registration: @values', [
         '@values' => implode(', ', TupasService::getHashableTypes()),
       ]),
     ];
