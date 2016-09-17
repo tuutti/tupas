@@ -2,7 +2,6 @@
 
 namespace Drupal\tupas_registration\Controller;
 
-use Drupal\Component\Utility\Random;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\TupasService;

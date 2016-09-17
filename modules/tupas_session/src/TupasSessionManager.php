@@ -48,6 +48,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   /**
    * Constructor.
    *
+   * @todo Replace Private temp store with custom storage that does not expire.
+   *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The config factory.
    * @param \Drupal\user\PrivateTempStoreFactory $temp_store
@@ -156,6 +158,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function uniqueName($name = NULL) {
     if (!$name) {
+      // @todo Generate human readable username?
       $random = new Random();
       // Generate unique username.
       while (TRUE) {

@@ -6,9 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\tupas_session\TupasSessionManagerInterface;
-use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -79,10 +77,13 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       return;
     }
     if (!$session = $this->sessionManager->getSession()) {
+      // Log current user out if there is no tupas session.
+      if (!$this->currentUser->hasPermission('bypass tupas session expiration')) {
+        user_logout();
+      }
       return;
     }
-    // @todo Handle non-expirable sessions.
-    if ($session->getExpire() > REQUEST_TIME) {
+    if ($session->getExpire() > REQUEST_TIME || $session->getExpire() === 0) {
       // Automatically refresh expiration date.
       if ($this->config->get('tupas_session_renew')) {
         $this->sessionManager->renew();
