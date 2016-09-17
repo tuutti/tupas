@@ -31,9 +31,9 @@ function tupas_session_schema() {
         'size' => 'big',
       ],
     ],
-    'primary key' => ['owner'],
     'indexes' => [
       'expire' => ['expire'],
+      'owner' => ['owner'],
     ],
   ];
 

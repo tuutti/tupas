@@ -176,6 +176,16 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       return $name;
     }
     $i = 1;
+
+    $parts = explode(' ', strtolower($name));
+
+    if (isset($parts[1])) {
+      // Name is uppercase by default. Convert to lowercase and
+      // capitalize first letter.
+      list($first, $last) = $parts;
+
+      $name = sprintf('%s %s', ucfirst($first), ucfirst($last));
+    }
     // Generate unique username, by incrementing suffix.
     while (TRUE) {
       if (!user_load_by_name($name)) {

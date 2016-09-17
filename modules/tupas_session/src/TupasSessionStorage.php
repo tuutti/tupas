@@ -94,12 +94,13 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
   public function get() {
     $session = $this->connection->select('tupas_session', 's')
       ->fields('s')
+      ->orderBy('expire', 'DESC')
       ->condition('owner', $this->getOwner())
       ->range(0, 1)
       ->execute()
       ->fetchObject();
 
-    return $session ?: FALSE;
+    return $session ? (array) $session : FALSE;
   }
 
   /**

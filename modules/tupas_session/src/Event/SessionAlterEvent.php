@@ -165,7 +165,11 @@ class SessionAlterEvent extends Event {
    * @return static
    */
   static public function createFromArray(array $data) {
-    return new static($data['transaction_id'], $data['unique_id'], $data['expire'], $data['data']);
+    if (empty($data['data'])) {
+      throw new \InvalidArgumentException('Missing required data field.');
+    }
+    $details = unserialize($data['data']);
+    return new static($details['transaction_id'], $details['unique_id'], $data['expire'], $details['data']);
   }
 
 }
