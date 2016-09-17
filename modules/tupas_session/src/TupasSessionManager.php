@@ -175,8 +175,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       }
       return $name;
     }
-    $i = 1;
-
     $parts = explode(' ', strtolower($name));
 
     if (isset($parts[1])) {
@@ -186,6 +184,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
 
       $name = sprintf('%s %s', ucfirst($first), ucfirst($last));
     }
+    $i = 1;
     // Generate unique username, by incrementing suffix.
     while (TRUE) {
       if (!user_load_by_name($name)) {

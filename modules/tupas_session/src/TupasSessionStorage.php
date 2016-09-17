@@ -65,6 +65,16 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
     if (!is_scalar($data)) {
       $data = serialize($data);
     }
+    // Attempt to update existing session.
+    if ($session = $this->get()) {
+      return $this->connection->update('tupas_session')
+        ->fields([
+          'expire' => $session['expire'],
+          'data' => $data,
+        ])
+        ->condition('owner', $this->getOwner())
+        ->execute();
+    }
     return $this->connection->merge('tupas_session')
       ->keys([
         'expire' => $expire,
@@ -77,7 +87,7 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
   }
 
   /**
-   * Delete current session.
+   * Delete current session(s).
    */
   public function delete() {
     $this->connection->delete('tupas_session')
