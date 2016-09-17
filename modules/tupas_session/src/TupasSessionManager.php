@@ -2,6 +2,7 @@
 
 namespace Drupal\tupas_session;
 
+use Drupal\Component\Utility\Random;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\tupas_session\Event\SessionAlterEvent;
@@ -142,6 +143,39 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       user_logout();
     }
     return $status;
+  }
+
+  /**
+   * Generate unique username for account.
+   *
+   * @param string $name
+   *   Username base.
+   *
+   * @return string
+   *   Unique username.
+   */
+  public function uniqueName($name = NULL) {
+    if (!$name) {
+      $random = new Random();
+      // Generate unique username.
+      while (TRUE) {
+        $name = $random->string(10);
+
+        if (!user_load_by_name($name)) {
+          break;
+        }
+      }
+      return $name;
+    }
+    $i = 1;
+    // Generate unique username, by incrementing suffix.
+    while (TRUE) {
+      if (!user_load_by_name($name)) {
+        break;
+      }
+      $name = sprintf('%s %d', $name, $i++);
+    }
+    return $name;
   }
 
 }

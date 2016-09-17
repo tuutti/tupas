@@ -118,17 +118,8 @@ class RegistrationController extends SessionController {
       return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
     };
     if ($account = $this->sessionManager->migrate($session, $callback)) {
-      $random = new Random();
-
-      // Generate unique username.
-      // @todo Attempt to use B02K_CUSTNAME as username?
-      while (TRUE) {
-        $name = $random->string(10);
-
-        if (!user_load_by_name($name)) {
-          break;
-        }
-      }
+      // Attempt to use customer name and fallback to random name.
+      $name = $this->sessionManager->uniqueName($session->getData('name'));
       // Save user details.
       $account->setUsername($name)
         ->setPassword(user_password(20));
