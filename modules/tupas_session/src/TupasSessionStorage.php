@@ -50,4 +50,66 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
     $this->requestStack = $request_stack;
   }
 
+  /**
+   * Save values to database.
+   *
+   * @param int $expire
+   *   The expiration time.
+   * @param array $data
+   *   Values to save.
+   *
+   * @return \Drupal\Core\Database\StatementInterface|int|null
+   *   Status of crud operation.
+   */
+  public function save($expire, array $data) {
+    if (!is_scalar($data)) {
+      $data = serialize($data);
+    }
+    return $this->connection->merge('tupas_session')
+      ->keys([
+        'expire' => $expire,
+        'owner' => $this->getOwner(),
+      ])
+      ->fields([
+        'data' => $data,
+      ])
+      ->execute();
+  }
+
+  /**
+   * Delete current session.
+   */
+  public function delete() {
+    $this->connection->delete('tupas_session')
+      ->condition('owner', $this->getOwner())
+      ->execute();
+  }
+
+  /**
+   * Get session for active user or session.
+   *
+   * @return mixed
+   *   Session object on success, FALSE on failure.
+   */
+  public function get() {
+    $session = $this->connection->select('tupas_session', 's')
+      ->fields('s')
+      ->condition('owner', $this->getOwner())
+      ->range(0, 1)
+      ->execute()
+      ->fetchObject();
+
+    return $session ?: FALSE;
+  }
+
+  /**
+   * Gets the current owner based on the current user or the session ID.
+   *
+   * @return string
+   *   The owner.
+   */
+  protected function getOwner() {
+    return $this->currentUser->id() ?: $this->requestStack->getCurrentRequest()->getSession()->getId();
+  }
+
 }

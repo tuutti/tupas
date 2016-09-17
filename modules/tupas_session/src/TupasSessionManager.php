@@ -9,6 +9,7 @@ use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface;
 
 /**
  * Class TupasSessionManager.
@@ -46,23 +47,28 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $eventDispatcher;
 
   /**
-   * Constructor.
+   * The session storage controller.
    *
-   * @todo Replace Private temp store with custom storage that does not expire.
+   * @var \Drupal\tupas_session\TupasSessionStorage
+   */
+  protected $storage;
+
+  /**
+   * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The config factory.
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store
-   *   The temporary storage service.
+   * @param \Drupal\tupas_session\TupasSessionStorage $session_storage
+   *   The session storage controller.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session manager service.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher service.
    */
-  public function __construct(ConfigFactory $config_factory, PrivateTempStoreFactory $temp_store, SessionManagerInterface $session_manager, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(ConfigFactory $config_factory, TupasSessionStorage $session_storage, SessionManagerInterface $session_manager, EventDispatcherInterface $event_dispatcher) {
     $this->configFactory = $config_factory;
     $this->sessionManager = $session_manager;
-    $this->tempStore = $temp_store->get('tupas_registration');
+    $this->storage = $session_storage;
     $this->eventDispatcher = $event_dispatcher;
   }
 
@@ -70,7 +76,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function getSession() {
-    if (!$session = $this->tempStore->get('tupas_session')) {
+    if (!$session = $this->storage->get()) {
       return FALSE;
     }
     return SessionAlterEvent::createFromArray($session);
@@ -109,9 +115,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire, $data);
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
     // Store tupas session.
-    $this->tempStore->set('tupas_session', [
+    $this->storage->save($session->getExpire(), [
       'transaction_id' => $session->getTransactionId(),
-      'expire' => $session->getExpire(),
       'unique_id' => $session->getUniqueId(),
       'data' => $session->getData(),
     ]);
@@ -139,7 +144,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function destroy($logout = FALSE) {
-    $status = $this->tempStore->delete('tupas_session');
+    $status = $this->storage->delete();
 
     if ($logout) {
       user_logout();
