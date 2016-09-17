@@ -8,3 +8,8 @@ services:
     arguments: ["@tupas_session.session_manager", "@current_user", "@config.factory"]
     tags:
       - { name: event_subscriber }
+
+  tupas_session.storage:
+    class: Drupal\tupas_session\TupasSessionStorage
+    arguments: ["@database", "@current_user", "@request_stack"]
+
