@@ -1,0 +1,5 @@
+name: tupas
+type: module
+description: Enables the TUPAS authentication functionality
+core: 8.x
+package: Tupas

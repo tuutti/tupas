@@ -1,0 +1,5 @@
+entity.tupas_bank.add_form:
+  route_name: 'entity.tupas_bank.add_form'
+  title: 'Add Tupas bank'
+  appears_on:
+    - entity.tupas_bank.collection

@@ -1,0 +1,10 @@
+status: true
+id: nordea
+label: Nordea
+action_url: 'https://tupas.nordea.fi/cgi-bin/SOLO3011'
+cert_version: '0002'
+rcv_id: '87654321'
+rcv_key: LEHTI
+key_version: '0001'
+encryption_alg: '03'
+id_type: '02'

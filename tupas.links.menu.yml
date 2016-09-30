@@ -1,0 +1,15 @@
+# Tupas bank menu items definition
+tupas.tupas_settings_form:
+  title: 'TUPAS authentication'
+  route_name: tupas.tupas_settings_form
+  description: 'General settings of the TUPAS authentication module'
+  parent: user.admin_index
+  weight: 99
+
+entity.tupas_bank.collection:
+  title: 'Tupas bank'
+  route_name: entity.tupas_bank.collection
+  description: 'List Tupas banks'
+  parent: tupas.tupas_settings_form
+  weight: 99
+

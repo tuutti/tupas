@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Contains TUPAS session module.
+ */
+
+/**
+ * Implements hook_cron().
+ */
+function tupas_session_cron() {
+  // Handle session garbage collection.
+  $session_manager = \Drupal::service('tupas_session.session_manager');
+  $session_manager->gc();
+}

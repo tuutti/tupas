@@ -1,0 +1,41 @@
+<?php
+/**
+ * @file
+ * Contains Tupas session install.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function tupas_session_schema() {
+  $schema['tupas_session'] = [
+    'description' => 'Stores tupas sessions.',
+    'fields' => [
+      'owner' => [
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 128,
+        'default' => '',
+      ],
+      'expire' => [
+        'description' => 'The expiration timestamp',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'data' => [
+        'description' => 'Extra (serialized) data to store with the session.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+      ],
+    ],
+    'indexes' => [
+      'expire' => ['expire'],
+      'owner' => ['owner'],
+    ],
+  ];
+
+  return $schema;
+}

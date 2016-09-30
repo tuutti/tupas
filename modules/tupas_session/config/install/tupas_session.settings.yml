@@ -1,0 +1,3 @@
+tupas_session_length: '30'
+expired_goto: tupas_session.front
+tupas_session_renew: 1

@@ -1,0 +1,10 @@
+status: true
+id: danske
+label: 'Danske Bank'
+action_url: 'https://verkkopankki.danskebank.fi/SP/tupaha/TupahaApp'
+cert_version: '0003'
+rcv_id: '000000000000'
+rcv_key: jumCLB4T2ceZWGJ9ztjuhn5FaeZnTm5HpfDXWU2APRqfDcsrBs8mqkFARzm7uXKd
+key_version: '0001'
+encryption_alg: '03'
+id_type: '02'

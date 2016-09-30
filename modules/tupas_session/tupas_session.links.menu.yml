@@ -1,0 +1,7 @@
+tupas_session.settings_form:
+  title: 'TUPAS temporary session'
+  route_name: tupas_session.settings_form
+  description: 'General settings of the TUPAS temporary session module'
+  parent: tupas.tupas_settings_form
+  weight: 99
+

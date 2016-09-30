@@ -1,0 +1,15 @@
+services:
+  tupas_session.session_manager:
+    class: Drupal\tupas_session\TupasSessionManager
+    arguments: ["@config.factory", "@tupas_session.storage", "@session_manager", "@event_dispatcher"]
+
+  tupas_session.event_subscriber:
+    class: Drupal\tupas_session\EventSubscriber\TupasSessionEventSubscriber
+    arguments: ["@tupas_session.session_manager", "@current_user", "@config.factory"]
+    tags:
+      - { name: event_subscriber }
+
+  tupas_session.storage:
+    class: Drupal\tupas_session\TupasSessionStorage
+    arguments: ["@database", "@current_user", "@request_stack"]
+

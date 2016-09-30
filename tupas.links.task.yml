@@ -1,0 +1,13 @@
+tupas.tupas_settings_form:
+  title: 'TUPAS authentication'
+  route_name: tupas.tupas_settings_form
+  description: 'General settings of the TUPAS authentication module'
+  base_route: tupas.tupas_settings_form
+  weight: 0
+
+entity.tupas_bank.collection:
+  title: 'Tupas bank'
+  route_name: entity.tupas_bank.collection
+  base_route: tupas.tupas_settings_form
+  description: 'List Tupas banks'
+  weight: 1

@@ -1,0 +1,10 @@
+status: true
+id: osuuspankki
+label: Osuuspankki
+action_url: 'https://kultaraha.op.fi/cgi-bin/krcgi'
+cert_version: '0003'
+rcv_id: Esittelymyyja
+rcv_key: Esittelykauppiaansalainentunnus
+key_version: '0001'
+encryption_alg: '03'
+id_type: '02'

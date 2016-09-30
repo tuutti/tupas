@@ -1,0 +1,13 @@
+services:
+  tupas_registration.success_redirect:
+    class: Drupal\tupas_registration\EventSubscriber\TupasRegistrationRedirectSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }
+
+  tupas_registration.external_auth:
+    class: Drupal\tupas_registration\EventSubscriber\TupasRegistrationExternalAuthSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }
+

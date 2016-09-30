@@ -1,0 +1,10 @@
+status: true
+id: handelsbanken
+label: Handelsbanken
+action_url: 'https://tunnistepalvelu.samlink.fi/TupasTunnistus/SHBtupas.html'
+cert_version: '0002'
+rcv_id: '1111111111111'
+rcv_key: '11111111111111111111'
+key_version: '0001'
+encryption_alg: '03'
+id_type: '02'
