@@ -15,7 +15,7 @@ tupas_session.front:
     _controller: '\Drupal\tupas_session\Controller\SessionController::front'
     _title: 'TUPAS authentication'
   requirements:
-    _access: 'TRUE'
+    _permission: 'access tupas'
   # @todo Review this. We need to generate unique transaction id for every tupas
   # form.
   options:
@@ -41,4 +41,3 @@ tupas_session.return:
     _title: 'TUPAS authenticated'
   requirements:
     _access: 'TRUE'
-

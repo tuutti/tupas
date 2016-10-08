@@ -4,9 +4,9 @@ namespace Drupal\tupas_registration\Controller;
 
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
-use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Controller\SessionController;
 use Drupal\tupas_session\TupasSessionManagerInterface;
+use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -31,11 +31,13 @@ class RegistrationController extends SessionController {
    *   The event dispatcher service.
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
+   * @param \Drupal\tupas_session\TupasTransactionManagerInterface $transaction_manager
+   *   The transaction manager service.
    * @param \Drupal\externalauth\ExternalAuthInterface $auth
    *   The external auth service.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth) {
-    parent::__construct($event_dispatcher, $session_manager);
+  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, TupasTransactionManagerInterface $transaction_manager, ExternalAuthInterface $auth) {
+    parent::__construct($event_dispatcher, $session_manager, $transaction_manager);
 
     $this->auth = $auth;
   }
@@ -47,6 +49,7 @@ class RegistrationController extends SessionController {
     return new static(
       $container->get('event_dispatcher'),
       $container->get('tupas_session.session_manager'),
+      $container->get('tupas_session.transaction_manager'),
       $container->get('externalauth.externalauth')
     );
   }
@@ -58,7 +61,6 @@ class RegistrationController extends SessionController {
    *   Formbuilder form object.
    */
   public function register() {
-    $config = $this->config('tupas_session.settings');
     // Make sure user has active TUPAS session.
     if (!$session = $this->sessionManager->getSession()) {
       drupal_set_message($this->t('TUPAS session not found.'), 'error');
@@ -77,12 +79,8 @@ class RegistrationController extends SessionController {
     // Check if user has already connected their account.
     if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
       if ($this->currentUser()->isAuthenticated()) {
-        // Show error message only if session length is not enabled.
-        // This allows users to refresh their tupas sessions without showing
-        // confusing error messages to them.
-        if (!$config->get('tupas_session_length') > 0) {
-          drupal_set_message($this->t('You have already connected your account with TUPAS service.'), 'warning');
-        }
+        drupal_set_message($this->t('You have already connected your account with TUPAS service.'), 'warning');
+
         return $this->redirect('<front>');
       }
       // Create callback to call after session migrate is succesfull.

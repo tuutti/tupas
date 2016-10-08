@@ -1,0 +1,16 @@
+tupas_session.settings:
+  type: config_object
+  label: 'Tupas settings'
+  mapping:
+    tupas_session_length:
+      type: string
+      label: 'Session expiration in minutes'
+    expired_goto:
+      type: string
+      label: 'Uri to redirect after session expiration'
+    tupas_session_renew:
+      type: integer
+      label: 'Renew tupas session automatically'
+    require_session:
+      type: integer
+      label: 'Require tupas session to stay logged-in'

@@ -1,0 +1,7 @@
+tupas_registration.settings:
+  type: config_object
+  label: 'Tupas registration'
+  mapping:
+    disable_form:
+      type: integer
+      label: 'Disable registration form and generate accounts automatically'

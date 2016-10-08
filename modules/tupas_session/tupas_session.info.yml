@@ -3,3 +3,5 @@ type: module
 description: TUPAS session.
 core: 8.x
 package: TUPAS
+dependencies:
+ - tupas

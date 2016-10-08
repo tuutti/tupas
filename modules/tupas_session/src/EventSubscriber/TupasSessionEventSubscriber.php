@@ -74,8 +74,12 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
    */
   public function handleTupasSession(GetResponseEvent $event) {
     if (!$session = $this->sessionManager->getSession()) {
-      // Log current user out if there is no tupas session.
-      if (!$this->currentUser->hasPermission('bypass tupas session expiration')) {
+
+      $permission = $this->currentUser->hasPermission('bypass tupas session expiration');
+      // Log current user out if there is no active tupas session
+      // and user has no permission to bypass this check.
+      if ($this->config->get('require_session') && !$this->currentUser->isAnonymous() && !$permission) {
+        drupal_set_message($this->t('Current role does not allow users to log-in without an active TUPAS session.'), 'error');
         user_logout();
       }
       return;
@@ -83,6 +87,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     if ($session->getExpire() > REQUEST_TIME) {
       // Automatically refresh expiration date.
       if ($this->config->get('tupas_session_renew')) {
+        // @todo Review this for anonymous users.
         $this->sessionManager->renew();
       }
       return;
@@ -91,11 +96,11 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     elseif ($session->getExpire() === 0 && empty($this->config->get('tupas_session_length'))) {
       return;
     }
+    // Session has expired. Destroy the session.
+    $this->sessionManager->destroy();
+
     // Allow users with permission to bypass session expiration check.
     if (!$this->currentUser->hasPermission('bypass tupas session expiration')) {
-      // Session has expired. Destroy session and log current user out.
-      $this->sessionManager->destroy(TRUE);
-
       drupal_set_message($this->t('Your TUPAS authentication has expired'), 'warning');
       // Redirect to expired page.
       if ($this->config->get('expired_goto')) {

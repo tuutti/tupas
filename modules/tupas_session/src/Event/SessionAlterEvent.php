@@ -156,20 +156,4 @@ class SessionAlterEvent extends Event {
     return $this->data;
   }
 
-  /**
-   * Create new static object from array.
-   *
-   * @param array $data
-   *   Array of data to populate constructor.
-   *
-   * @return static
-   */
-  static public function createFromArray(array $data) {
-    if (empty($data['data'])) {
-      throw new \InvalidArgumentException('Missing required data field.');
-    }
-    $details = unserialize($data['data']);
-    return new static($details['transaction_id'], $details['unique_id'], $data['expire'], $details['data']);
-  }
-
 }

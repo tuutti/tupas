@@ -13,3 +13,13 @@ services:
     class: Drupal\tupas_session\TupasSessionStorage
     arguments: ["@database", "@current_user", "@request_stack"]
 
+  # Override default transaction storage to lower tempstore expiration.
+  tupas_transaction.storage:
+    class: Drupal\user\PrivateTempStoreFactory
+    arguments: ['@keyvalue.expirable', '@lock', '@current_user', '@request_stack', 600]
+    tags:
+      - { name: backend_overridable }
+
+  tupas_session.transaction_manager:
+    class: Drupal\tupas_session\TupasTransactionManager
+    arguments: ["@session_manager", "@tupas_transaction.storage"]

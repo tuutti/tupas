@@ -5,6 +5,3 @@ administer tupas:
 access tupas:
   title: 'Access TUPAS'
   description: 'Access TUPAS authentication'
-access areas requiring tupas authentication:
-  title: 'Access areas requiring TUPAS authentication'
-  description: 'Access areas requiring TUPAS authentication'

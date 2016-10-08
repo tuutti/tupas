@@ -50,4 +50,12 @@ interface TupasServiceInterface {
    * @return int
    */
   public function getTransactionId();
+
+  /**
+   * Get default settings.
+   *
+   * @return array
+   */
+  public function getDefaults();
+
 }

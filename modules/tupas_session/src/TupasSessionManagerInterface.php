@@ -47,13 +47,10 @@ interface TupasSessionManagerInterface {
   /**
    * Destroy tupas session.
    *
-   * @param bool $logout
-   *   Whether to log current user out or not.
-   *
    * @return bool Status of delete event.
    *   Status of delete event.
    */
-  public function destroy($logout = FALSE);
+  public function destroy();
 
   /**
    * Automatically renew session.

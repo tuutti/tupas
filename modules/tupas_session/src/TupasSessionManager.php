@@ -24,13 +24,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $configFactory;
 
   /**
-   * The temporary storage service.
-   *
-   * @var \Drupal\user\PrivateTempStoreFactory
-   */
-  protected $tempStore;
-
-  /**
    * The session manager service.
    *
    * @var \Drupal\Core\Session\SessionManagerInterface
@@ -77,7 +70,15 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->storage->get()) {
       return FALSE;
     }
-    return SessionAlterEvent::createFromArray($session);
+    if (empty($session['data'])) {
+      throw new \InvalidArgumentException('Missing required data field.');
+    }
+    $data = $session['data'];
+
+    if (is_scalar($data)) {
+      $data = unserialize($data);
+    }
+    return new SessionAlterEvent($data['transaction_id'], $data['unique_id'], $session['expire'], $data['data']);
   }
 
   /**
@@ -88,7 +89,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->getSession()) {
       return FALSE;
     }
-    $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+    return $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
   }
 
   /**
@@ -107,7 +108,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
 
     // Set session length only if configured.
     if ($expire > 0) {
-      $expire = ($expire * 60) + REQUEST_TIME;
+      $expire = ($expire * 60) + (int) $_SERVER['REQUEST_TIME'];
     }
     // Allow session data to be altered.
     $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire, $data);
@@ -142,26 +143,15 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function destroy($logout = FALSE) {
-    $status = $this->storage->delete();
-
-    if ($logout) {
-      user_logout();
-    }
-    return $status;
+  public function destroy() {
+    return $this->storage->delete();
   }
 
   /**
    * Handle garbage collection.
    */
   public function gc() {
-    $timestamp = (int) $this->configFactory->get('tupas_session.settings')
-      ->get('tupas_session_length');
-
-    if ($timestamp > 0) {
-      $timestamp = REQUEST_TIME - ($timestamp * 60);
-    }
-    $this->storage->deleteExpired($timestamp);
+    $this->storage->deleteExpired($_SERVER['REQUEST_TIME']);
   }
 
   /**

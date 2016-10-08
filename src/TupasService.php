@@ -45,14 +45,23 @@ class TupasService implements TupasServiceInterface {
     foreach ($settings as $key => $setting) {
       $this->set($key, $setting);
     }
-    // Populate default allowed languages.
-    if (!$this->get('allowed_languages')) {
-      $this->set('allowed_languages', ['FI', 'EN', 'SV']);
+    // Populate defaults.
+    foreach ($this->getDefaults() as $key => $value) {
+      if ($this->get($key)) {
+        continue;
+      }
+      $this->set($key, $value);
     }
-    // Fallback to english.
-    if (!$this->get('language')) {
-      $this->set('language', 'EN');
-    }
+  }
+
+  /**
+   * Get defaults.
+   */
+  public function getDefaults() {
+    return [
+      'allowed_languages' => ['FI', 'EN', 'SV'],
+      'language' => 'EN',
+    ];
   }
 
   /**
@@ -98,11 +107,12 @@ class TupasService implements TupasServiceInterface {
    * {@inheritdoc}
    */
   public function getLanguage() {
+    $language = strtoupper($this->get('language'));
     // Fallback to english.
-    if (!in_array($this->get('language'), $this->get('allowed_languages'))) {
+    if (!in_array($language, $this->get('allowed_languages'))) {
       return 'EN';
     }
-    return strtoupper($this->get('language'));
+    return $language;
   }
 
   /**
@@ -246,6 +256,24 @@ class TupasService implements TupasServiceInterface {
       throw new TupasHashMatchException('Mac hash does not match with B02K_MAC.');
     }
     return TRUE;
+  }
+
+  /**
+   * Parse transaction id from return timestamp.
+   *
+   * @param string $timestamp
+   *   Timestamp.
+   *
+   * @return string
+   *   Transaction id.
+   */
+  public function parseTransactionId($timestamp) {
+    $timestamp = substr($timestamp, -6);
+
+    if (!$this->getTransactionId()) {
+      $this->set('transaction_id', $timestamp);
+    }
+    return $timestamp;
   }
 
   /**

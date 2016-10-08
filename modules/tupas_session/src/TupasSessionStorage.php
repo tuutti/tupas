@@ -51,43 +51,25 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
   }
 
   /**
-   * Save values to database.
-   *
-   * @param int $expire
-   *   The expiration time.
-   * @param array $data
-   *   Values to save.
-   *
-   * @return \Drupal\Core\Database\StatementInterface|int|null
-   *   Status of crud operation.
+   * {@inheritdoc}
    */
   public function save($expire, array $data) {
     if (!is_scalar($data)) {
       $data = serialize($data);
     }
-    // Attempt to update existing session.
-    if ($session = $this->get()) {
-      return $this->connection->update('tupas_session')
-        ->fields([
-          'expire' => $expire,
-          'data' => $data,
-        ])
-        ->condition('owner', $this->getOwner())
-        ->execute();
-    }
     return $this->connection->merge('tupas_session')
       ->keys([
-        'expire' => $expire,
         'owner' => $this->getOwner(),
       ])
       ->fields([
+        'expire' => $expire,
         'data' => $data,
       ])
       ->execute();
   }
 
   /**
-   * Delete current session(s).
+   * {@inheritdoc}
    */
   public function delete() {
     $this->connection->delete('tupas_session')
@@ -96,15 +78,11 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
   }
 
   /**
-   * Get session for active user or session.
-   *
-   * @return mixed
-   *   Session object on success, FALSE on failure.
+   * {@inheritdoc}
    */
   public function get() {
     $session = $this->connection->select('tupas_session', 's')
       ->fields('s')
-      ->orderBy('expire', 'DESC')
       ->condition('owner', $this->getOwner())
       ->range(0, 1)
       ->execute()
