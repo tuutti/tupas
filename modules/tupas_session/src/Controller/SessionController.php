@@ -5,6 +5,7 @@ namespace Drupal\tupas_session\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\TupasService;
+use Drupal\tupas_session\Event\CustomerIdAlterEvent;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
 use Drupal\tupas_session\Event\SessionEvents;
@@ -148,10 +149,15 @@ class SessionController extends ControllerBase {
     try {
       $tupas->validate($request->query->all());
       // Hash customer id.
-      $customer_id = TupasService::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
+      $hashed_id = TupasService::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
 
+      // Allow customer id to be altered.
+      $dispatched_data = $this->eventDispatcher
+        ->dispatch(SessionEvents::CUSTOMER_ID_ALTER, new CustomerIdAlterEvent($hashed_id, [
+          'raw' => $request->query->all(),
+        ]));
       // Start tupas session.
-      $this->sessionManager->start($transaction_id, $customer_id, [
+      $this->sessionManager->start($transaction_id, $dispatched_data->getCustomerId(), [
         'bank' => $bank->id(),
         'name' => $request->query->get('B02K_CUSTNAME'),
       ]);

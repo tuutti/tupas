@@ -30,4 +30,11 @@ final class SessionEvents {
    */
   const SESSION_ALTER = 'tupas_session.session_alter';
 
+  /**
+   * Allow customer id to be altered.
+   *
+   * @var string
+   */
+  const CUSTOMER_ID_ALTER = 'tupas_session.customer_id_alter';
+
 }

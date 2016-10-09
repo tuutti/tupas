@@ -249,6 +249,15 @@ class TupasService implements TupasServiceInterface {
       }
       $parts[] = $values[$key];
     }
+    // Validate customer type and append required values.
+    if (in_array($values['B02K_CUSTTYPE'], ['08', '09'])) {
+      foreach (['B02K_USRID', 'B02K_USERNAME'] as $key) {
+        if (!isset($values[$key])) {
+          throw new TupasGenericException(sprintf('Missing %s argument', $key));
+        }
+        $parts[] = $values[$key];
+      }
+    }
     // Append rcv key.
     $parts[] = $this->bank->getRcvKey();
 
