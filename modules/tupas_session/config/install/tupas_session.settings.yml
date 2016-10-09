@@ -1,4 +1,4 @@
 tupas_session_length: '30'
 expired_goto: tupas_session.front
 tupas_session_renew: 1
-require_session: 1
+require_session: 0
