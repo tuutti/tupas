@@ -4,6 +4,7 @@ namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\tupas_session\TupasSessionManager;
 
 /**
@@ -78,11 +79,33 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->eventDispatcher = $this->getMockBuilder('\Symfony\Component\EventDispatcher\EventDispatcherInterface')
+    $this->eventDispatcher = $this->getMock('\Symfony\Component\EventDispatcher\EventDispatcherInterface');
+
+    $this->session = new SessionAlterEvent(123456, $this->randomMachineName(), time(), []);
+
+    $dispatched_event = $this->getMockBuilder('\Drupal\tupas_session\Event\SessionAlterEvent')
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->session = new SessionAlterEvent(123456, $this->randomMachineName(), 12345678, []);
+    $dispatched_event->expects($this->any())
+      ->method('getExpire')
+      ->will($this->returnValue($this->session->getExpire()));
+
+    $dispatched_event->expects($this->any())
+      ->method('getTransactionId')
+      ->will($this->returnValue($this->session->getTransactionId()));
+
+    $dispatched_event->expects($this->any())
+      ->method('getUniqueId')
+      ->will($this->returnValue($this->session->getUniqueId()));
+
+    $dispatched_event->expects($this->any())
+      ->method('getData')
+      ->will($this->returnValue($this->session->getData()));
+
+    $this->eventDispatcher->expects($this->any())
+      ->method('dispatch')
+      ->will($this->returnValue($dispatched_event));
 
     $this->tupasSessionManager = new TupasSessionManager($this->configFactory, $this->storage, $this->sessionManager, $this->eventDispatcher);
   }
@@ -133,13 +156,9 @@ class TupasSessionManagerTest extends UnitTestCase {
    * @covers ::start
    */
   public function testStart() {
-    $this->sessionManager->expects($this->once())
+    $this->sessionManager->expects($this->any())
       ->method('isStarted')
       ->will($this->returnValue(1));
-
-    $this->eventDispatcher->expects($this->once())
-      ->method('dispatch')
-      ->will($this->returnValue($this->session));
 
     $this->storage->expects($this->once())
       ->method('save')

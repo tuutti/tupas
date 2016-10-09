@@ -1,7 +1,7 @@
-name: TUPAS session
+name: Tupas session
 type: module
 description: TUPAS session.
 core: 8.x
-package: TUPAS
+package: Tupas
 dependencies:
  - tupas

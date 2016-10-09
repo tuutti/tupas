@@ -20,14 +20,6 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
   public static $modules = ['tupas', 'tupas_session'];
 
   /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-    $this->htmlOutputEnabled = TRUE;
-  }
-
-  /**
    * Generates bank mac.
    *
    * @param \Drupal\tupas\Entity\TupasBankInterface $bank

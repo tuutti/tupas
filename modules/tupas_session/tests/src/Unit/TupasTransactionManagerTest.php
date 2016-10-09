@@ -4,6 +4,9 @@ namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\tupas_session\TupasTransactionManager;
+use Drupal\user\PrivateTempStore;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * TupasSessionNanager unit tests.
@@ -35,20 +38,36 @@ class TupasTransactionManagerTest extends UnitTestCase {
   protected $transactionManager;
 
   /**
+   * Temp store factory.
+   *
+   * @var \PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $storageFactory;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
 
-    $this->storage = $this->getMockBuilder('\Drupal\user\PrivateTempStoreFactory')
+    $this->storage = $this->getMockBuilder('\Drupal\user\PrivateTempStore')
       ->disableOriginalConstructor()
       ->getMock();
+
+    $this->storageFactory = $this->getMockBuilder('\Drupal\user\PrivateTempStoreFactory')
+      ->disableOriginalConstructor()
+      ->getMock();
+
+    $this->storageFactory->expects($this->any())
+      ->method('get')
+      ->with('tupas_session')
+      ->willReturn($this->storage);
 
     $this->sessionManager = $this->getMockBuilder('\Drupal\Core\Session\SessionManagerInterface')
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->transactionManager = new TupasTransactionManager($this->sessionManager, $this->storage);
+    $this->transactionManager = new TupasTransactionManager($this->sessionManager, $this->storageFactory);
   }
 
   /**
@@ -60,7 +79,8 @@ class TupasTransactionManagerTest extends UnitTestCase {
    * @covers ::delete
    */
   public function testRegenerate() {
-    $this->storage->expects($this->any())
+
+    $this->sessionManager->expects($this->any())
       ->method('isStarted')
       ->will($this->returnValue(TRUE));
 
@@ -83,7 +103,7 @@ class TupasTransactionManagerTest extends UnitTestCase {
 
     $this->transactionManager->delete();
 
-    $this->assertTrue($this->transactionManager->get());
+    $this->assertNull($this->transactionManager->get());
   }
 
 }
