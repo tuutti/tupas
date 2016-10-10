@@ -4,7 +4,7 @@ namespace Drupal\tupas\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tupas\TupasServiceInterface;
+use Drupal\tupas\Entity\TupasBankInterface;
 
 /**
  * Class TupasFormBase.
@@ -23,76 +23,76 @@ class TupasFormBase extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $tupas = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, $bank = []) {
     // This is supposed to be rendered manually.
-    if (!$tupas instanceof TupasServiceInterface) {
+    if (!$bank instanceof TupasBankInterface) {
       return $form;
     }
-    $form['#action'] = $tupas->getBank()->getActionUrl();
+    $form['#action'] = $bank->getActionUrl();
 
     // Message type (defaults to '701' on all banks).
     $form['A01Y_ACTION_ID'] = [
       '#type' => 'hidden',
-      '#value' => $tupas::A01Y_ACTION_ID,
+      '#value' => $bank::A01Y_ACTION_ID,
     ];
 
     // Version (depends on the bank).
     $form['A01Y_VERS'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getBank()->getCertVersion(),
+      '#value' => $bank->getCertVersion(),
     ];
 
     // Service provider.
     $form['A01Y_RCVID'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getBank()->getRcvId(),
+      '#value' => $bank->getRcvId(),
     ];
 
     // Language code (by ISO 639 definition: FI = Finnish, SV = Swedish, EN = English).
     $form['A01Y_LANGCODE'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getLanguage(),
+      '#value' => $bank->getLanguage(),
     ];
 
     // Personalization of the request.
     $form['A01Y_STAMP'] = [
       '#type' => 'hidden',
-      '#value' => date('YmdHis', REQUEST_TIME) . $tupas->getTransactionId(),
+      '#value' => date('YmdHis', REQUEST_TIME) . $bank->getTransactionId(),
     ];
 
     // Type of the personalization data (see the TUPAS documentation appendix 2).
     $form['A01Y_IDTYPE'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getBank()->getIdType(),
+      '#value' => $bank->getIdType(),
     ];
 
     // Return link on success.
     $form['A01Y_RETLINK'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getReturnUrl(),
+      '#value' => $bank->getReturnUrl(),
     ];
 
     // Return link on cancel.
     $form['A01Y_CANLINK'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getCancelUrl(),
+      '#value' => $bank->getCancelUrl(),
     ];
 
     // Return link on failure.
     $form['A01Y_REJLINK'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getRejectedUrl(),
+      '#value' => $bank->getRejectedUrl(),
     ];
 
     // MAC key version.
     $form['A01Y_KEYVERS'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getBank()->getKeyVersion(),
+      '#value' => $bank->getKeyVersion(),
     ];
     // Algorithm used to calculate the MAC (01 = MD5, 02 = SHA-1).
     $form['A01Y_ALG'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->getBank()->getEncryptionAlg(),
+      '#value' => $bank->getEncryptionAlg(),
     ];
 
     $parts = [];
@@ -103,16 +103,16 @@ class TupasFormBase extends FormBase {
       $parts[] = $element['#value'];
     }
     // Append bank's RCV key.
-    $parts[] = $tupas->getBank()->getRcvKey();
+    $parts[] = $bank->getRcvKey();
 
     $form['A01Y_MAC'] = [
       '#type' => 'hidden',
-      '#value' => $tupas->checksum($parts),
+      '#value' => $bank->checksum($parts),
     ];
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $tupas->getBank()->label(),
+      '#value' => $bank->label(),
     ];
 
     return $form;

@@ -6,7 +6,6 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\tupas\Entity\TupasBankInterface;
-use Drupal\tupas\TupasService;
 use Drupal\user\RoleInterface;
 
 /**
@@ -33,9 +32,7 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
    *   Fake return values from bank.
    */
   protected function generateBankMac(TupasBankInterface $bank, $transaction_id, array $overrides = []) {
-    $tupas = new TupasService($bank, [
-      'transaction_id' => $transaction_id,
-    ]);
+    $bank->setSetting('transaction_id', $transaction_id);
 
     $macstring = [];
     $return_values = [
@@ -57,7 +54,7 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
     // Append rcv key to mac.
     $macstring[] = $bank->getRcvKey();
     // Calculate the MAC based on the encryption algorithm.
-    $return_values['B02K_MAC'] = $tupas->checksum($macstring);
+    $return_values['B02K_MAC'] = $bank->checksum($macstring);
 
     return $return_values;
   }

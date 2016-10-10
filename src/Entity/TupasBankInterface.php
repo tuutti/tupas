@@ -72,4 +72,52 @@ interface TupasBankInterface extends ConfigEntityInterface {
    */
   public function getIdType();
 
+  /**
+   * Gets the language code.
+   *
+   * @return string
+   *   The language.
+   */
+  public function getLanguage();
+
+  /**
+   * Gets the return url.
+   *
+   * @return mixed
+   *   The return url.
+   */
+  public function getReturnUrl();
+
+  /**
+   * Gets the cancellation url.
+   *
+   * @return mixed
+   *   The cancel url.
+   */
+  public function getCancelUrl();
+
+  /**
+   * Gets the rejected url.
+   *
+   * @return mixed
+   *   The rejected url.
+   */
+  public function getRejectedUrl();
+
+  /**
+   * Gets the transaction id.
+   *
+   * @return int
+   *   The transaction id.
+   */
+  public function getTransactionId();
+
+  /**
+   * Gets the default settings.
+   *
+   * @return array
+   *   List of default settings.
+   */
+  public function getDefaultSettings();
+
 }

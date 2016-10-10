@@ -4,7 +4,6 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
-use Drupal\tupas\TupasService;
 use Drupal\tupas_session\Event\CustomerIdAlterEvent;
 use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
@@ -95,19 +94,21 @@ class SessionController extends ControllerBase {
     foreach ($banks as $bank) {
       if ($this->moduleHandler()->moduleExists('tupas_registration')) {
         // Show only banks that allows registration (correct id type) when using tupas_registration.
-        if (!TupasService::validateIdType($bank->getIdType())) {
+        if (!$bank::validateIdType($bank->getIdType())) {
           continue;
         }
       }
+      // Populate required settings.
+      $bank->setSettings([
+        // Attempt to use current language. Fallback to english.
+        'language' => $this->languageManager()->getCurrentLanguage()->getId(),
+        'return_url' => 'tupas_session.return',
+        'cancel_url' => 'tupas_session.canceled',
+        'rejected_url' => 'tupas_session.return',
+        'transaction_id' => $transaction_id,
+      ]);
       $content['tupas_bank_items'][] = $this->formBuilder()
-        ->getForm('\Drupal\tupas\Form\TupasFormBase', new TupasService($bank, [
-          // Attempt to use current language. Fallback to english.
-          'language' => $this->languageManager()->getCurrentLanguage()->getId(),
-          'return_url' => 'tupas_session.return',
-          'cancel_url' => 'tupas_session.canceled',
-          'rejected_url' => 'tupas_session.return',
-          'transaction_id' => $transaction_id,
-        ]));
+        ->getForm('\Drupal\tupas\Form\TupasFormBase', $bank);
     }
     return $content;
   }
@@ -136,8 +137,7 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    $tupas = new TupasService($bank);
-    $transaction_id = $tupas->parseTransactionId($request->query->get('B02K_STAMP'));
+    $transaction_id = $bank->parseTransactionId($request->query->get('B02K_STAMP'));
 
     // Session not found / expired.
     if ($transaction_id != $this->transactionManager->get()) {
@@ -147,9 +147,9 @@ class SessionController extends ControllerBase {
     }
 
     try {
-      $tupas->validate($request->query->all());
+      $bank->validate($request->query->all());
       // Hash customer id.
-      $hashed_id = TupasService::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
+      $hashed_id = $bank::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
 
       // Allow customer id to be altered.
       $dispatched_data = $this->eventDispatcher

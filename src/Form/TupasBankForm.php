@@ -4,7 +4,6 @@ namespace Drupal\tupas\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tupas\TupasService;
 
 /**
  * Class TupasBankForm.
@@ -62,7 +61,7 @@ class TupasBankForm extends EntityForm {
       '#title' => $this->t('Id type (A01Y_IDTYPE)'),
       '#default_value' => $tupas_bank->getIdType(),
       '#description' => $this->t('Note: Changing this value will break authentication for existing users.<br />Available values when used with tupas_registration: @values', [
-        '@values' => implode(', ', TupasService::getHashableTypes()),
+        '@values' => implode(', ', $tupas_bank::getHashableTypes()),
       ]),
     ];
 

@@ -3,17 +3,17 @@
 namespace Drupal\Tests\tupas\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\Exception\TupasHashMatchException;
-use Drupal\tupas\TupasService;
 
 /**
- * TupasService unit tests.
+ * TupasBank unit tests.
  *
  * @group tupas
- * @coversDefaultClass \Drupal\tupas\TupasService
+ * @coversDefaultClass \Drupal\tupas\Entity\TupasBank
  */
-class TupasServiceTest extends UnitTestCase {
+class TupasBankTest extends UnitTestCase {
 
   /**
    * The mocked Tupas Bank entity.
@@ -23,20 +23,15 @@ class TupasServiceTest extends UnitTestCase {
   protected $bank;
 
   /**
-   * The Tupas Service.
-   *
-   * @var \Drupal\tupas\TupasServiceInterface
-   */
-  protected $sut;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
 
-    $this->bank = $this->getMock('\Drupal\tupas\Entity\TupasBankInterface');
-    $this->sut = new TupasService($this->bank);
+    $values = [
+      'encryption_alg' => '01',
+    ];
+    $this->bank = new TupasBank($values, 'tupas_bank');
   }
 
   /**
@@ -46,18 +41,17 @@ class TupasServiceTest extends UnitTestCase {
    * @covers ::get
    * @covers ::set
    * @covers ::__construct
-   * @covers ::getBank
-   * @covers ::getDefaults
+   * @covers ::getDefaultSettings
    */
   public function testLanguage() {
     // Test language fallback.
-    $this->assertEquals($this->sut->getLanguage(), 'EN');
+    $this->assertEquals($this->bank->getLanguage(), 'EN');
     // Test invalid language fallback.
-    $this->sut->set('language', 'en_US');
-    $this->assertEquals($this->sut->getLanguage(), 'EN');
+    $this->bank->setSetting('language', 'en_US');
+    $this->assertEquals($this->bank->getLanguage(), 'EN');
     // Test correct language and autocapitalize.
-    $this->sut->set('language', 'fi');
-    $this->assertEquals($this->sut->getLanguage(), 'FI');
+    $this->bank->setSetting('language', 'fi');
+    $this->assertEquals($this->bank->getLanguage(), 'FI');
   }
 
   /**
@@ -69,13 +63,6 @@ class TupasServiceTest extends UnitTestCase {
    * @covers ::validate
    */
   public function testEncryption() {
-    $this->bank->expects($this->any())
-      ->method('getEncryptionAlg')
-      ->will($this->returnValue('01'));
-    $this->bank->expects($this->any())
-      ->method('getRcvKey')
-      ->will($this->returnValue('1234567'));
-
     $values = [
       'B02K_VERS' => 1,
       'B02K_TIMESTMP' => 123456,
@@ -89,17 +76,17 @@ class TupasServiceTest extends UnitTestCase {
     ];
     // B02K_MAC missing.
     $this->setExpectedException(TupasGenericException::class);
-    $this->sut->validate($values);
+    $this->bank->validate($values);
 
-    $values['B02K_MAC'] = $this->sut->checksum($values);
+    $values['B02K_MAC'] = $this->bank->checksum($values);
 
     // Hashes does not match.
     $this->setExpectedException(TupasHashMatchException::class);
-    $this->sut->validate($values);
+    $this->bank->validate($values);
 
     $values[] = $this->bank->getRcvKey();
 
-    $this->assertTrue($this->sut->validate($values));
+    $this->assertTrue($this->bank->validate($values));
   }
 
   /**
@@ -111,7 +98,7 @@ class TupasServiceTest extends UnitTestCase {
     for ($i = 0; $i < 3; $i++) {
       $transaction_id = random_int(123456, 234567);
       $combined = date('YdmHis') . $transaction_id;
-      $this->assertEquals($transaction_id, $this->sut->parseTransactionId($combined));
+      $this->assertEquals($transaction_id, $this->bank->parseTransactionId($combined));
     }
   }
 
@@ -126,13 +113,13 @@ class TupasServiceTest extends UnitTestCase {
     $invalid = '1234567';
 
     $this->setExpectedException(TupasGenericException::class);
-    TupasService::hashResponseId($invalid, '02');
+    TupasBank::hashResponseId($invalid, '02');
 
     // Test invalid id.
-    $response = TupasService::hashResponseId($invalid, '01');
+    $response = TupasBank::hashResponseId($invalid, '01');
     $this->assertEquals($invalid, $response);
 
-    TupasService::hashResponseId('123456-123A');
+    TupasBank::hashResponseId('123456-123A');
   }
 
 }
