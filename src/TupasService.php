@@ -9,9 +9,7 @@ use Drupal\tupas\Exception\TupasGenericException;
 use Drupal\tupas\Exception\TupasHashMatchException;
 
 /**
- * Class TupasService.
- *
- * @package Drupal\tupas
+ * Tupas service wrapper for a bank.
  */
 class TupasService implements TupasServiceInterface {
 
@@ -41,21 +39,13 @@ class TupasService implements TupasServiceInterface {
    */
   public function __construct(TupasBankInterface $bank, array $settings = []) {
     $this->bank = $bank;
-
-    foreach ($settings as $key => $setting) {
-      $this->set($key, $setting);
-    }
-    // Populate defaults.
-    foreach ($this->getDefaults() as $key => $value) {
-      if ($this->get($key)) {
-        continue;
-      }
-      $this->set($key, $value);
-    }
+    $this->settings = $settings + $this->getDefaults();
   }
 
   /**
    * Get defaults.
+   *
+   * @return array
    */
   public function getDefaults() {
     return [

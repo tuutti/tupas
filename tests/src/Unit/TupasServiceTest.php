@@ -16,11 +16,18 @@ use Drupal\tupas\TupasService;
 class TupasServiceTest extends UnitTestCase {
 
   /**
-   * The mocket Tupas bank entity.
+   * The mocked Tupas Bank entity.
    *
-   * @var \PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\tupas\Entity\TupasBankInterface|\PHPUnit_Framework_MockObject_MockObject
    */
   protected $bank;
+
+  /**
+   * The Tupas Service.
+   *
+   * @var \Drupal\tupas\TupasServiceInterface
+   */
+  protected $sut;
 
   /**
    * {@inheritdoc}
@@ -28,9 +35,8 @@ class TupasServiceTest extends UnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    $this->bank = $this->getMockBuilder('\Drupal\tupas\Entity\TupasBankInterface')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->bank = $this->getMock('\Drupal\tupas\Entity\TupasBankInterface');
+    $this->sut = new TupasService($this->bank);
   }
 
   /**
@@ -44,16 +50,14 @@ class TupasServiceTest extends UnitTestCase {
    * @covers ::getDefaults
    */
   public function testLanguage() {
-    $tupas = new TupasService($this->bank);
-
     // Test language fallback.
-    $this->assertEquals($tupas->getLanguage(), 'EN');
+    $this->assertEquals($this->sut->getLanguage(), 'EN');
     // Test invalid language fallback.
-    $tupas->set('language', 'en_US');
-    $this->assertEquals($tupas->getLanguage(), 'EN');
+    $this->sut->set('language', 'en_US');
+    $this->assertEquals($this->sut->getLanguage(), 'EN');
     // Test correct language and autocapitalize.
-    $tupas->set('language', 'fi');
-    $this->assertEquals($tupas->getLanguage(), 'FI');
+    $this->sut->set('language', 'fi');
+    $this->assertEquals($this->sut->getLanguage(), 'FI');
   }
 
   /**
@@ -65,8 +69,6 @@ class TupasServiceTest extends UnitTestCase {
    * @covers ::validate
    */
   public function testEncryption() {
-    $tupas = new TupasService($this->bank);
-
     $this->bank->expects($this->any())
       ->method('getEncryptionAlg')
       ->will($this->returnValue('01'));
@@ -87,17 +89,17 @@ class TupasServiceTest extends UnitTestCase {
     ];
     // B02K_MAC missing.
     $this->setExpectedException(TupasGenericException::class);
-    $tupas->validate($values);
+    $this->sut->validate($values);
 
-    $values['B02K_MAC'] = $tupas->checksum($values);
+    $values['B02K_MAC'] = $this->sut->checksum($values);
 
     // Hashes does not match.
     $this->setExpectedException(TupasHashMatchException::class);
-    $tupas->validate($values);
+    $this->sut->validate($values);
 
     $values[] = $this->bank->getRcvKey();
 
-    $this->assertTrue($tupas->validate($values));
+    $this->assertTrue($this->sut->validate($values));
   }
 
   /**
@@ -106,12 +108,10 @@ class TupasServiceTest extends UnitTestCase {
    * @covers ::parseTransactionId
    */
   public function testParseTransactionId() {
-    $tupas = new TupasService($this->bank);
-
     for ($i = 0; $i < 3; $i++) {
       $transaction_id = random_int(123456, 234567);
       $combined = date('YdmHis') . $transaction_id;
-      $this->assertEquals($transaction_id, $tupas->parseTransactionId($combined));
+      $this->assertEquals($transaction_id, $this->sut->parseTransactionId($combined));
     }
   }
 

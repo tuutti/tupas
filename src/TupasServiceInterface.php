@@ -3,56 +3,54 @@
 namespace Drupal\tupas;
 
 /**
- * Interface TupasServiceInterface.
- *
- * @package Drupal\tupas
+ * Interface for Tupas Services.
  */
 interface TupasServiceInterface {
 
   /**
-   * Get bank property.
+   * Gets the bank property.
    *
    * @return \Drupal\tupas\Entity\TupasBankInterface
    */
   public function getBank();
 
   /**
-   * Get language code.
+   * Gets the language code.
    *
    * @return string
    */
   public function getLanguage();
 
   /**
-   * Get return url.
+   * Gets the return url.
    *
    * @return mixed
    */
   public function getReturnUrl();
 
   /**
-   * Get cancellation url.
+   * Gets the cancellation url.
    *
    * @return mixed
    */
   public function getCancelUrl();
 
   /**
-   * Get rejected url.
+   * Gets the rejected url.
    *
    * @return mixed
    */
   public function getRejectedUrl();
 
   /**
-   * Get transaction id.
+   * Gets the transaction id.
    *
    * @return int
    */
   public function getTransactionId();
 
   /**
-   * Get default settings.
+   * Gets the default settings.
    *
    * @return array
    */
