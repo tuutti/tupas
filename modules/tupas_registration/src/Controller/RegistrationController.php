@@ -5,6 +5,7 @@ namespace Drupal\tupas_registration\Controller;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas_session\Controller\SessionController;
+use Drupal\tupas_session\Event\SessionAlterEvent;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -67,7 +68,7 @@ class RegistrationController extends SessionController {
       // Return to tupas initialize page.
       return $this->redirect('tupas_session.front');
     }
-    $bank = $this->entityManager()
+    $bank = $this->entityTypeManager()
       ->getStorage('tupas_bank')
       ->load($session->getData('bank'));
 
@@ -84,7 +85,7 @@ class RegistrationController extends SessionController {
         return $this->redirect('<front>');
       }
       // Create callback to call after session migrate is succesfull.
-      $callback = function ($session) {
+      $callback = function (SessionAlterEvent $session) {
         return $this->auth->login($session->getUniqueId(), 'tupas_registration');
       };
       if ($this->sessionManager->migrate($session, $callback)) {
@@ -100,14 +101,14 @@ class RegistrationController extends SessionController {
     // Show custom registration form if user is not allowed to register without
     // filling the registration form.
     if (!$this->config('tupas_registration.settings')->get('disable_form')) {
-      $entity = $this->entityManager()->getStorage('user')->create();
+      $entity = $this->entityTypeManager()->getStorage('user')->create();
 
       // Call our custom registration form.
       return $this->entityFormBuilder()
         ->getForm($entity, 'tupas_registration');
     }
     // Autoregister user without filling the registration form.
-    $callback = function ($session) {
+    $callback = function (SessionAlterEvent $session) {
       return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
     };
     if ($account = $this->sessionManager->migrate($session, $callback)) {

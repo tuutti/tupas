@@ -5,7 +5,6 @@ namespace Drupal\tupas_session\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas_session\Event\CustomerIdAlterEvent;
-use Drupal\tupas_session\Event\MessageAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
 use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\tupas_session\TupasSessionManagerInterface;
@@ -80,7 +79,7 @@ class SessionController extends ControllerBase {
     if ($this->sessionManager->getSession()) {
       drupal_set_message($this->t('You already have an active TUPAS session.'), 'warning');
     }
-    $banks = $this->entityManager()
+    $banks = $this->entityTypeManager()
       ->getStorage('tupas_bank')
       ->getEnabled();
 
@@ -91,9 +90,11 @@ class SessionController extends ControllerBase {
     // Regenerate transaction id every page refresh.
     $transaction_id = $this->transactionManager->regenerate();
 
+    /** @var \Drupal\tupas\Entity\TupasBank $bank */
     foreach ($banks as $bank) {
       if ($this->moduleHandler()->moduleExists('tupas_registration')) {
-        // Show only banks that allows registration (correct id type) when using tupas_registration.
+        // Show only banks that allows registration (correct id type) when using
+        // tupas_registration.
         if (!$bank::validateIdType($bank->getIdType())) {
           continue;
         }
@@ -128,7 +129,7 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    $bank = $this->entityManager()
+    $bank = $this->entityTypeManager()
       ->getStorage('tupas_bank')
       ->load($request->query->get('bank_id'));
 
@@ -152,6 +153,7 @@ class SessionController extends ControllerBase {
       $hashed_id = $bank::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
 
       // Allow customer id to be altered.
+      /** @var CustomerIdAlterEvent $dispatched_data */
       $dispatched_data = $this->eventDispatcher
         ->dispatch(SessionEvents::CUSTOMER_ID_ALTER, new CustomerIdAlterEvent($hashed_id, [
           'raw' => $request->query->all(),
@@ -161,12 +163,14 @@ class SessionController extends ControllerBase {
         'bank' => $bank->id(),
         'name' => $request->query->get('B02K_CUSTNAME'),
       ]);
+      /** @var GenericEvent $message */
       $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new GenericEvent($this->t('TUPAS authentication succesful.')));
       // Allow message to be altered.
       if ($message->getSubject()) {
         drupal_set_message($message->getSubject());
       }
       // Allow  redirect path to be customized.
+      /** @var RedirectAlterEvent $uri */
       $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
       // Delete used transaction after succesful tupas authentication.
       $this->transactionManager->delete();

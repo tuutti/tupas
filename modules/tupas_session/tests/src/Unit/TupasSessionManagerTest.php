@@ -4,7 +4,6 @@ namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\tupas_session\Event\SessionAlterEvent;
-use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\tupas_session\TupasSessionManager;
 
 /**
@@ -69,7 +68,7 @@ class TupasSessionManagerTest extends UnitTestCase {
     $this->configFactory = $this->getConfigFactoryStub([
       'tupas_session.settings' => [
         'tupas_session_length' => 30,
-      ]
+      ],
     ]);
     $this->storage = $this->getMockBuilder('\Drupal\tupas_session\TupasSessionStorageInterface')
       ->disableOriginalConstructor()
