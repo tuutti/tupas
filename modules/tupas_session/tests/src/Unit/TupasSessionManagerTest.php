@@ -3,7 +3,7 @@
 namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\TupasSessionManager;
 
 /**
@@ -52,7 +52,7 @@ class TupasSessionManagerTest extends UnitTestCase {
   /**
    * Session object.
    *
-   * @var \Drupal\tupas_session\Event\SessionAlterEvent
+   * @var \Drupal\tupas_session\Event\SessionData
    */
   protected $session;
 
@@ -80,9 +80,9 @@ class TupasSessionManagerTest extends UnitTestCase {
 
     $this->eventDispatcher = $this->getMock('\Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
-    $this->session = new SessionAlterEvent(123456, $this->randomMachineName(), time(), []);
+    $this->session = new SessionData(123456, $this->randomMachineName(), time(), []);
 
-    $dispatched_event = $this->getMockBuilder('\Drupal\tupas_session\Event\SessionAlterEvent')
+    $dispatched_event = $this->getMockBuilder('\Drupal\tupas_session\Event\SessionData')
       ->disableOriginalConstructor()
       ->getMock();
 
@@ -135,7 +135,7 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->method('get')
       ->will($this->returnValue(['test' => 1]));
 
-    $actual_object = new SessionAlterEvent($actual_data['data']['transaction_id'], $actual_data['data']['unique_id'], $actual_data['expire'], $actual_data['data']['data']);
+    $actual_object = new SessionData($actual_data['data']['transaction_id'], $actual_data['data']['unique_id'], $actual_data['expire'], $actual_data['data']['data']);
     // Test correct session.
     $result = $this->tupasSessionManager->getSession();
     $this->assertEquals($actual_object, $result);

@@ -2,7 +2,7 @@
 
 namespace Drupal\tupas_session;
 
-use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionData;
 
 /**
  * Interface TupasSessionManagerInterface.
@@ -26,7 +26,7 @@ interface TupasSessionManagerInterface {
   /**
    * Migrate session to new user.
    *
-   * @param \Drupal\tupas_session\Event\SessionAlterEvent $session
+   * @param \Drupal\tupas_session\Event\SessionData $session
    *   Session from previous user.
    * @param callable $callback
    *   Allow users to call function after session migrate.
@@ -34,7 +34,7 @@ interface TupasSessionManagerInterface {
    * @return mixed
    *   Status of callback result.
    */
-  public function migrate(SessionAlterEvent $session, callable $callback = NULL);
+  public function migrate(SessionData $session, callable $callback = NULL);
 
   /**
    * Return active session if possible.

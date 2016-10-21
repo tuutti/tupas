@@ -5,6 +5,7 @@ namespace Drupal\Tests\tupas_registration\Functional;
 use Drupal\Tests\tupas_session\Functional\TupasSessionFunctionalBase;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
 
 /**
  * Functional tests for tupas_registration.
@@ -39,7 +40,8 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
       'query' => $query,
     ]);
     $this->assertSession()->pageTextContains('TUPAS authentication succesful.');
-    // User should be redirected to /user/2 path after account has been automatically created.
+    // User should be redirected to /user/2 path after account has been
+    // automatically created.
     $this->assertSession()->addressEquals('/user/2');
 
     // Logout and test login functionality.
@@ -120,6 +122,29 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     // Make sure user is succesfully logged in using tupas.
     $this->assertSession()->pageTextContains('TUPAS authentication succesful.');
     $this->assertSession()->addressEquals('/user/2');
+
+    $this->drupalLogout();
+
+    $account = $this->drupalCreateUser(['access tupas', 'bypass tupas session expiration']);
+    // Test legacy hash migration.
+    $authmap = $this->container->get('externalauth.authmap');
+    $ssn = random_int(123456, 234567) . '-123A';
+    $authmap->save($account, 'tupas_registration', $bank->legacyHash($ssn));
+
+    $this->drupalGet('/user/tupas/login');
+    $transaction_id = $this->getTransactionId();
+    $query = $this->generateBankMac($bank, $transaction_id, [
+      'B02K_CUSTID' => $ssn,
+    ]);
+    $query['bank_id'] = $bank->id();
+    $this->drupalGet('/user/tupas/authenticated', [
+      'query' => $query,
+    ]);
+    // Make sure user is succesfully logged in using tupas (with legacy hash).
+    $this->assertSession()->addressEquals('/user/3');
+
+    $authname = $authmap->get($account->id(), 'tupas_registration');
+    $this->assertEquals($authname, $bank->hashResponseId($ssn));
   }
 
 }

@@ -29,8 +29,9 @@ class TupasRegistrationExternalAuthSubscriber implements EventSubscriberInterfac
    *   Event to dispatch.
    */
   public function alterUsername(ExternalAuthAuthmapAlterEvent $event) {
-    // By default externalauth module generates username from auth_service + authname.
-    // We use hashed SSN as authname so username is gonna be longer than allowed 60 characters.
+    // By default externalauth module generates username from auth_
+    // service + authname. We use hashed SSN as authname so username
+    // is gonna be longer than allowed 60 characters.
     $event->setUsername($event->getAuthname());
   }
 

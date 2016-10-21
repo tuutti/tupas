@@ -5,11 +5,11 @@ namespace Drupal\tupas_session\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class SessionAlterEvent.
+ * Class SessionData.
  *
  * @package Drupal\tupas_session\Event
  */
-class SessionAlterEvent extends Event {
+class SessionData extends Event {
 
   /**
    * Unique id for session.
@@ -40,7 +40,7 @@ class SessionAlterEvent extends Event {
   protected $data;
 
   /**
-   * SessionAlterEvent constructor.
+   * SessionData constructor.
    *
    * @param int $transaction_id
    *   Transaction id.
@@ -59,12 +59,7 @@ class SessionAlterEvent extends Event {
   }
 
   /**
-   * Store unique id.
-   *
-   * @param string $unique_id
-   *   Unique id for session.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setUniqueId($unique_id) {
     $this->uniqueId = $unique_id;

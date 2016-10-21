@@ -5,7 +5,7 @@ namespace Drupal\tupas_session;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\SessionManagerInterface;
-use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -78,7 +78,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (is_scalar($data)) {
       $data = unserialize($data);
     }
-    return new SessionAlterEvent($data['transaction_id'], $data['unique_id'], $session['expire'], $data['data']);
+    return new SessionData($data['transaction_id'], $data['unique_id'], $session['expire'], $data['data']);
   }
 
   /**
@@ -111,7 +111,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       $expire = ($expire * 60) + (int) $_SERVER['REQUEST_TIME'];
     }
     // Allow session data to be altered.
-    $session_data = new SessionAlterEvent($transaction_id, $unique_id, $expire, $data);
+    $session_data = new SessionData($transaction_id, $unique_id, $expire, $data);
+    /** @var SessionData $session */
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
     // Store tupas session.
     return $this->storage->save($session->getExpire(), [
@@ -124,7 +125,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function migrate(SessionAlterEvent $session, callable $callback = NULL) {
+  public function migrate(SessionData $session, callable $callback = NULL) {
     $return = NULL;
     // Destroy current session.
     $this->destroy();

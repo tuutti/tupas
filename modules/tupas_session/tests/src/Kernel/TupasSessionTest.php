@@ -3,7 +3,7 @@
 namespace Drupal\Tests\tupas_session\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionData;
 use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -92,7 +92,7 @@ class TupasSessionTest extends KernelTestBase {
 
     // Make sure getSession() returns valid session.
     $session = $this->sessionManager->getSession();
-    $this->assertTrue($session instanceof SessionAlterEvent);
+    $this->assertTrue($session instanceof SessionData);
 
     // Make sure renew() extends session expiration.
     $_SERVER['REQUEST_TIME'] = REQUEST_TIME + 2;
@@ -166,7 +166,7 @@ class TupasSessionTest extends KernelTestBase {
     $this->sessionManager->start($this->randomString(), random_int(10000, 100000), []);
     // Test that gc() does not remove non expired sessions.
     $this->sessionManager->gc();
-    $this->assertTrue($this->sessionManager->getSession() instanceof SessionAlterEvent);
+    $this->assertTrue($this->sessionManager->getSession() instanceof SessionData);
 
     // Test that expired sessions gets removed.
     $_SERVER['REQUEST_TIME'] = REQUEST_TIME + (31 * 60);

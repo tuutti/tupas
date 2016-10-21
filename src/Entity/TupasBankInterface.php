@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\tupas\Entity;
+
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**

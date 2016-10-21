@@ -2,14 +2,16 @@
 
 namespace Drupal\tupas_registration\Controller;
 
+use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas_session\Controller\SessionController;
-use Drupal\tupas_session\Event\SessionAlterEvent;
+use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class TupasRegistrationController.
@@ -26,6 +28,13 @@ class RegistrationController extends SessionController {
   protected $auth;
 
   /**
+   * The authmap service.
+   *
+   * @var \Drupal\externalauth\AuthmapInterface
+   */
+  protected $authmap;
+
+  /**
    * RegistrationController constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
@@ -36,10 +45,13 @@ class RegistrationController extends SessionController {
    *   The transaction manager service.
    * @param \Drupal\externalauth\ExternalAuthInterface $auth
    *   The external auth service.
+   * @param \Drupal\externalauth\AuthmapInterface $authmap
+   *   The authmap service.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, TupasTransactionManagerInterface $transaction_manager, ExternalAuthInterface $auth) {
+  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, TupasTransactionManagerInterface $transaction_manager, ExternalAuthInterface $auth, AuthmapInterface $authmap) {
     parent::__construct($event_dispatcher, $session_manager, $transaction_manager);
 
+    $this->authmap = $authmap;
     $this->auth = $auth;
   }
 
@@ -51,17 +63,21 @@ class RegistrationController extends SessionController {
       $container->get('event_dispatcher'),
       $container->get('tupas_session.session_manager'),
       $container->get('tupas_session.transaction_manager'),
-      $container->get('externalauth.externalauth')
+      $container->get('externalauth.externalauth'),
+      $container->get('externalauth.authmap')
     );
   }
 
   /**
    * Page callback for /user/tupas/register.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   *
    * @return array
-   *   Formbuilder form object.
+   *    Formbuilder form object.
    */
-  public function register() {
+  public function register(Request $request) {
     // Make sure user has active TUPAS session.
     if (!$session = $this->sessionManager->getSession()) {
       drupal_set_message($this->t('TUPAS session not found.'), 'error');
@@ -77,20 +93,35 @@ class RegistrationController extends SessionController {
 
       return $this->redirect('<front>');
     }
+    $user_found = FALSE;
+
     // Check if user has already connected their account.
-    if ($session->getUniqueId() && $this->auth->load($session->getUniqueId(), 'tupas_registration')) {
+    if ($this->auth->load($session->getUniqueId(), 'tupas_registration')) {
       if ($this->currentUser()->isAuthenticated()) {
         drupal_set_message($this->t('You have already connected your account with TUPAS service.'), 'warning');
 
         return $this->redirect('<front>');
       }
-      // Create callback to call after session migrate is succesfull.
-      $callback = function (SessionAlterEvent $session) {
-        return $this->auth->login($session->getUniqueId(), 'tupas_registration');
-      };
-      if ($this->sessionManager->migrate($session, $callback)) {
-        return $this->redirect('<front>');
+      $user_found = TRUE;
+    }
+    // Attempt to migrate legacy (Drupal 7) users.
+    // @see https://www.drupal.org/node/2639222
+    elseif ($customer_id = $request->query->get('B02K_CUSTID')) {
+      $legacy_hash = $bank->legacyHash($customer_id);
+
+      if ($account = $this->auth->load($legacy_hash, 'tupas_registration')) {
+        // Migrate legacy user.
+        $this->authmap->save($account, 'tupas_registration', $session->getUniqueId());
+        $user_found = TRUE;
       }
+    }
+
+    // Legacy/normal user found. Migrate session and log user in.
+    if ($user_found) {
+      $this->sessionManager->migrate($session, function (SessionData $session) {
+        return $this->auth->login($session->getUniqueId(), 'tupas_registration');
+      });
+      return $this->redirect('<front>');
     }
 
     // Show map account confirmation form if user is already logged in.
@@ -108,7 +139,7 @@ class RegistrationController extends SessionController {
         ->getForm($entity, 'tupas_registration');
     }
     // Autoregister user without filling the registration form.
-    $callback = function (SessionAlterEvent $session) {
+    $callback = function (SessionData $session) {
       return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
     };
     if ($account = $this->sessionManager->migrate($session, $callback)) {

@@ -95,7 +95,7 @@ class SessionController extends ControllerBase {
       if ($this->moduleHandler()->moduleExists('tupas_registration')) {
         // Show only banks that allows registration (correct id type) when using
         // tupas_registration.
-        if (!$bank::validateIdType($bank->getIdType())) {
+        if (!$bank->validIdType()) {
           continue;
         }
       }
@@ -150,7 +150,7 @@ class SessionController extends ControllerBase {
     try {
       $bank->validate($request->query->all());
       // Hash customer id.
-      $hashed_id = $bank::hashResponseId($request->get('B02K_CUSTID'), $bank->getIdType());
+      $hashed_id = $bank->hashResponseId($request->query->get('B02K_CUSTID'));
 
       // Allow customer id to be altered.
       /** @var CustomerIdAlterEvent $dispatched_data */
@@ -163,19 +163,19 @@ class SessionController extends ControllerBase {
         'bank' => $bank->id(),
         'name' => $request->query->get('B02K_CUSTNAME'),
       ]);
-      /** @var GenericEvent $message */
-      $message = $this->eventDispatcher->dispatch(SessionEvents::MESSAGE_ALTER, new GenericEvent($this->t('TUPAS authentication succesful.')));
-      // Allow message to be altered.
-      if ($message->getSubject()) {
-        drupal_set_message($message->getSubject());
+      // Allow redirect path to be customized.
+      $redirect_data = new RedirectAlterEvent('<front>', $request->query->all(), $this->t('TUPAS authentication succesful.'));
+      /** @var RedirectAlterEvent $redirect */
+      $redirect = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, $redirect_data);
+
+      // Show message only if message is set.
+      if ($message = $redirect->getMessage()) {
+        drupal_set_message($message);
       }
-      // Allow  redirect path to be customized.
-      /** @var RedirectAlterEvent $uri */
-      $uri = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, new RedirectAlterEvent('<front>'));
       // Delete used transaction after succesful tupas authentication.
       $this->transactionManager->delete();
 
-      return $this->redirect($uri->getPath());
+      return $this->redirect($redirect->getPath(), $redirect->getArguments());
     }
     catch (\Exception $e) {
       drupal_set_message($this->t('TUPAS authentication failed.'), 'error');

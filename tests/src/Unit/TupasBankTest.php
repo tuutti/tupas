@@ -30,6 +30,7 @@ class TupasBankTest extends UnitTestCase {
 
     $values = [
       'encryption_alg' => '01',
+      'id_type' => '02',
     ];
     $this->bank = new TupasBank($values, 'tupas_bank');
   }
@@ -107,19 +108,20 @@ class TupasBankTest extends UnitTestCase {
    *
    * @covers ::hashResponseId
    * @covers ::getHashableTypes
-   * @covers ::validateIdType
+   * @covers ::validIdType
    */
   public function testHashResponseId() {
     $invalid = '1234567';
 
     $this->setExpectedException(TupasGenericException::class);
-    TupasBank::hashResponseId($invalid, '02');
+    $this->bank->hashResponseId($invalid);
 
+    $this->bank->set('id_type', 02);
     // Test invalid id.
-    $response = TupasBank::hashResponseId($invalid, '01');
+    $response = $this->bank->hashResponseId($invalid);
     $this->assertEquals($invalid, $response);
 
-    TupasBank::hashResponseId('123456-123A');
+    $this->bank->hashResponseId('123456-123A');
   }
 
 }
