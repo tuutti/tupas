@@ -1,0 +1,3 @@
+tupas_session.session_alter:
+  label: 'Succesful tupas authentication'
+  category: 'Tupas'
