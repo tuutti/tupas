@@ -117,7 +117,7 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
    *   The owner.
    */
   protected function getOwner() {
-    // Session is not quaranteed to be active. Throw an exception to
+    // Session is not guaranteed to be active. Throw an exception to
     // exit gracefully.
     // @see #2828252.
     if (!$this->requestStack->getCurrentRequest()->getSession() && !$this->currentUser->id()) {
