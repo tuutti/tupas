@@ -97,12 +97,7 @@ class RegisterForm extends AccountForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $session = $this->sessionManager->getSession();
-
-    $callback = function ($session) {
-      return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
-    };
-    if ($account = $this->sessionManager->migrate($session, $callback)) {
+    if ($account = $this->sessionManager->loginRegister($this->auth)) {
       drupal_set_message($this->t('Registration successful. You are now logged in.'));
 
       // Save user details.
@@ -110,6 +105,9 @@ class RegisterForm extends AccountForm {
         ->setEmail($form_state->getValue('mail'))
         ->setPassword(user_password(20));
       $account->save();
+    }
+    else {
+      drupal_set_message($this->t('Registration failed due to an unknown reason.'));
     }
     $form_state->setRedirect('<front>');
   }

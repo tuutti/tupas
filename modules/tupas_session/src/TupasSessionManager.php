@@ -5,6 +5,8 @@ namespace Drupal\tupas_session;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\SessionManagerInterface;
+use Drupal\externalauth\Exception\ExternalAuthRegisterException;
+use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -70,15 +72,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->storage->get()) {
       return FALSE;
     }
-    if (empty($session['data'])) {
-      throw new \InvalidArgumentException('Missing required data field.');
-    }
-    $data = $session['data'];
-
-    if (is_scalar($data)) {
-      $data = unserialize($data);
-    }
-    return new SessionData($data['transaction_id'], $data['unique_id'], $session['expire'], $data['data']);
+    return $session;
   }
 
   /**
@@ -89,7 +83,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     if (!$session = $this->getSession()) {
       return FALSE;
     }
-    return $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+    return $this->recreate($session);
   }
 
   /**
@@ -115,30 +109,40 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     /** @var SessionData $session */
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
     // Store tupas session.
-    return $this->storage->save($session->getExpire(), [
-      'transaction_id' => $session->getTransactionId(),
-      'unique_id' => $session->getUniqueId(),
-      'data' => $session->getData(),
-    ]);
+    return $this->storage->save($session);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function migrate(SessionData $session, callable $callback = NULL) {
-    $return = NULL;
-    // Destroy current session.
-    $this->destroy();
-    // Attempt to call given callback. This is usually closure with
-    // login / register logic.
-    // @todo Refactor this.
-    if (is_callable($callback)) {
-      $return = $callback($session);
-    }
-    // Start new session for logged in user.
-    $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+  public function recreate(SessionData $session) {
+    return $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+  }
 
-    return $return;
+  /**
+   * {@inheritdoc}
+   */
+  public function login(ExternalAuthInterface $auth) {
+    // Login before migrating session over.
+    if (!$account = $auth->login($this->getSession()->getUniqueId(), 'tupas_registration')) {
+      return FALSE;
+    }
+    // Migrate session to newly logged in account.
+    return $this->renew() ? $account : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loginRegister(ExternalAuthInterface $auth) {
+    $session = $this->getSession();
+    // Login before migrating session over.
+    if (!$account = $auth->loginRegister($session->getUniqueId(), 'tupas_registration')) {
+      return FALSE;
+    }
+    $this->recreate($session);
+
+    return $account;
   }
 
   /**

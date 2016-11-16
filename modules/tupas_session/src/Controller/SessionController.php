@@ -11,7 +11,6 @@ use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

@@ -2,6 +2,7 @@
 
 namespace Drupal\tupas_session;
 
+use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 
 /**
@@ -24,17 +25,45 @@ interface TupasSessionManagerInterface {
   public function start($transaction_id, $unique_id, array $data = []);
 
   /**
-   * Migrate session to new user.
+   * Login wrapper to migrate session over to newly logged in user.
+   *
+   * Note: the ExternalAuthInterface is injected to the function
+   * because we don't want to create a hard dependency to Tupas registration
+   * module.
+   *
+   * @param \Drupal\externalauth\ExternalAuthInterface $auth
+   *   The external auth service.
+   *
+   * @return \Drupal\user\UserInterface|bool
+   *   The logged in Drupal user.
+   */
+  public function login(ExternalAuthInterface $auth);
+
+  /**
+   * Login register wrapper to migrate session over to newly logged in user.
+   *
+   * Note: the ExternalAuthInterface is injected to the function
+   * because we don't want to create a hard dependency to Tupas registration
+   * module.
+   *
+   * @param \Drupal\externalauth\ExternalAuthInterface $auth
+   *   The external auth service.
+   *
+   * @return \Drupal\user\UserInterface|bool
+   *   The logged in Drupal user.
+   */
+  public function loginRegister(ExternalAuthInterface $auth);
+
+  /**
+   * Recreate session with previous session object.
    *
    * @param \Drupal\tupas_session\Event\SessionData $session
-   *   Session from previous user.
-   * @param callable $callback
-   *   Allow users to call function after session migrate.
+   *   The session.
    *
    * @return mixed
-   *   Status of callback result.
+   *   TRUE or FALSE depending on if session start succeed.
    */
-  public function migrate(SessionData $session, callable $callback = NULL);
+  public function recreate(SessionData $session);
 
   /**
    * Return active session if possible.

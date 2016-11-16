@@ -4,6 +4,7 @@ namespace Drupal\tupas_session;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\tupas_session\Event\SessionData;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -53,16 +54,21 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function save($expire, array $data) {
+  public function save(SessionData $session) {
+    $data = $session->getData();
+
     if (!is_scalar($data)) {
       $data = serialize($data);
     }
     return $this->connection->merge('tupas_session')
       ->keys([
-        'owner' => $this->getOwner(),
+        'unique_id' => $session->getUniqueId(),
       ])
       ->fields([
-        'expire' => $expire,
+        'owner' => $this->getOwner(),
+        'expire' => $session->getExpire(),
+        'transaction_id' => $session->getTransactionId(),
+        'unique_id' => $session->getUniqueId(),
         'data' => $data,
       ])
       ->execute();
@@ -88,7 +94,15 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
       ->execute()
       ->fetchObject();
 
-    return $session ? (array) $session : FALSE;
+    if (!$session) {
+      return FALSE;
+    }
+    $data = unserialize($session->data);
+
+    if (empty($data)) {
+      $data = [];
+    }
+    return new SessionData($session->transaction_id, $session->unique_id, $session->expire, $data);
   }
 
   /**

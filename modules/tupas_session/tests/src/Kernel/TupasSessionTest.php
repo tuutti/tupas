@@ -87,7 +87,7 @@ class TupasSessionTest extends KernelTestBase {
    */
   public function testExpirableSessionStart() {
     // Test session creation.
-    $result = $this->sessionManager->start($this->randomString(), random_int(10000, 100000), []);
+    $result = $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
     $this->assertTrue($result);
 
     // Make sure getSession() returns valid session.
@@ -109,7 +109,7 @@ class TupasSessionTest extends KernelTestBase {
       ->set('tupas_session_length', 0)
       ->save();
 
-    $this->sessionManager->start($this->randomString(), random_int(100, 1000), []);
+    $this->sessionManager->start(random_int(100, 1000), $this->randomString(), []);
     $session = $this->sessionManager->getSession();
     $this->assertTrue($session->getExpire() == 0);
   }
@@ -118,7 +118,7 @@ class TupasSessionTest extends KernelTestBase {
    * Test tupas session data.
    */
   public function testSessionData() {
-    $this->sessionManager->start($this->randomString(), random_int(100, 1000), [
+    $this->sessionManager->start(random_int(100, 1000), $this->randomString(), [
       'random_test_data' => 1,
       'test' => ['this is array' => 1],
     ]);
@@ -128,29 +128,10 @@ class TupasSessionTest extends KernelTestBase {
   }
 
   /**
-   * Test migration.
-   */
-  public function testMigrate() {
-    $this->sessionManager->start($this->randomString(), random_int(10000, 100000), []);
-
-    // Make sure sessions are identical after migrate.
-    $session = $this->sessionManager->getSession();
-    $this->sessionManager->migrate($session);
-    $new_session = $this->sessionManager->getSession();
-    $this->assertEquals($session, $new_session);
-
-    // Test callable.
-    $result = $this->sessionManager->migrate($session, function () {
-      return TRUE;
-    });
-    $this->assertTrue($result);
-  }
-
-  /**
    * Test session destroy.
    */
   public function testSessionDestroy() {
-    $this->sessionManager->start($this->randomString(), random_int(10000, 100000), []);
+    $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
     $this->sessionManager->destroy();
     $this->assertFalse($this->sessionManager->getSession());
   }
@@ -163,7 +144,7 @@ class TupasSessionTest extends KernelTestBase {
     $this->config('tupas_session.settings')
       ->set('tupas_session_length', 30)
       ->save();
-    $this->sessionManager->start($this->randomString(), random_int(10000, 100000), []);
+    $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
     // Test that gc() does not remove non expired sessions.
     $this->sessionManager->gc();
     $this->assertTrue($this->sessionManager->getSession() instanceof SessionData);

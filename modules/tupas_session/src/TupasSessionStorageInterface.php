@@ -2,6 +2,8 @@
 
 namespace Drupal\tupas_session;
 
+use Drupal\tupas_session\Event\SessionData;
+
 /**
  * Interface TupasSessionStorageInterface.
  *
@@ -20,15 +22,13 @@ interface TupasSessionStorageInterface {
   /**
    * Save values to database.
    *
-   * @param int $expire
-   *   The expiration time.
-   * @param array $data
-   *   Values to save.
+   * @param \Drupal\tupas_session\Event\SessionData $session
+   *   The session.
    *
    * @return \Drupal\Core\Database\StatementInterface|int|null
    *   Status of crud operation.
    */
-  public function save($expire, array $data);
+  public function save(SessionData $session);
 
   /**
    * Delete current session(s).

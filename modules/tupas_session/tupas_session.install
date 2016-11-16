@@ -5,6 +5,8 @@
  * Contains Tupas session install.
  */
 
+use Drupal\Core\Database\Database;
+
 /**
  * Implements hook_schema().
  */
@@ -18,8 +20,22 @@ function tupas_session_schema() {
         'length' => 128,
         'default' => '',
       ],
+      'unique_id' => [
+        'description' => 'The unique id',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 128,
+        'default' => '',
+      ],
       'expire' => [
         'description' => 'The expiration timestamp',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'transaction_id' => [
+        'description' => 'The transaction id',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -36,7 +52,61 @@ function tupas_session_schema() {
       'expire' => ['expire'],
       'owner' => ['owner'],
     ],
+    'unique keys' => [
+      'unique_id' => ['unique_id'],
+    ],
   ];
 
   return $schema;
+}
+
+/**
+ * Add unique_id and transaction_id fields. Migrate existing sessions.
+ */
+function tupas_session_update_8001() {
+  $schema = Database::getConnection()->schema();
+
+  if (!$schema->fieldExists('tupas_session', 'unique_id')) {
+    $field = [
+      'description' => 'The unique id',
+      'type' => 'varchar',
+      'not null' => TRUE,
+      'length' => 128,
+      'default' => '',
+    ];
+    $schema->addField('tupas_session', 'unique_id', $field);
+  }
+
+  if (!$schema->fieldExists('tupas_session', 'transaction_id')) {
+    $field = [
+      'description' => 'The transaction id',
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ];
+    $schema->addField('tupas_session', 'transaction_id', $field);
+    $schema->addUniqueKey('tupas_session', 'unique_id', ['unique_id']);
+  }
+
+  $connection = Database::getConnection();
+  $sessions = $connection->select('tupas_session', 's')
+    ->fields('s')
+    ->execute();
+
+  foreach ($sessions as $session) {
+    $data = unserialize($session->data);
+
+    $connection->merge('tupas_session')
+      ->keys([
+        'owner' => $session->owner,
+      ])
+      ->fields([
+        'expire' => $session->expire,
+        'data' => $session->data,
+        'unique_id' => $data['unique_id'],
+        'transaction_id' => $data['transaction_id'],
+      ])
+      ->execute();
+  }
 }

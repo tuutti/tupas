@@ -115,12 +115,10 @@ class RegistrationController extends SessionController {
         $user_found = TRUE;
       }
     }
-
-    // Legacy/normal user found. Migrate session and log user in.
+    // Legacy/normal user found. Log the user in.
     if ($user_found) {
-      $this->sessionManager->migrate($session, function (SessionData $session) {
-        return $this->auth->login($session->getUniqueId(), 'tupas_registration');
-      });
+      $this->sessionManager->login($this->auth);
+
       return $this->redirect('<front>');
     }
 
@@ -138,11 +136,7 @@ class RegistrationController extends SessionController {
       return $this->entityFormBuilder()
         ->getForm($entity, 'tupas_registration');
     }
-    // Autoregister user without filling the registration form.
-    $callback = function (SessionData $session) {
-      return $this->auth->loginRegister($session->getUniqueId(), 'tupas_registration');
-    };
-    if ($account = $this->sessionManager->migrate($session, $callback)) {
+    if ($account = $this->sessionManager->loginRegister($this->auth)) {
       // Attempt to use customer name and fallback to random name.
       $name = $this->sessionManager->uniqueName($session->getData('name'));
       // Save user details.

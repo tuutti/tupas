@@ -37,7 +37,7 @@ class SessionData extends Event {
    *
    * @var array
    */
-  protected $data;
+  protected $data = [];
 
   /**
    * SessionData constructor.
