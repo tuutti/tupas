@@ -87,22 +87,27 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
    * {@inheritdoc}
    */
   public function get() {
-    $session = $this->connection->select('tupas_session', 's')
-      ->fields('s')
-      ->condition('owner', $this->getOwner())
-      ->range(0, 1)
-      ->execute()
-      ->fetchObject();
+    try {
+      $session = $this->connection->select('tupas_session', 's')
+        ->fields('s')
+        ->condition('owner', $this->getOwner())
+        ->range(0, 1)
+        ->execute()
+        ->fetchObject();
 
-    if (!$session) {
+      if (!$session) {
+        return FALSE;
+      }
+      $data = unserialize($session->data);
+
+      if (empty($data)) {
+        $data = [];
+      }
+      return new SessionData($session->transaction_id, $session->unique_id, $session->expire, $data);
+    }
+    catch (\RuntimeException $e) {
       return FALSE;
     }
-    $data = unserialize($session->data);
-
-    if (empty($data)) {
-      $data = [];
-    }
-    return new SessionData($session->transaction_id, $session->unique_id, $session->expire, $data);
   }
 
   /**
@@ -112,6 +117,12 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
    *   The owner.
    */
   protected function getOwner() {
+    // Session is not quaranteed to be active. Throw an exception to
+    // exit gracefully.
+    // @see #2828252.
+    if (!$this->requestStack->getCurrentRequest()->getSession() && !$this->currentUser->id()) {
+      throw new \RuntimeException('Session not initialized.');
+    }
     return $this->currentUser->id() ?: $this->requestStack->getCurrentRequest()->getSession()->getId();
   }
 
