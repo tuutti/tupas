@@ -60,9 +60,6 @@ class TupasSessionManagerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    if (!defined('REQUEST_TIME')) {
-      define('REQUEST_TIME', time());
-    }
     parent::setUp();
 
     $this->configFactory = $this->getConfigFactoryStub([
@@ -86,22 +83,6 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    $dispatched_event->expects($this->any())
-      ->method('getExpire')
-      ->will($this->returnValue($this->session->getExpire()));
-
-    $dispatched_event->expects($this->any())
-      ->method('getTransactionId')
-      ->will($this->returnValue($this->session->getTransactionId()));
-
-    $dispatched_event->expects($this->any())
-      ->method('getUniqueId')
-      ->will($this->returnValue($this->session->getUniqueId()));
-
-    $dispatched_event->expects($this->any())
-      ->method('getData')
-      ->will($this->returnValue($this->session->getData()));
-
     $this->eventDispatcher->expects($this->any())
       ->method('dispatch')
       ->will($this->returnValue($dispatched_event));
@@ -115,38 +96,21 @@ class TupasSessionManagerTest extends UnitTestCase {
    * @covers ::getSession
    */
   public function testGetSession() {
-    $actual_data = [
-      'expire' => 12345678,
-      'data' => [
-        'transaction_id' => 1234,
-        'unique_id' => $this->randomMachineName(),
-        'data' => [],
-      ],
-    ];
     $this->storage->expects($this->at(0))
       ->method('get')
-      ->will($this->returnValue($actual_data));
+      ->will($this->returnValue($this->session));
 
     $this->storage->expects($this->at(1))
       ->method('get')
       ->will($this->returnValue(0));
 
-    $this->storage->expects($this->at(2))
-      ->method('get')
-      ->will($this->returnValue(['test' => 1]));
-
-    $actual_object = new SessionData($actual_data['data']['transaction_id'], $actual_data['data']['unique_id'], $actual_data['expire'], $actual_data['data']['data']);
     // Test correct session.
     $result = $this->tupasSessionManager->getSession();
-    $this->assertEquals($actual_object, $result);
+    $this->assertEquals($this->session, $result);
 
     // Test session not found.
     $result = $this->tupasSessionManager->getSession();
     $this->assertFalse($result);
-
-    // Test invalid data.
-    $this->setExpectedException(\InvalidArgumentException::class);
-    $this->tupasSessionManager->getSession();
   }
 
   /**
@@ -168,18 +132,13 @@ class TupasSessionManagerTest extends UnitTestCase {
   }
 
   /**
-   * Test migrate() method.
+   * Test recreate() method.
    *
-   * @covers ::migrate
+   * @covers ::recreate
    */
-  public function testMigrate() {
-    $result = $this->tupasSessionManager->migrate($this->session);
-    $this->assertNull($result);
-
-    $result = $this->tupasSessionManager->migrate($this->session, function () {
-      return TRUE;
-    });
-    $this->assertTrue($result);
+  public function testRecreate() {
+    $session = $this->tupasSessionManager->recreate($this->session);
+    $this->assertEquals($session, $this->session);
   }
 
   /**
@@ -192,17 +151,9 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->method('get')
       ->will($this->returnValue(0));
 
-    $actual_data = [
-      'expire' => $this->session->getExpire(),
-      'data' => [
-        'transaction_id' => $this->session->getExpire(),
-        'unique_id' => $this->session->getUniqueId(),
-        'data' => $this->session->getData(),
-      ],
-    ];
     $this->storage->expects($this->at(1))
       ->method('get')
-      ->will($this->returnValue($actual_data));
+      ->will($this->returnValue($this->session));
 
     $this->storage->expects($this->once())
       ->method('save')

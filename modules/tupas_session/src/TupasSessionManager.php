@@ -5,7 +5,6 @@ namespace Drupal\tupas_session;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\SessionManagerInterface;
-use Drupal\externalauth\Exception\ExternalAuthRegisterException;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
@@ -123,19 +122,25 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function login(ExternalAuthInterface $auth) {
-    // Login before migrating session over.
-    if (!$account = $auth->login($this->getSession()->getUniqueId(), 'tupas_registration')) {
+    if (!$session = $this->getSession()) {
       return FALSE;
     }
-    // Migrate session to newly logged in account.
-    return $this->renew() ? $account : FALSE;
+    // Login before migrating session over.
+    if (!$account = $auth->login($session->getUniqueId(), 'tupas_registration')) {
+      return FALSE;
+    }
+    $this->recreate($session);
+
+    return $account;
   }
 
   /**
    * {@inheritdoc}
    */
   public function loginRegister(ExternalAuthInterface $auth) {
-    $session = $this->getSession();
+    if (!$session = $this->getSession()) {
+      return FALSE;
+    }
     // Login before migrating session over.
     if (!$account = $auth->loginRegister($session->getUniqueId(), 'tupas_registration')) {
       return FALSE;

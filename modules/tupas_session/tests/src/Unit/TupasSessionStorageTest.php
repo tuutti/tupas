@@ -3,6 +3,7 @@
 namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\TupasSessionStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -136,6 +137,7 @@ class TupasSessionStorageTest extends UnitTestCase {
   public function testSave() {
     $expire = 1236789;
     $data = [];
+    $session = new SessionData(random_int(123456, 234567), $this->randomMachineName(), $expire, $data);
 
     $merge = $this->getMockBuilder('Drupal\Core\Database\Query\Merge')
       ->disableOriginalConstructor()
@@ -158,7 +160,7 @@ class TupasSessionStorageTest extends UnitTestCase {
       ->with($this->equalTo('tupas_session'))
       ->will($this->returnValue($merge));
 
-    $this->storage->save($expire, $data);
+    $this->storage->save($session);
   }
 
   /**
@@ -181,21 +183,28 @@ class TupasSessionStorageTest extends UnitTestCase {
    * @covers ::get
    */
   public function testGet() {
-    $data = [
+    $data = (object) [
       'owner' => $this->currentUser->id(),
       'expire' => 12345678,
-      'data' => [
-        'transaction_id' => random_int(100, 1000),
-        'unique_id' => $this->randomMachineName(),
-        'data' => [],
-      ],
+      'transaction_id' => random_int(100, 1000),
+      'unique_id' => $this->randomMachineName(),
+      'data' => serialize([]),
     ];
-    $this->statement->expects($this->any())
+    $this->statement->expects($this->at(0))
       ->method('fetchObject')
       ->will($this->returnValue($data));
 
+    $this->statement->expects($this->at(1))
+      ->method('fetchObject')
+      ->will($this->returnValue(FALSE));
+
+    // Test valid session.
     $result = $this->storage->get();
-    $this->assertEquals($data, $result);
+    $this->assertTrue($result instanceof SessionData);
+
+    // Test invalid session.
+    $result = $this->storage->get();
+    $this->assertFalse($result);
   }
 
   /**
