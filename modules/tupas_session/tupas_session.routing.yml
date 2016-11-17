@@ -53,4 +53,3 @@ tupas_session.logout:
   requirements:
     _require_tupas_session: 'TRUE'
     _csrf_token: 'TRUE'
-
