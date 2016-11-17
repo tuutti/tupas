@@ -1,0 +1,5 @@
+services:
+  tupas_session_test.route_subscriber:
+    class: Drupal\tupas_session_test\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

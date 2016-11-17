@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\tupas_session\Functional;
 
-use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\user\Entity\Role;
 

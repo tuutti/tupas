@@ -49,8 +49,7 @@ class TupasSessionAccess implements AccessInterface {
    *   TRUE user has an active tupas sesssion, FALSE if not.
    */
   public function access(AccountInterface $account) {
-    // Allow access if user has an active tupas session.
-    $result = AccessResult::allowedIf($this->sessionManager->getSession());
+    $result = $this->sessionManager->getSession() ? AccessResult::allowed() : AccessResult::forbidden();
     // Not cacheable.
     return $result->setCacheMaxAge(0);
   }
