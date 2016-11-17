@@ -43,7 +43,7 @@ tupas_session.return:
     _access: 'TRUE'
 
 # @note: You have to create menu link programmatically if you wish to hide logout link from
-# the roles that have 'administer menu' permission. This is because MenuLinkContentAccessControlHandler::checkAccess()
+# the roles that have 'administer menu' permission, because MenuLinkContentAccessControlHandler::checkAccess()
 # does not respect route requirements.
 tupas_session.logout:
   path: '/user/tupas/logout'
