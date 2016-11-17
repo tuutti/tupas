@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\tupas_session\Functional;
 
+use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\user\Entity\Role;
 
@@ -69,20 +70,15 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
     $this->assertSession()->pageTextContains('TUPAS authentication failed.');
 
     // Test succesful authentication.
-    $query = $this->generateBankMac($bank, $transaction_id);
-    $query['bank_id'] = $bank->id();
-    $this->drupalGet('/user/tupas/authenticated', [
-      'query' => $query,
-    ]);
-    $this->assertSession()->pageTextContains('TUPAS authentication succesful.');
+    $this->loginUsingTupas();
   }
 
   /**
    * Test authenticated return.
    */
   public function testAuthenticated() {
-    // Grant bypass tupas session expiration to prevent TupasSessionEventSubscriber from
-    // logging us out.
+    // Grant bypass tupas session expiration to prevent
+    // TupasSessionEventSubscriber from logging us out.
     $account = $this->createUser(['access tupas', 'bypass tupas session expiration']);
     $this->drupalLogin($account);
 
@@ -102,8 +98,8 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
       ->save();
 
     $role = Role::load(Role::AUTHENTICATED_ID);
-    // Give temporarily access to bypass tupas expiration so user does not instantly log out
-    // and fails the test.
+    // Give temporarily access to bypass tupas expiration so user does
+    // not instantly log out and fails the test.
     $account = $this->drupalCreateUser(['access tupas']);
     $this->grantPermissions($role, ['bypass tupas session expiration']);
     $this->drupalLogin($account);
@@ -151,10 +147,36 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
       ->save();
 
     sleep(2);
-    // Make sure session expire does not increase when session renew is disabled.
+    // Make sure session expire does not increase when session
+    // renew is disabled.
     $this->drupalGet('/user/tupas/login');
     $expire3 = $session_manager->getSession()->getExpire();
     $this->assertTrue(!empty($expire3) && $expire3 == $expire2);
+  }
+
+  /**
+   * Make sure access check works.
+   */
+  public function testAccessCheck() {
+    // Allow anonymous users to use tupas auth.
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['access tupas']);
+
+    $this->drupalGet('/tupas_session_test');
+    // Make sure user has no access without an active tupas session.
+    $this->assertSession()->statusCodeEquals(403);
+
+    // Make sure user has access after authenticating using tupas.
+    $this->loginUsingTupas();
+
+    $this->drupalGet('/tupas_session_test');
+    $this->assertSession()->pageTextContains('Implement method: index.');
+
+    // Test tupas logout.
+    $this->tupasLogout();
+
+    // Test session page after logout.
+    $this->drupalGet('/tupas_session_test');
+    $this->assertSession()->statusCodeEquals(403);
   }
 
 }

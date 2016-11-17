@@ -1,0 +1,7 @@
+tupas_session_test.default_controller_index:
+  path: '/tupas_session_test'
+  defaults:
+    _controller: '\Drupal\tupas_session_test\Controller\DefaultController::index'
+    _title: 'Index test'
+  requirements:
+    _require_tupas_session: 'TRUE'

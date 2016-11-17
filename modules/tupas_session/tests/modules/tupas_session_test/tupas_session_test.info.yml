@@ -1,0 +1,7 @@
+name: tupas_session_test
+type: module
+package: Testing
+version: VERSION
+core: 8.x
+dependencies:
+  - tupas_session

@@ -23,3 +23,9 @@ services:
   tupas_session.transaction_manager:
     class: Drupal\tupas_session\TupasTransactionManager
     arguments: ["@session_manager", "@tupas_transaction.storage"]
+
+  tupas_session.require_tupas_session:
+    class: Drupal\tupas_session\Access\TupasSessionAccess
+    arguments: ["@tupas_session.session_manager"]
+    tags:
+      - { name: access_check, applies_to: _require_tupas_session }

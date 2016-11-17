@@ -4,7 +4,9 @@ namespace Drupal\Tests\tupas_session\Functional;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Session\AnonymousUserSession;
+use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\user\RoleInterface;
 
@@ -16,7 +18,7 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['tupas', 'tupas_session'];
+  public static $modules = ['tupas', 'tupas_session', 'tupas_session_test'];
 
   /**
    * Generates bank mac.
@@ -57,6 +59,39 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
     $return_values['B02K_MAC'] = $bank->checksum($macstring);
 
     return $return_values;
+  }
+
+  /**
+   * Login using tupas.
+   *
+   * @param array $overrides
+   *   Allow request variables to be altered.
+   */
+  protected function loginUsingTupas(array $overrides = []) {
+    // Visit form page to generate transaction id.
+    $this->drupalGet('/user/tupas/login');
+
+    $bank = TupasBank::load('aktia');
+    $transaction_id = $this->getTransactionId();
+
+    $query = $this->generateBankMac($bank, $transaction_id, $overrides);
+    $query['bank_id'] = $bank->id();
+    $this->drupalGet('/user/tupas/authenticated', [
+      'query' => $query,
+    ]);
+    $this->assertSession()->pageTextContains('TUPAS authentication succesful.');
+  }
+
+  /**
+   * Logout tupas.
+   */
+  protected function tupasLogout() {
+    $path = Url::fromRoute('tupas_session.logout');
+    $this->drupalGet($path);
+    $this->assertSession()->statusCodeEquals(200);
+    // Make sure user is redirected to front page.
+    $front = Url::fromRoute('<front>');
+    $this->assertSession()->addressEquals($front);
   }
 
   /**

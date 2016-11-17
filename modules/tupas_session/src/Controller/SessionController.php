@@ -207,4 +207,17 @@ class SessionController extends ControllerBase {
     return $this->redirect('<front>');
   }
 
+  /**
+   * Callback for /user/tupas/logout path.
+   */
+  public function logout() {
+    // Log the user out if user is authenticated.
+    if ($this->currentUser()->isAuthenticated()) {
+      user_logout();
+    }
+    $this->sessionManager->destroy();
+
+    return $this->redirect('<front>');
+  }
+
 }

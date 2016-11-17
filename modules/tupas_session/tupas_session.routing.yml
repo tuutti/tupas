@@ -41,3 +41,13 @@ tupas_session.return:
     _title: 'TUPAS authenticated'
   requirements:
     _access: 'TRUE'
+
+tupas_session.logout:
+  path: '/user/tupas/logout'
+  defaults:
+    _controller: '\Drupal\tupas_session\Controller\SessionController::logout'
+    _title: 'TUPAS logout'
+  requirements:
+    _require_tupas_session: 'TRUE'
+    _csrf_token: 'TRUE'
+
