@@ -48,6 +48,12 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('require_session'),
     ];
 
+    $form['destroy_session_on_logout'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Destroy TUPAS session on logout'),
+      '#default_value' => $config->get('destroy_session_on_logout'),
+    ];
+
     $form['tupas_session_renew'] = [
       '#type' => 'checkbox',
       '#title' => t('Auto-renew TUPAS session'),
@@ -78,9 +84,10 @@ class SettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config('tupas_session.settings')
-      ->set('tupas_session_length', $form_state->getValue('tupas_session_length'))
       ->set('expired_goto', $form_state->getValue('expired_goto'))
+      ->set('tupas_session_length', $form_state->getValue('tupas_session_length'))
       ->set('require_session', $form_state->getValue('require_session'))
+      ->set('destroy_session_on_logout', $form_state->getValue('destroy_session_on_logout'))
       ->set('tupas_session_renew', $form_state->getValue('tupas_session_renew'))
       ->save();
   }

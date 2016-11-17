@@ -13,3 +13,15 @@ function tupas_session_cron() {
   $session_manager = \Drupal::service('tupas_session.session_manager');
   $session_manager->gc();
 }
+
+/**
+ * Implements hook_user_logout().
+ */
+function tupas_session_user_logout($account) {
+  $config = \Drupal::config('tupas_session.settings');
+
+  if ($config->get('destroy_session_on_logout')) {
+    $session_manager = \Drupal::service('tupas_session.session_manager');
+    $session_manager->destroy();
+  }
+}

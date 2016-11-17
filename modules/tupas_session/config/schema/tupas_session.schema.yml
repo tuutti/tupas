@@ -14,3 +14,6 @@ tupas_session.settings:
     require_session:
       type: integer
       label: 'Require tupas session to stay logged-in'
+    destroy_session_on_logout:
+      type: integer
+      label: 'Destroy Tupas session on logout'

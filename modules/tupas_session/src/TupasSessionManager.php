@@ -154,9 +154,6 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function destroy() {
-    if ($this->sessionManager->isStarted()) {
-      $this->sessionManager->destroy();
-    }
     return $this->storage->delete();
   }
 

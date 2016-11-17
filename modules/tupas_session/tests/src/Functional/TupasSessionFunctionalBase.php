@@ -9,6 +9,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\user\RoleInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Functional tests for tupas_session.
@@ -59,6 +60,27 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
     $return_values['B02K_MAC'] = $bank->checksum($macstring);
 
     return $return_values;
+  }
+
+  /**
+   * Load tupas session for given user.
+   *
+   * @param \Drupal\user\UserInterface $owner
+   *   The account to load session for.
+   *
+   * @return bool|array
+   *    FALSE if no sessions found, array of sessions if session found.
+   */
+  protected function loadTupasSession(UserInterface $owner) {
+    $db = $this->container->get('database');
+    $session = $db->select('tupas_session', 's')
+      ->fields('s')
+      ->condition('owner', $owner->id())
+      ->range(0, 1)
+      ->execute()
+      ->fetchObject();
+
+    return !empty($session) ? $session : FALSE;
   }
 
   /**

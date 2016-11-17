@@ -83,6 +83,22 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
 
     // Repeat same tests for authenticated user.
     $this->testAnonymousTupasReturn();
+
+    // Make sure tupas session does not get destroyed on logout.
+    // At this point we should already have an active tupas session
+    // from testAnonymousTupasReturn().
+    $this->drupalLogout();
+    $this->assertNotEmpty($this->loadTupasSession($account));
+
+    // Enable session destroy on logout feature.
+    $this->config('tupas_session.settings')
+      ->set('destroy_session_on_logout', 1)
+      ->save();
+
+    $this->drupalLogin($account);
+    // Make sure session gets destroyed on logout.
+    $this->drupalLogout();
+    $this->assertFalse($this->loadTupasSession($account));
   }
 
   /**

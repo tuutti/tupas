@@ -27,8 +27,6 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalGet('/user/tupas/register');
     $this->assertSession()->pageTextContains('TUPAS session not found.');
 
-    $bank = TupasBank::load('aktia');
-
     $this->loginUsingTupas();
     // User should be redirected to /user/2 path after account has been
     // automatically created.

@@ -69,7 +69,7 @@ class TupasSessionTest extends KernelTestBase {
    * @param string $name
    *   Account name.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|static
+   * @return \Drupal\Core\Entity\EntityInterface
    *   New account.
    */
   private function createUser($name) {
