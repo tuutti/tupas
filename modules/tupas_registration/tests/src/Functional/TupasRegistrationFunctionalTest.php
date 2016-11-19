@@ -10,14 +10,18 @@ use Drupal\user\Entity\Role;
  * Functional tests for tupas_registration.
  *
  * @group tupas
- * @requires module externalauth
  */
 class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['tupas', 'tupas_session', 'tupas_registration'];
+  public static $modules = [
+    'tupas',
+    'tupas_session',
+    'tupas_registration',
+    'externalauth',
+  ];
 
   /**
    * Test registration process as unauthenticated user.
