@@ -101,7 +101,8 @@ mysql:
 
 before_install:
   - composer self-update
-  - cd ./tests
+  - git config --global github.accesstoken $GITHUB_OAUTH_TOKEN
+    #- cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install
 
