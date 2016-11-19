@@ -4,14 +4,5 @@
   "description": "TUPAS Authentication module is a general tool for enabling strong session-based authentication.",
   "homepage": "http://drupal.org/project/tupas",
   "license": "GPL-2.0+",
-  "minimum-stability": "dev",
-  "require": {
-    "drupal/externalauth": "1.x-dev"
-  },
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://packages.drupal.org/8"
-    }
-  ]
+  "minimum-stability": "dev"
 }
