@@ -185,7 +185,7 @@ class TupasSessionStorageTest extends UnitTestCase {
   public function testGet() {
     $data = (object) [
       'owner' => $this->currentUser->id(),
-      'expire' => 12345678,
+      'access' => 12345678,
       'transaction_id' => random_int(100, 1000),
       'unique_id' => $this->randomMachineName(),
       'data' => serialize([]),

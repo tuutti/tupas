@@ -4,9 +4,6 @@ namespace Drupal\Tests\tupas_session\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\tupas_session\TupasTransactionManager;
-use Drupal\user\PrivateTempStore;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * TupasSessionNanager unit tests.
@@ -79,10 +76,6 @@ class TupasTransactionManagerTest extends UnitTestCase {
    * @covers ::delete
    */
   public function testRegenerate() {
-
-    $this->sessionManager->expects($this->any())
-      ->method('isStarted')
-      ->will($this->returnValue(TRUE));
 
     $transaction_id = $this->transactionManager->regenerate();
 

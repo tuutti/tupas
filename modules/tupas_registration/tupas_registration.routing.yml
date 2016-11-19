@@ -5,6 +5,7 @@ tupas_registration.register:
     _title: 'TUPAS authentication'
   requirements:
     _access: 'TRUE'
+    _require_tupas_session: 'TRUE'
 
 tupas_registration.settings_form:
   path: '/admin/config/people/tupas/tupas_registration'

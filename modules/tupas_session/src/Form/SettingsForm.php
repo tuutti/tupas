@@ -4,6 +4,8 @@ namespace Drupal\tupas_session\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * Class settingsForm.
@@ -74,6 +76,12 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    try {
+      Url::fromRoute($form_state->getValue('expired_goto'))->toString();
+    }
+    catch (RouteNotFoundException $e) {
+      $form_state->setErrorByName('expired_goto', $this->t('Landing page is not valid route.'));
+    }
     parent::validateForm($form, $form_state);
   }
 

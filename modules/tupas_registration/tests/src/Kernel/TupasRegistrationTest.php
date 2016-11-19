@@ -3,6 +3,7 @@
 namespace Drupal\Tests\tupas_registration\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -27,6 +28,13 @@ class TupasRegistrationTest extends KernelTestBase {
    * @var \Symfony\Component\HttpFoundation\RequestStack
    */
   protected $requestStack;
+
+  /**
+   * The unique username generator.
+   *
+   * @var \Drupal\tupas_registration\UniqueUsername
+   */
+  protected $usernameGenerator;
 
   /**
    * {@inheritdoc}
@@ -62,6 +70,26 @@ class TupasRegistrationTest extends KernelTestBase {
     $this->container->set('request_stack', $this->requestStack);
 
     $this->sessionManager = $this->container->get('tupas_session.session_manager');
+    $this->usernameGenerator = $this->container->get('tupas_registration.unique_username');
+  }
+
+  /**
+   * Create new user entity.
+   *
+   * @param string $name
+   *   Account name.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   New account.
+   */
+  protected function createUser($name) {
+    $account = User::create([
+      'name' => $name,
+      'status' => 1,
+    ]);
+    $account->save();
+
+    return $account;
   }
 
   /**
@@ -90,7 +118,30 @@ class TupasRegistrationTest extends KernelTestBase {
 
     $this->assertEquals($session, $new_session);
     $this->assertTrue($account->isAuthenticated());
+  }
 
+  /**
+   * Test unique name.
+   */
+  public function testUniqueName() {
+    $this->assertEquals('test', $this->usernameGenerator->getName('test'));
+    // Test random generated name.
+    $this->assertTrue(mb_strlen($this->usernameGenerator->getName()) == 10);
+
+    $this->createUser('test');
+    $this->assertEquals('test 1', $this->usernameGenerator->getName('test'));
+
+    // Make sure incrementing works.
+    foreach (range(1, 5) as $i) {
+      $this->createUser('test ' . $i);
+    }
+    $this->assertEquals('test 6', $this->usernameGenerator->getName('test'));
+
+    // Make sure first + lastname gets capitalized.
+    $this->assertEquals('Firstname Lastname', $this->usernameGenerator->getName('firstname lastname'));
+
+    $this->createUser('Firstname Lastname');
+    $this->assertEquals('Firstname Lastname 1', $this->usernameGenerator->getName('Firstname Lastname'));
   }
 
 }

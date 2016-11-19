@@ -18,6 +18,16 @@ interface TupasBankInterface extends ConfigEntityInterface {
   public function getStatus();
 
   /**
+   * Get tupas bank number.
+   *
+   * This is used to identify bank when returning from Tupas service.
+   *
+   * @return int
+   *   The bank number.
+   */
+  public function getBankNumber();
+
+  /**
    * Get bank action url.
    *
    * @return string

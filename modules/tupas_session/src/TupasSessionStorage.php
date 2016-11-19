@@ -66,7 +66,7 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
       ])
       ->fields([
         'owner' => $this->getOwner(),
-        'expire' => $session->getExpire(),
+        'access' => $session->getAccess(),
         'transaction_id' => $session->getTransactionId(),
         'unique_id' => $session->getUniqueId(),
         'data' => $data,
@@ -103,7 +103,7 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
       if (empty($data)) {
         $data = [];
       }
-      return new SessionData($session->transaction_id, $session->unique_id, $session->expire, $data);
+      return new SessionData($session->transaction_id, $session->unique_id, $session->access, $data);
     }
     catch (\RuntimeException $e) {
       return FALSE;
@@ -137,8 +137,8 @@ class TupasSessionStorage implements TupasSessionStorageInterface {
    */
   public function deleteExpired($before) {
     return $this->connection->delete('tupas_session')
-      ->condition('expire', 0, '!=')
-      ->condition('expire', $before, '<')
+      ->condition('access', 0, '!=')
+      ->condition('access', $before, '<')
       ->execute();
   }
 

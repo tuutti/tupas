@@ -5,7 +5,7 @@ services:
 
   tupas_session.event_subscriber:
     class: Drupal\tupas_session\EventSubscriber\TupasSessionEventSubscriber
-    arguments: ["@tupas_session.session_manager", "@current_user", "@config.factory"]
+    arguments: ["@tupas_session.session_manager", "@current_user"]
     tags:
       - { name: event_subscriber }
 

@@ -7,7 +7,7 @@ tupas_session.settings_form:
   requirements:
     _permission: 'administer tupas'
   options:
-    _admin_route: TRUE
+    _admin_route: 'TRUE'
 
 tupas_session.front:
   path: '/user/tupas/login'
@@ -16,10 +16,9 @@ tupas_session.front:
     _title: 'TUPAS authentication'
   requirements:
     _permission: 'access tupas'
-  # @todo Review this. We need to generate unique transaction id for every tupas
-  # form.
+  # @todo Review this. We need to generate unique transaction id for every page request.
   options:
-    no_cache: TRUE
+    no_cache: 'TRUE'
 tupas_session.canceled:
   path: '/user/tupas/cancel'
   defaults:

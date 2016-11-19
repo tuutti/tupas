@@ -8,3 +8,4 @@ rcv_key: SPANKKI
 key_version: '0001'
 encryption_alg: '03'
 id_type: '02'
+bank_number: 390

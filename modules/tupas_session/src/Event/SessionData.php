@@ -26,11 +26,11 @@ class SessionData extends Event {
   protected $transactionId;
 
   /**
-   * Expiration time.
+   * Access time.
    *
    * @var int
    */
-  protected $expire;
+  protected $access;
 
   /**
    * Additional session data.
@@ -46,15 +46,15 @@ class SessionData extends Event {
    *   Transaction id.
    * @param string $unique_id
    *   Unique id for session.
-   * @param int $expire
-   *   Session expiration.
+   * @param int $access
+   *   Session last access time.
    * @param array $data
    *   Allow users to store additional data.
    */
-  public function __construct($transaction_id, $unique_id, $expire, array $data = []) {
+  public function __construct($transaction_id, $unique_id, $access, array $data = []) {
     $this->transactionId = $transaction_id;
     $this->uniqueId = $unique_id;
-    $this->expire = $expire;
+    $this->access = $access;
     $this->data = $data;
   }
 
@@ -80,15 +80,15 @@ class SessionData extends Event {
   }
 
   /**
-   * Store expiration time.
+   * Store access time.
    *
-   * @param int $expire
-   *   Session expiration.
+   * @param int $access
+   *   Session last access time.
    *
    * @return $this
    */
-  public function setExpire($expire) {
-    $this->expire = $expire;
+  public function setAccess($access) {
+    $this->access = $access;
     return $this;
   }
 
@@ -126,13 +126,13 @@ class SessionData extends Event {
   }
 
   /**
-   * Get expiration time.
+   * Get access time.
    *
    * @return int
-   *   Expiration time.
+   *   The last access time.
    */
-  public function getExpire() {
-    return $this->expire;
+  public function getAccess() {
+    return $this->access;
   }
 
   /**

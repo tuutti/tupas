@@ -123,14 +123,15 @@ class SessionController extends ControllerBase {
    *   Redirect response.
    */
   public function returnTo(Request $request) {
-    if (!$request->query->get('bank_id')) {
+    if (!$stamp = $request->query->get('B02K_TIMESTMP')) {
       drupal_set_message($this->t('Missing required bank id argument.'), 'error');
 
       return $this->redirect('<front>');
     }
+    $bank_number = substr($stamp, 0, 3);
     $bank = $this->entityTypeManager()
       ->getStorage('tupas_bank')
-      ->load($request->query->get('bank_id'));
+      ->loadByBankNumber($bank_number);
 
     if (!$bank instanceof TupasBank) {
       drupal_set_message($this->t('Validation failed.'), 'error');

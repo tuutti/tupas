@@ -43,12 +43,9 @@ class TupasTransactionManager implements TupasTransactionManagerInterface {
    * {@inheritdoc}
    */
   public function regenerate() {
-    // We need to start session manually for private temp storage.
-    if (!$this->sessionManager->isStarted() && empty($_SESSION['session_started'])) {
-      $_SESSION['session_started'] = TRUE;
+    // @todo This might cause some issues with logged in users.
+    $this->sessionManager->regenerate();
 
-      $this->sessionManager->start();
-    }
     $transaction_id = random_int(100000, 999999);
     // Store transaction id in temporary storage.
     $this->storage->set('transaction_id', $transaction_id);

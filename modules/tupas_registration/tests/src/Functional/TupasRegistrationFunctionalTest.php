@@ -25,7 +25,7 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['access tupas']);
     // Page should not be accessable without tupas session.
     $this->drupalGet('/user/tupas/register');
-    $this->assertSession()->pageTextContains('TUPAS session not found.');
+    $this->assertSession()->statusCodeEquals(403);
 
     $this->loginUsingTupas();
     // User should be redirected to /user/2 path after account has been
@@ -52,6 +52,9 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
       'B02K_CUSTID' => '654321-123A',
     ]);
     $this->assertSession()->addressEquals('/user/tupas/register');
+    $this->assertSession()->fieldExists('name');
+
+    $this->drupalGet('/user/tupas/register');
     $this->assertSession()->fieldExists('name');
 
     // Fill registration form.

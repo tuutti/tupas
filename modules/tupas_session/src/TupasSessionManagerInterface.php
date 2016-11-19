@@ -13,6 +13,17 @@ use Drupal\tupas_session\Event\SessionData;
 interface TupasSessionManagerInterface {
 
   /**
+   * Helper function to get tupas session settings.
+   *
+   * @param string $key
+   *   The setting key.
+   *
+   * @return mixed
+   *   NULL if setting does not exists, setting value if setting exists.
+   */
+  public function getSetting($key);
+
+  /**
    * Start tupas session.
    *
    * @param int $transaction_id
@@ -82,7 +93,7 @@ interface TupasSessionManagerInterface {
   public function destroy();
 
   /**
-   * Automatically renew session.
+   * Automatically renew session by updating last access timestamp.
    *
    * @return bool
    *   TRUE on success, FALSE on failure.

@@ -40,7 +40,8 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
     $macstring = [];
     $return_values = [
       'B02K_VERS' => $bank->getCertVersion(),
-      'B02K_TIMESTMP' => REQUEST_TIME,
+      // All tests defaults to aktia. Use 410 as bank code.
+      'B02K_TIMESTMP' => 410 . REQUEST_TIME,
       'B02K_IDNBR' => random_int(1000, 10000),
       'B02K_STAMP' => date('YmdHis', REQUEST_TIME) . $transaction_id,
       'B02K_CUSTNAME' => $this->randomString(),
@@ -97,7 +98,6 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
     $transaction_id = $this->getTransactionId();
 
     $query = $this->generateBankMac($bank, $transaction_id, $overrides);
-    $query['bank_id'] = $bank->id();
     $this->drupalGet('/user/tupas/authenticated', [
       'query' => $query,
     ]);
@@ -138,10 +138,9 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
    *   Url parts.
    */
   protected function getTransactionId() {
-    $fields = $this->xpath('//input[@name="A01Y_RETLINK"]');
+    $fields = $this->xpath('//input[@name="A01Y_STAMP"]');
     $field = reset($fields)->getValue();
-    $url = UrlHelper::parse($field);
-    return $url['query']['transaction_id'];
+    return substr($field, -6);
   }
 
   /**

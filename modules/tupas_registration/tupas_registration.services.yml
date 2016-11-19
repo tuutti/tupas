@@ -11,3 +11,6 @@ services:
     tags:
       - { name: event_subscriber }
 
+  tupas_registration.unique_username:
+    class: Drupal\tupas_registration\UniqueUsername
+    arguments: ["@entity_type.manager"]

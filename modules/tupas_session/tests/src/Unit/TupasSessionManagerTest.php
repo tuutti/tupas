@@ -119,10 +119,6 @@ class TupasSessionManagerTest extends UnitTestCase {
    * @covers ::start
    */
   public function testStart() {
-    $this->sessionManager->expects($this->any())
-      ->method('isStarted')
-      ->will($this->returnValue(1));
-
     $this->storage->expects($this->once())
       ->method('save')
       ->will($this->returnValue(TRUE));
@@ -137,6 +133,10 @@ class TupasSessionManagerTest extends UnitTestCase {
    * @covers ::recreate
    */
   public function testRecreate() {
+    $this->storage->expects($this->once())
+      ->method('get')
+      ->will($this->returnValue($this->session));
+
     $session = $this->tupasSessionManager->recreate($this->session);
     $this->assertEquals($session, $this->session);
   }

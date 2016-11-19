@@ -26,3 +26,5 @@ tupas.tupas_bank.*:
       type: string
     id_type:
       type: string
+    bank_number:
+      type: integer

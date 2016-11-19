@@ -125,6 +125,13 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
   protected $id_type;
 
   /**
+   * The Tupas bank number.
+   *
+   * @var integer
+   */
+  protected $bank_number;
+
+  /**
    * TupasBank constructor.
    *
    * @param array $values
@@ -194,6 +201,13 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
    */
   public function getIdType() {
     return $this->get('id_type');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBankNumber() {
+    return (int) $this->get('bank_number');
   }
 
   /**
@@ -306,11 +320,7 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
    *   Absolute url to given route.
    */
   public function fromRoute($key) {
-    $arguments = [
-      'bank_id' => $this->id(),
-      'transaction_id' => $this->getTransactionId(),
-    ];
-    $url = new Url($key, $arguments, ['absolute' => TRUE]);
+    $url = new Url($key, [], ['absolute' => TRUE]);
 
     return $url->toString();
   }
@@ -508,7 +518,7 @@ class TupasBank extends ConfigEntityBase implements TupasBankInterface, ConfigEn
    * Legacy hash SSN.
    *
    * @param string $payload
-   *   The value SSN to be hashed.
+   *   The SSN to be hashed.
    *
    * @return string
    *   Hashed payload.

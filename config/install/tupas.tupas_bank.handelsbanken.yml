@@ -8,3 +8,4 @@ rcv_key: '11111111111111111111'
 key_version: '0001'
 encryption_alg: '03'
 id_type: '02'
+bank_number: 310

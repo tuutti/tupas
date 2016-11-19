@@ -18,6 +18,7 @@ class TupasBankForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
+    /** @var \Drupal\tupas\Entity\TupasBank $tupas_bank */
     $tupas_bank = $this->entity;
 
     $form['label'] = [
@@ -36,6 +37,14 @@ class TupasBankForm extends EntityForm {
         'exists' => '\Drupal\tupas\Entity\TupasBank::load',
       ],
       '#disabled' => !$tupas_bank->isNew(),
+    ];
+
+    $form['bank_number'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Bank number.'),
+      '#description' => $this->t('This is used to validate the bank when returning from TUPAS service.'),
+      '#default_value' => $tupas_bank->getBankNumber(),
+      '#required' => TRUE,
     ];
 
     $form['status'] = [

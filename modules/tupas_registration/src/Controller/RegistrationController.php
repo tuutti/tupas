@@ -5,8 +5,8 @@ namespace Drupal\tupas_registration\Controller;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas_registration\UniqueUsernameInterface;
 use Drupal\tupas_session\Controller\SessionController;
-use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,6 +35,13 @@ class RegistrationController extends SessionController {
   protected $authmap;
 
   /**
+   * The unique username generator.
+   *
+   * @var \Drupal\tupas_registration\UniqueUsernameInterface
+   */
+  protected $usernameGenerator;
+
+  /**
    * RegistrationController constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
@@ -47,10 +54,13 @@ class RegistrationController extends SessionController {
    *   The external auth service.
    * @param \Drupal\externalauth\AuthmapInterface $authmap
    *   The authmap service.
+   * @param \Drupal\tupas_registration\UniqueUsernameInterface $username_generator
+   *   The unique username generator.
    */
-  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, TupasTransactionManagerInterface $transaction_manager, ExternalAuthInterface $auth, AuthmapInterface $authmap) {
+  public function __construct(EventDispatcherInterface $event_dispatcher, TupasSessionManagerInterface $session_manager, TupasTransactionManagerInterface $transaction_manager, ExternalAuthInterface $auth, AuthmapInterface $authmap, UniqueUsernameInterface $username_generator) {
     parent::__construct($event_dispatcher, $session_manager, $transaction_manager);
 
+    $this->usernameGenerator = $username_generator;
     $this->authmap = $authmap;
     $this->auth = $auth;
   }
@@ -64,7 +74,8 @@ class RegistrationController extends SessionController {
       $container->get('tupas_session.session_manager'),
       $container->get('tupas_session.transaction_manager'),
       $container->get('externalauth.externalauth'),
-      $container->get('externalauth.authmap')
+      $container->get('externalauth.authmap'),
+      $container->get('tupas_registration.unique_username')
     );
   }
 
@@ -89,7 +100,7 @@ class RegistrationController extends SessionController {
       ->load($session->getData('bank'));
 
     if (!$bank instanceof TupasBank) {
-      drupal_set_message($this->t('Validation failed'), 'error');
+      drupal_set_message($this->t('Validation failed.'), 'error');
 
       return $this->redirect('<front>');
     }
@@ -138,7 +149,7 @@ class RegistrationController extends SessionController {
     }
     if ($account = $this->sessionManager->loginRegister($this->auth)) {
       // Attempt to use customer name and fallback to random name.
-      $name = $this->sessionManager->uniqueName($session->getData('name'));
+      $name = $this->usernameGenerator->getName($session->getData('name'));
       // Save user details.
       $account->setUsername($name)
         ->setPassword(user_password(20));

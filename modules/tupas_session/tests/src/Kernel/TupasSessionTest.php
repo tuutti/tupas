@@ -4,7 +4,6 @@ namespace Drupal\Tests\tupas_session\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\tupas_session\Event\SessionData;
-use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -64,54 +63,22 @@ class TupasSessionTest extends KernelTestBase {
   }
 
   /**
-   * Create new user entity.
-   *
-   * @param string $name
-   *   Account name.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   New account.
-   */
-  private function createUser($name) {
-    $account = User::create([
-      'name' => $name,
-      'status' => 1,
-    ]);
-    $account->save();
-
-    return $account;
-  }
-
-  /**
    * Test tupas session expire.
    */
   public function testExpirableSessionStart() {
     // Test session creation.
-    $result = $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
+    $result = $this->sessionManager->start(random_int(10000, 100000), $this->randomString());
     $this->assertTrue($result);
 
     // Make sure getSession() returns valid session.
     $session = $this->sessionManager->getSession();
     $this->assertTrue($session instanceof SessionData);
 
-    // Make sure renew() extends session expiration.
+    // Make sure renew() extends session access.
     $_SERVER['REQUEST_TIME'] = REQUEST_TIME + 2;
     $this->sessionManager->renew();
     $new_session = $this->sessionManager->getSession();
-    $this->assertTrue($new_session->getExpire() > $session->getExpire());
-  }
-
-  /**
-   * Test non expirable session.
-   */
-  public function testNonExpirableSessionStart() {
-    $this->config('tupas_session.settings')
-      ->set('tupas_session_length', 0)
-      ->save();
-
-    $this->sessionManager->start(random_int(100, 1000), $this->randomString(), []);
-    $session = $this->sessionManager->getSession();
-    $this->assertTrue($session->getExpire() == 0);
+    $this->assertTrue($new_session->getAccess() > $session->getAccess());
   }
 
   /**
@@ -131,7 +98,7 @@ class TupasSessionTest extends KernelTestBase {
    * Test session destroy.
    */
   public function testSessionDestroy() {
-    $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
+    $this->sessionManager->start(random_int(10000, 100000), $this->randomString());
     $this->sessionManager->destroy();
     $this->assertFalse($this->sessionManager->getSession());
   }
@@ -144,33 +111,18 @@ class TupasSessionTest extends KernelTestBase {
     $this->config('tupas_session.settings')
       ->set('tupas_session_length', 30)
       ->save();
-    $this->sessionManager->start(random_int(10000, 100000), $this->randomString(), []);
+    $this->sessionManager->start(random_int(10000, 100000), $this->randomString());
     // Test that gc() does not remove non expired sessions.
-    $this->sessionManager->gc();
+    $expire = REQUEST_TIME - 1800;
+    $this->sessionManager->gc($expire);
     $this->assertTrue($this->sessionManager->getSession() instanceof SessionData);
 
     // Test that expired sessions gets removed.
-    $_SERVER['REQUEST_TIME'] = REQUEST_TIME + (31 * 60);
-    $this->sessionManager->gc();
+    // Manipulate request time to update last access time 31 minutes into past.
+    $_SERVER['REQUEST_TIME'] = REQUEST_TIME - (31 * 60);
+    $this->sessionManager->renew();
+    $this->sessionManager->gc($expire);
     $this->assertFalse($this->sessionManager->getSession());
-  }
-
-  /**
-   * Test unique name.
-   */
-  public function testUniqueName() {
-    $this->assertEquals('test', $this->sessionManager->uniqueName('test'));
-    // Test random generated name.
-    $this->assertTrue(mb_strlen($this->sessionManager->uniqueName()) == 10);
-
-    $this->createUser('test');
-    $this->assertEquals('test 1', $this->sessionManager->uniqueName('test'));
-
-    // Make sure first + lastname gets capitalized.
-    $this->assertEquals('Firstname Lastname', $this->sessionManager->uniqueName('firstname lastname'));
-
-    $this->createUser('Firstname Lastname');
-    $this->assertEquals('Firstname Lastname 1', $this->sessionManager->uniqueName('Firstname Lastname'));
   }
 
 }

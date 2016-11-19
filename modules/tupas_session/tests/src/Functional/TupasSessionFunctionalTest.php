@@ -37,19 +37,19 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalGet('/user/tupas/rejected');
     $this->assertSession()->pageTextContains('TUPAS authentication was rejected.');
 
-    // Make sure we cant access page without bank argument.
+    // Make sure we cant access page without bank argument (B02K_TIMESTMP).
     $this->drupalGet('/user/tupas/authenticated');
     $this->assertSession()->pageTextContains('Missing required bank id argument.');
 
     // Test invalid bank id.
     $this->drupalGet('/user/tupas/authenticated', [
-      'query' => ['transaction_id' => 1, 'bank_id' => 'invalid'],
+      'query' => ['B02K_TIMESTMP' => 666 . REQUEST_TIME],
     ]);
     $this->assertSession()->pageTextContains('Validation failed.');
 
     // Test valid bank, but incorrect argument values.
     $this->drupalGet('/user/tupas/authenticated', [
-      'query' => ['transaction_id' => 1, 'bank_id' => 'aktia'],
+      'query' => ['B02K_TIMESTMP' => 410 . REQUEST_TIME],
     ]);
     $this->assertSession()->pageTextContains('TUPAS authentication failed.');
 
@@ -62,7 +62,6 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
     $query = $this->generateBankMac($bank, $transaction_id, [
       'B02K_CUSTID' => 1234,
     ]);
-    $query['bank_id'] = $bank->id();
     $this->drupalGet('/user/tupas/authenticated', [
       'query' => $query,
     ]);
@@ -132,7 +131,7 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
       ->set('require_session', FALSE)
       ->save();
 
-    // Log current user out.
+    // Log the current user out.
     $this->forceLogout();
 
     // Make sure account keeps logged in without bypass tupas session when
@@ -144,17 +143,17 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
       $this->drupalGet('/user');
       $this->assertSession()->pageTextNotContains('Current role does not allow users to log-in without an active TUPAS session.');
     }
-    // Make sure session expiration gets automatically refreshed.
+    // Make sure session access timestamp is automatically refreshed.
     $session_manager = $this->container->get('tupas_session.session_manager');
     $session_manager->start(random_int(123456, 2345678), '123456-789A', [
       'bank' => 'aktia',
       'name' => 'Test Name',
     ]);
-    $expire = $session_manager->getSession()->getExpire();
+    $access = $session_manager->getSession()->getAccess();
     sleep(2);
     $this->drupalGet('/user');
-    $expire2 = $session_manager->getSession()->getExpire();
-    $this->assertTrue($expire2 > $expire);
+    $access2 = $session_manager->getSession()->getAccess();
+    $this->assertTrue(!empty($access) && $access2 > $access);
 
     // Disable session autorefresh.
     $this->config('tupas_session.settings')
@@ -162,11 +161,11 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
       ->save();
 
     sleep(2);
-    // Make sure session expire does not increase when session
+    // Make sure session access stamp does not increase when session
     // renew is disabled.
     $this->drupalGet('/user/tupas/login');
-    $expire3 = $session_manager->getSession()->getExpire();
-    $this->assertTrue(!empty($expire3) && $expire3 == $expire2);
+    $access3 = $session_manager->getSession()->getAccess();
+    $this->assertTrue(!empty($access3) && $access3 == $access2);
   }
 
   /**

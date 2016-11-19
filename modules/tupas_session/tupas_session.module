@@ -9,9 +9,14 @@
  * Implements hook_cron().
  */
 function tupas_session_cron() {
+  $expire = (int) \Drupal::config('tupas_session.settings')->get('tupas_session_length');
+
+  if ($expire > 0) {
+    $expire = REQUEST_TIME - ($expire * 60);
+  }
   // Handle session garbage collection.
   $session_manager = \Drupal::service('tupas_session.session_manager');
-  $session_manager->gc();
+  $session_manager->gc($expire);
 }
 
 /**

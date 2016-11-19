@@ -65,6 +65,18 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
+   * Get request time.
+   *
+   * @todo Replace with time service in 8.3.x.
+   *
+   * @return int
+   *   The request time.
+   */
+  public function getTime() {
+    return (int) $_SERVER['REQUEST_TIME'];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getSession() {
@@ -78,11 +90,20 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function renew() {
-    // @todo Add some kind of lazy writing method.
     if (!$session = $this->getSession()) {
       return FALSE;
     }
-    return $this->recreate($session);
+    $session->setAccess($this->getTime());
+    return $this->storage->save($session);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSetting($key) {
+    return $this->configFactory
+      ->get('tupas_session.settings')
+      ->get($key);
   }
 
   /**
@@ -90,24 +111,14 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    */
   public function start($transaction_id, $unique_id, array $data = []) {
     // Drupal does not start session unless we store something in $_SESSION.
-    if (!$this->sessionManager->isStarted() && empty($_SESSION['session_stared'])) {
-      $_SESSION['session_stared'] = TRUE;
+    $_SESSION['tupas_session'] = TRUE;
+    $this->sessionManager->start();
 
-      $this->sessionManager->start();
-    }
-
-    $config = $this->configFactory->get('tupas_session.settings');
-    $expire = (int) $config->get('tupas_session_length');
-
-    // Set session length only if configured.
-    if ($expire > 0) {
-      $expire = ($expire * 60) + (int) $_SERVER['REQUEST_TIME'];
-    }
     // Allow session data to be altered.
-    $session_data = new SessionData($transaction_id, $unique_id, $expire, $data);
+    $session_data = new SessionData($transaction_id, $unique_id, $this->getTime(), $data);
     /** @var SessionData $session */
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
-    // Store tupas session.
+
     return $this->storage->save($session);
   }
 
@@ -115,7 +126,9 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function recreate(SessionData $session) {
-    return $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+    $this->start($session->getTransactionId(), $session->getUniqueId(), $session->getData());
+
+    return $this->getSession();
   }
 
   /**
@@ -154,57 +167,20 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * {@inheritdoc}
    */
   public function destroy() {
+    if ($session_data = $this->getSession()) {
+      $this->eventDispatcher->dispatch(SessionEvents::SESSION_LOGOUT, $session_data);
+    }
     return $this->storage->delete();
   }
 
   /**
    * Handle garbage collection.
-   */
-  public function gc() {
-    $this->storage->deleteExpired($_SERVER['REQUEST_TIME']);
-  }
-
-  /**
-   * Generate unique username for account.
    *
-   * @param string $name
-   *   Username base.
-   *
-   * @return string
-   *   Unique username.
+   * @param int $timestamp
+   *   The expiration timestamp.
    */
-  public function uniqueName($name = NULL) {
-    if (!$name) {
-      // @todo Generate human readable username?
-      $random = new Random();
-      // Generate unique username.
-      while (TRUE) {
-        $name = $random->string(10);
-
-        if (!user_load_by_name($name)) {
-          break;
-        }
-      }
-      return $name;
-    }
-    $parts = explode(' ', strtolower($name));
-
-    if (isset($parts[1])) {
-      // Name is uppercase by default. Convert to lowercase and
-      // capitalize first letter.
-      list($first, $last) = $parts;
-
-      $name = sprintf('%s %s', ucfirst($first), ucfirst($last));
-    }
-    $i = 1;
-    // Generate unique username, by incrementing suffix.
-    while (TRUE) {
-      if (!user_load_by_name($name)) {
-        break;
-      }
-      $name = sprintf('%s %d', $name, $i++);
-    }
-    return $name;
+  public function gc($timestamp) {
+    $this->storage->deleteExpired($timestamp);
   }
 
 }
