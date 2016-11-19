@@ -1,0 +1,8 @@
+{
+  "name": "drupal/tupas",
+  "type": "drupal-module",
+  "description": "TUPAS Authentication module is a general tool for enabling strong session-based authentication.",
+  "homepage": "http://drupal.org/project/tupas",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev"
+}
