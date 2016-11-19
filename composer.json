@@ -7,5 +7,11 @@
   "minimum-stability": "dev",
   "require": {
     "drupal/externalauth": "1.x-dev"
-  }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ]
 }
