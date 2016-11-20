@@ -2,13 +2,13 @@
 
 namespace Drupal\tupas_session;
 
-use Drupal\Component\Utility\Random;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Class TupasSessionManager.
@@ -107,11 +107,22 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   }
 
   /**
+   * Create wrapper to save data to $_SESSION.
+   *
+   * This is used to prevent unit tests from being marked as a risky.
+   *
+   * @todo Refactor.
+   */
+  public function startNativeSession() {
+    $_SESSION['tupas_session'] = TRUE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id, array $data = []) {
     // Drupal does not start session unless we store something in $_SESSION.
-    $_SESSION['tupas_session'] = TRUE;
+    $this->startNativeSession();
     $this->sessionManager->start();
 
     // Allow session data to be altered.

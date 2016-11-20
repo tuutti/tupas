@@ -87,7 +87,15 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->method('dispatch')
       ->will($this->returnValue($dispatched_event));
 
-    $this->tupasSessionManager = new TupasSessionManager($this->configFactory, $this->storage, $this->sessionManager, $this->eventDispatcher);
+    $this->tupasSessionManager = $this->getMockBuilder(TupasSessionManager::class)
+      ->setConstructorArgs([
+        $this->configFactory,
+        $this->storage,
+        $this->sessionManager,
+        $this->eventDispatcher,
+      ])
+      ->setMethods(['startNativeSession'])
+      ->getMock();
   }
 
   /**
