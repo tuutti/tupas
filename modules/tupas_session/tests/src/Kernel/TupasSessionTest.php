@@ -75,7 +75,7 @@ class TupasSessionTest extends KernelTestBase {
     $this->assertTrue($session instanceof SessionData);
 
     // Make sure renew() extends session access.
-    $_SERVER['REQUEST_TIME'] = REQUEST_TIME + 2;
+    $_SERVER['REQUEST_TIME'] = $this->sessionManager->getTime() + 2;
     $this->sessionManager->renew();
     $new_session = $this->sessionManager->getSession();
     $this->assertTrue($new_session->getAccess() > $session->getAccess());
@@ -113,13 +113,13 @@ class TupasSessionTest extends KernelTestBase {
       ->save();
     $this->sessionManager->start(random_int(10000, 100000), $this->randomString());
     // Test that gc() does not remove non expired sessions.
-    $expire = REQUEST_TIME - 1800;
+    $expire = $this->sessionManager->getTime() - 1800;
     $this->sessionManager->gc($expire);
     $this->assertTrue($this->sessionManager->getSession() instanceof SessionData);
 
     // Test that expired sessions gets removed.
     // Manipulate request time to update last access time 31 minutes into past.
-    $_SERVER['REQUEST_TIME'] = REQUEST_TIME - (31 * 60);
+    $_SERVER['REQUEST_TIME'] = $this->sessionManager->getTime() - (31 * 60);
     $this->sessionManager->renew();
     $this->sessionManager->gc($expire);
     $this->assertFalse($this->sessionManager->getSession());

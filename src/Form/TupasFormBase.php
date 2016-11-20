@@ -26,7 +26,7 @@ class TupasFormBase extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $bank = []) {
     // This is supposed to be rendered manually.
     if (!$bank instanceof TupasBankInterface) {
-      return $form;
+      throw new \RuntimeException('Missing $bank argument or argument is invalid type.');
     }
     $form['#action'] = $bank->getActionUrl();
 
@@ -89,6 +89,7 @@ class TupasFormBase extends FormBase {
       '#type' => 'hidden',
       '#value' => $bank->getKeyVersion(),
     ];
+
     // Algorithm used to calculate the MAC (01 = MD5, 02 = SHA-1).
     $form['A01Y_ALG'] = [
       '#type' => 'hidden',
