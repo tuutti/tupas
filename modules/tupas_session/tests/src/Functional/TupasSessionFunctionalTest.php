@@ -47,11 +47,11 @@ class TupasSessionFunctionalTest extends TupasSessionFunctionalBase {
     ]);
     $this->assertSession()->pageTextContains('Validation failed.');
 
-    // Test valid bank, but incorrect argument values.
+    // Test valid bank, but missing transaction id.
     $this->drupalGet('/user/tupas/authenticated', [
       'query' => ['B02K_TIMESTMP' => 410 . REQUEST_TIME],
     ]);
-    $this->assertSession()->pageTextContains('TUPAS authentication failed.');
+    $this->assertSession()->pageTextContains('Transaction not found or expired.');
 
     // Visit form page to generate transaction id.
     $this->drupalGet('/user/tupas/login');

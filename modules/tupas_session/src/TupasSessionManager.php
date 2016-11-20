@@ -114,16 +114,17 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    * @todo Refactor.
    */
   public function startNativeSession() {
+    // Drupal does not start session unless we store something in $_SESSION.
     $_SESSION['tupas_session'] = TRUE;
+
+    $this->sessionManager->start();
   }
 
   /**
    * {@inheritdoc}
    */
   public function start($transaction_id, $unique_id, array $data = []) {
-    // Drupal does not start session unless we store something in $_SESSION.
     $this->startNativeSession();
-    $this->sessionManager->start();
 
     // Allow session data to be altered.
     $session_data = new SessionData($transaction_id, $unique_id, $this->getTime(), $data);

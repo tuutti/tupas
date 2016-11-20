@@ -5,6 +5,7 @@ namespace Drupal\tupas_registration\Controller;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas_registration\Form\MapTupasConfirmForm;
 use Drupal\tupas_registration\UniqueUsernameInterface;
 use Drupal\tupas_session\Controller\SessionController;
 use Drupal\tupas_session\TupasSessionManagerInterface;
@@ -116,15 +117,13 @@ class RegistrationController extends SessionController {
       $user_found = TRUE;
     }
     // Attempt to migrate legacy (Drupal 7) users.
-    // @see https://www.drupal.org/node/2639222
-    elseif ($customer_id = $request->query->get('B02K_CUSTID')) {
-      $legacy_hash = $bank->legacyHash($customer_id);
+    // @see https://www.drupal.org/node/2821277
+    $legacy_hash = $bank->legacyHash($request->query->get('B02K_CUSTID'));
 
-      if ($account = $this->auth->load($legacy_hash, 'tupas_registration')) {
-        // Migrate legacy user.
-        $this->authmap->save($account, 'tupas_registration', $session->getUniqueId());
-        $user_found = TRUE;
-      }
+    // Account found with legacy hash. Migrate to use a new hash.
+    if ($account = $this->auth->load($legacy_hash, 'tupas_registration')) {
+      $this->authmap->save($account, 'tupas_registration', $session->getUniqueId());
+      $user_found = TRUE;
     }
     // Legacy/normal user found. Log the user in.
     if ($user_found) {
@@ -136,7 +135,7 @@ class RegistrationController extends SessionController {
     // Show map account confirmation form if user is already logged in.
     if ($this->currentUser()->isAuthenticated()) {
       return $this->formBuilder()
-        ->getForm('\Drupal\tupas_registration\Form\MapTupasConfirmForm');
+        ->getForm(MapTupasConfirmForm::class);
     }
     // Show custom registration form if user is not allowed to register without
     // filling the registration form.

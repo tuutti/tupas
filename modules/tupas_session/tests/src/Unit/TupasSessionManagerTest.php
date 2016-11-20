@@ -125,6 +125,8 @@ class TupasSessionManagerTest extends UnitTestCase {
    * Test start() method.
    *
    * @covers ::start
+   * @covers ::getTime
+   * @covers ::startNativeSession
    */
   public function testStart() {
     $this->storage->expects($this->once())
@@ -153,6 +155,7 @@ class TupasSessionManagerTest extends UnitTestCase {
    * Test renew() method.
    *
    * @covers ::renew
+   * @covers ::getTime
    */
   public function testRenew() {
     $this->storage->expects($this->at(0))
@@ -174,6 +177,27 @@ class TupasSessionManagerTest extends UnitTestCase {
     // Test renew with working session.
     $result = $this->tupasSessionManager->renew();
     $this->assertTrue($result);
+  }
+
+  /**
+   * Tests getSetting() method.
+   *
+   * @covers ::getSetting
+   * @dataProvider getSettingDataProvider
+   */
+  public function testGetSetting($key, $return) {
+    $result = $this->tupasSessionManager->getSetting($key);
+    $this->assertEquals($result, $return);
+  }
+
+  /**
+   * Data provider for testGetSetting().
+   */
+  public function getSettingDataProvider() {
+    return [
+      ['tupas_session_length', 30],
+      ['invalid_data', NULL],
+    ];
   }
 
 }

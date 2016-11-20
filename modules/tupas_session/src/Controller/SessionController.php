@@ -4,6 +4,7 @@ namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\tupas\Entity\TupasBank;
+use Drupal\tupas\Form\TupasFormBase;
 use Drupal\tupas_session\Event\CustomerIdAlterEvent;
 use Drupal\tupas_session\Event\RedirectAlterEvent;
 use Drupal\tupas_session\Event\SessionEvents;
@@ -108,7 +109,7 @@ class SessionController extends ControllerBase {
         'transaction_id' => $transaction_id,
       ]);
       $content['tupas_bank_items'][] = $this->formBuilder()
-        ->getForm('\Drupal\tupas\Form\TupasFormBase', $bank);
+        ->getForm(TupasFormBase::class, $bank);
     }
     return $content;
   }
@@ -128,7 +129,7 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    $bank_number = substr($stamp, 0, 3);
+    $bank_number = (int) substr($stamp, 0, 3);
     $bank = $this->entityTypeManager()
       ->getStorage('tupas_bank')
       ->loadByBankNumber($bank_number);
@@ -141,7 +142,7 @@ class SessionController extends ControllerBase {
     $transaction_id = $bank->parseTransactionId($request->query->get('B02K_STAMP'));
 
     // Session not found / expired.
-    if ($transaction_id != $this->transactionManager->get()) {
+    if (empty($transaction_id) || $transaction_id != $this->transactionManager->get()) {
       drupal_set_message($this->t('Transaction not found or expired.'), 'error');
 
       return $this->redirect('tupas_session.front');
