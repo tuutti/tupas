@@ -3,6 +3,7 @@
 namespace Drupal\tupas_session\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Form\TupasFormBase;
 use Drupal\tupas_session\Event\CustomerIdAlterEvent;
@@ -13,6 +14,8 @@ use Drupal\tupas_session\TupasTransactionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Tupas\Form\TupasForm;
+use Tupas\Tupas;
 
 /**
  * Class SessionController.
@@ -70,6 +73,21 @@ class SessionController extends ControllerBase {
   }
 
   /**
+   * Helper to generate (absolute) internal URLs.
+   *
+   * @param string $key
+   *   Route.
+   *
+   * @return string
+   *   Absolute url to given route.
+   */
+  public function fromRoute($key) {
+    $url = new Url($key, [], ['absolute' => TRUE]);
+
+    return $url->toString();
+  }
+
+  /**
    * Callback for /user/tupas/login path.
    *
    * @return array
@@ -99,17 +117,16 @@ class SessionController extends ControllerBase {
           continue;
         }
       }
+      $form = new TupasForm($bank);
       // Populate required settings.
-      $bank->setSettings([
-        // Attempt to use current language. Fallback to english.
-        'language' => $this->languageManager()->getCurrentLanguage()->getId(),
-        'return_url' => 'tupas_session.return',
-        'cancel_url' => 'tupas_session.canceled',
-        'rejected_url' => 'tupas_session.return',
-        'transaction_id' => $transaction_id,
-      ]);
+      $form->setCancelUrl($this->fromRoute('tupas_session.return'))
+        ->setRejectedUrl($this->fromRoute('tupas_session.canceled'))
+        ->setReturnUrl($this->fromRoute('tupas_session.return'))
+        ->setLanguage($this->languageManager()->getCurrentLanguage()->getId())
+        ->setTransactionId($transaction_id);
+
       $content['tupas_bank_items'][] = $this->formBuilder()
-        ->getForm(TupasFormBase::class, $bank);
+        ->getForm(TupasFormBase::class, $form, $bank);
     }
     return $content;
   }
@@ -139,17 +156,18 @@ class SessionController extends ControllerBase {
 
       return $this->redirect('<front>');
     }
-    $transaction_id = $bank->parseTransactionId($request->query->get('B02K_STAMP'));
+    $tupas = new Tupas($bank, $request->query->all());
+    $transaction_id = (string) $this->transactionManager->get();
 
     // Session not found / expired.
-    if (empty($transaction_id) || $transaction_id != $this->transactionManager->get()) {
+    if (!$tupas->isValidTransaction($transaction_id)) {
       drupal_set_message($this->t('Transaction not found or expired.'), 'error');
 
       return $this->redirect('tupas_session.front');
     }
 
     try {
-      $bank->validate($request->query->all());
+      $tupas->validate();
       // Hash customer id.
       $hashed_id = $bank->hashResponseId($request->query->get('B02K_CUSTID'));
 

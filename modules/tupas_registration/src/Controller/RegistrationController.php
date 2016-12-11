@@ -86,8 +86,8 @@ class RegistrationController extends SessionController {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
-   * @return array
-   *    Formbuilder form object.
+   * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
+   *    Formbuilder form object or redirect response on error.
    */
   public function register(Request $request) {
     // Make sure user has active TUPAS session.

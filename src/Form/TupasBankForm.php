@@ -77,13 +77,13 @@ class TupasBankForm extends EntityForm {
     $form['rcv_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Receiver ID (A01Y_RCVID)'),
-      '#default_value' => $tupas_bank->getRcvId(),
+      '#default_value' => $tupas_bank->getReceiverId(),
     ];
 
     $form['rcv_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Receiver key'),
-      '#default_value' => $tupas_bank->getRcvKey(),
+      '#default_value' => $tupas_bank->getReceiverKey(),
     ];
 
     $form['key_version'] = [
@@ -95,7 +95,7 @@ class TupasBankForm extends EntityForm {
     $form['encryption_alg'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Encryption algorithm (A01Y_ALG)'),
-      '#default_value' => $tupas_bank->getEncryptionAlg(),
+      '#default_value' => $tupas_bank->getAlgorithm(),
     ];
 
     return $form;
