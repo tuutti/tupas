@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\tupas_session\Functional;
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
@@ -10,11 +9,14 @@ use Drupal\tupas\Entity\TupasBank;
 use Drupal\tupas\Entity\TupasBankInterface;
 use Drupal\user\RoleInterface;
 use Drupal\user\UserInterface;
+use Tupas\TupasEncryptionTrait;
 
 /**
  * Functional tests for tupas_session.
  */
 abstract class TupasSessionFunctionalBase extends BrowserTestBase {
+
+  use TupasEncryptionTrait;
 
   /**
    * {@inheritdoc}
@@ -35,8 +37,6 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
    *   Fake return values from bank.
    */
   protected function generateBankMac(TupasBankInterface $bank, $transaction_id, array $overrides = []) {
-    $bank->setSetting('transaction_id', $transaction_id);
-
     $macstring = [];
     $return_values = [
       'B02K_VERS' => $bank->getCertVersion(),
@@ -46,7 +46,7 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
       'B02K_STAMP' => date('YmdHis', REQUEST_TIME) . $transaction_id,
       'B02K_CUSTNAME' => $this->randomString(),
       'B02K_KEYVERS' => $bank->getKeyVersion(),
-      'B02K_ALG' => $bank->getEncryptionAlg(),
+      'B02K_ALG' => $bank->getAlgorithm(),
       'B02K_CUSTID' => '123456-123A',
       'B02K_CUSTTYPE' => '01',
     ];
@@ -56,9 +56,9 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
       $macstring[] = $value;
     }
     // Append rcv key to mac.
-    $macstring[] = $bank->getRcvKey();
+    $macstring[] = $bank->getReceiverKey();
     // Calculate the MAC based on the encryption algorithm.
-    $return_values['B02K_MAC'] = $bank->checksum($macstring);
+    $return_values['B02K_MAC'] = $this->checksum($macstring, $bank->getAlgorithm());
 
     return $return_values;
   }
