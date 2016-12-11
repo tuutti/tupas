@@ -6,6 +6,7 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
+    "drupal/externalauth": "1.x-dev",
     "tuutti/php-tupas": "^1.0@alpha"
   }
 }

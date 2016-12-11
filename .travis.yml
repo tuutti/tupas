@@ -30,7 +30,7 @@ env:
     - PATH="$PATH:$HOME/.composer/vendor/bin"
 
     # Configuration variables.
-    - DRUPAL_TI_MODULE_NAME="tupas_registration"
+    - DRUPAL_TI_MODULE_NAME="tupas"
     - DRUPAL_TI_SIMPLETEST_GROUP="tupas"
 
     # Define runners and environment vars to include before and after the
