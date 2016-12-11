@@ -6,6 +6,6 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "tuutti/php-tupas": ~1.0
+    "tuutti/php-tupas": "^1.0@alpha"
   }
 }
