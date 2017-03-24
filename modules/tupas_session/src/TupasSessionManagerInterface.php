@@ -4,6 +4,7 @@ namespace Drupal\tupas_session;
 
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
+use Drupal\user\UserInterface;
 
 /**
  * Interface TupasSessionManagerInterface.
@@ -44,6 +45,23 @@ interface TupasSessionManagerInterface {
    *
    * @param \Drupal\externalauth\ExternalAuthInterface $auth
    *   The external auth service.
+   * @param \Drupal\user\UserInterface $account
+   *   The user account entity.
+   *
+   * @return \Drupal\user\UserInterface|bool
+   *   The logged in Drupal user.
+   */
+  public function linkExisting(ExternalAuthInterface $auth, UserInterface $account);
+
+  /**
+   * Login wrapper to migrate session over to newly logged in user.
+   *
+   * Note: the ExternalAuthInterface is injected to the function
+   * because we don't want to create a hard dependency to Tupas registration
+   * module.
+   *
+   * @param \Drupal\externalauth\ExternalAuthInterface $auth
+   *   The external auth service.
    *
    * @return \Drupal\user\UserInterface|bool
    *   The logged in Drupal user.
@@ -59,11 +77,13 @@ interface TupasSessionManagerInterface {
    *
    * @param \Drupal\externalauth\ExternalAuthInterface $auth
    *   The external auth service.
+   * @param array $data
+   *   An additional account data.
    *
-   * @return \Drupal\user\UserInterface|bool
+   * @return bool|\Drupal\user\UserInterface
    *   The logged in Drupal user.
    */
-  public function loginRegister(ExternalAuthInterface $auth);
+  public function loginRegister(ExternalAuthInterface $auth, array $data = []);
 
   /**
    * Recreate session with previous session object.

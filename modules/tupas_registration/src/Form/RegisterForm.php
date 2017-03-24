@@ -97,17 +97,24 @@ class RegisterForm extends AccountForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    if ($account = $this->sessionManager->loginRegister($this->auth)) {
-      drupal_set_message($this->t('Registration successful. You are now logged in.'));
+    /** @var \Drupal\user\UserInterface $entity */
+    $entity = $this->entity;
+    // Force account to be active.
+    $entity->set('status', TRUE);
 
-      // Save user details.
-      $account->setUsername($form_state->getValue('name'))
-        ->setEmail($form_state->getValue('mail'))
-        ->setPassword(user_password(20));
-      $account->save();
+    parent::save($form, $form_state);
+
+    // Map tupas session to existing account after a succesful registration.
+    if ($account = $this->sessionManager->linkExisting($this->auth, $entity)) {
+      $this->sessionManager->login($this->auth);
+
+      drupal_set_message($this->t('Registration successful. You are now logged in.'));
     }
     else {
-      drupal_set_message($this->t('Registration failed due to an unknown reason.'));
+      // Delete account if registration failed.
+      $entity->delete();
+
+      drupal_set_message($this->t('Registration failed due to an unknown reason.'), 'error');
     }
     $form_state->setRedirect('<front>');
   }
