@@ -32,10 +32,14 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalGet('/user/tupas/register');
     $this->assertSession()->statusCodeEquals(403);
 
-    $this->loginUsingTupas();
+    $this->loginUsingTupas([
+      'B02K_CUSTNAME' => 'Testaa Portaalia',
+    ]);
     // User should be redirected to /user/2 path after account has been
     // automatically created.
     $this->assertSession()->addressEquals('/user/2');
+    // Make sure automatic name mapping works.
+    $this->assertSession()->pageTextContains('Testaa Portaalia');
 
     // Logout and test login functionality.
     $this->drupalLogout();
@@ -67,6 +71,31 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->getSession()->getPage()->fillField('mail', 'test@example.com');
     $this->drupalPostForm(NULL, [], 'Create new account');
     $this->assertSession()->pageTextContains('Registration successful. You are now logged in.');
+    $this->assertSession()->addressEquals('/user/3');
+
+    // Make sure random username generation works.
+    $this->config('tupas_registration.settings')
+      ->set('generate_random_username', TRUE)
+      ->save();
+    // @todo Is there a better way to flush config cache?
+    drupal_flush_all_caches();
+
+    $this->drupalLogout();
+
+    $this->loginUsingTupas([
+      'B02K_CUSTNAME' => 'Anne Testaaja',
+      'B02K_CUSTID' => '654321-211A',
+    ]);
+    // Make sure username is hidden.
+    $this->assertSession()->fieldNotExists('name');
+    $this->getSession()->getPage()->fillField('mail', 'test123@example.com');
+    $this->drupalPostForm(NULL, [], 'Create new account');
+    $this->assertSession()->pageTextContains('Registration successful. You are now logged in.');
+    $this->assertSession()->addressEquals('/user/4');
+    // Make sure user has a random generated username.
+    $title = $this->getSession()->getPage()->find('css', 'h1');
+    $this->assertTrue(mb_strlen($title->getText()), 10);
+    $this->assertNotEquals($title->getText(), 'Anne Testaaja');
   }
 
   /**

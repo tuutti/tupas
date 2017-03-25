@@ -69,6 +69,19 @@ class RegisterForm extends AccountForm {
   /**
    * {@inheritdoc}
    */
+  public function form(array $form, FormStateInterface $form_state) {
+    $form = parent::form($form, $form_state);
+
+    // Disable name field if random username generation is enabled.
+    if ($this->config('tupas_registration.settings')->get('generate_random_username')) {
+      $form['account']['name']['#access'] = FALSE;
+    }
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function actions(array $form, FormStateInterface $form_state) {
     $element = parent::actions($form, $form_state);
     $element['submit']['#value'] = $this->t('Create new account');
@@ -90,6 +103,13 @@ class RegisterForm extends AccountForm {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    /** @var \Drupal\user\UserInterface $entity */
+    $entity = $this->entity;
+    // Populate the form state with the correct username if one does
+    // not exist already.
+    if (!$form_state->getValue('name')) {
+      $form_state->setValue('name', $entity->getAccountName());
+    }
     return parent::validateForm($form, $form_state);
   }
 

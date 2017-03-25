@@ -177,10 +177,16 @@ class SessionController extends ControllerBase {
         ->dispatch(SessionEvents::CUSTOMER_ID_ALTER, new CustomerIdAlterEvent($hashed_id, [
           'raw' => $request->query->all(),
         ]));
+
+      $name = NULL;
+      // Store username only if random username generation is disabled.
+      if (!$this->config('tupas_registration.settings')->get('generate_random_username')) {
+        $name = $request->query->get('B02K_CUSTNAME');
+      }
       // Start tupas session.
       $this->sessionManager->start($transaction_id, $dispatched_data->getCustomerId(), [
         'bank' => $bank->id(),
-        'name' => $request->query->get('B02K_CUSTNAME'),
+        'name' => $name,
       ]);
       // Allow redirect path to be customized.
       $redirect_data = new RedirectAlterEvent('<front>', $request->query->all(), $this->t('TUPAS authentication succesful.'));

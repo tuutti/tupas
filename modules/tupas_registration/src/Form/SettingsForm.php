@@ -40,7 +40,12 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t('Force users to register without filling the registration form. Username and email will be auto-generated.'),
       '#default_value' => $config->get('disable_form'),
     ];
-
+    $form['generate_random_username'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Always generate random username'),
+      '#description' => $this->t('This is useful if you wish to store no identifiable information about the user.'),
+      '#default_value' => $config->get('generate_random_username'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -58,6 +63,7 @@ class SettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config('tupas_registration.settings')
+      ->set('generate_random_username', $form_state->getValue('generate_random_username'))
       ->set('disable_form', $form_state->getValue('disable_form'))
       ->save();
   }

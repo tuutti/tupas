@@ -3,14 +3,12 @@
 namespace Drupal\tupas_session;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\UserInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Class TupasSessionManager.
