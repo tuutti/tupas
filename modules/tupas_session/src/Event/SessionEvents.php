@@ -45,4 +45,20 @@ final class SessionEvents {
    */
   const CUSTOMER_ID_ALTER = 'tupas_session.customer_id_alter';
 
+  /**
+   * Allow custom stuff to be executed on login.
+   *
+   * @see \Drupal\tupas_session\Event\SessionAuthenticationEvent
+   * @var string
+   */
+  const SESSION_LOGIN = 'tupas_session.login';
+
+  /**
+   * Allow custom stuff to be executed on registration.
+   *
+   * @see \Drupal\tupas_session\Event\SessionAuthenticationEvent
+   * @var string
+   */
+  const SESSION_REGISTER = 'tupas_session.register';
+
 }

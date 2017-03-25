@@ -8,6 +8,7 @@ use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\Event\SessionData;
 use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\UserInterface;
+use Drupal\tupas_session\Event\SessionAuthenticationEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -156,6 +157,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     }
     $this->recreate($session);
 
+    $this->eventDispatcher->dispatch(SessionEvents::SESSION_LOGIN, new SessionAuthenticationEvent($account, $session));
+
     return $account;
   }
 
@@ -168,6 +171,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     }
     $auth->linkExistingAccount($session->getUniqueId(), 'tupas_registration', $account);
     $this->recreate($session);
+
+    $this->eventDispatcher->dispatch(SessionEvents::SESSION_REGISTER, new SessionAuthenticationEvent($account, $session));
 
     return $account;
   }
@@ -184,6 +189,8 @@ class TupasSessionManager implements TupasSessionManagerInterface {
       return FALSE;
     }
     $this->recreate($session);
+
+    $this->eventDispatcher->dispatch(SessionEvents::SESSION_REGISTER, new SessionAuthenticationEvent($account, $session));
 
     return $account;
   }
