@@ -47,7 +47,7 @@ class UniqueUsername implements UniqueUsernameInterface {
       $random = new Random();
       // Generate unique username.
       while (TRUE) {
-        $name = $random->string(10);
+        $name = $random->name(10);
 
         if (!$this->userExists($name)) {
           break;

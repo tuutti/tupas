@@ -137,18 +137,20 @@ class RegistrationController extends SessionController {
       return $this->formBuilder()
         ->getForm(MapTupasConfirmForm::class);
     }
+    // Attempt to use customer name and fallback to random name.
+    $name = $this->usernameGenerator->getName($session->getData('name'));
     // Show custom registration form if user is not allowed to register without
     // filling the registration form.
     if (!$this->config('tupas_registration.settings')->get('disable_form')) {
-      $entity = $this->entityTypeManager()->getStorage('user')->create();
+      $entity = $this->entityTypeManager()
+        ->getStorage('user')
+        ->create(['name' => $name]);
 
       // Call our custom registration form.
       return $this->entityFormBuilder()
         ->getForm($entity, 'tupas_registration');
     }
     if ($account = $this->sessionManager->loginRegister($this->auth)) {
-      // Attempt to use customer name and fallback to random name.
-      $name = $this->usernameGenerator->getName($session->getData('name'));
       // Save user details.
       $account->setUsername($name)
         ->setPassword(user_password(20));
