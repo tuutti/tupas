@@ -2,9 +2,9 @@ tupas_registration.settings:
   type: config_object
   label: 'Tupas registration'
   mapping:
-    generate_random_username:
+    use_tupas_name:
       type: integer
-      label: 'Always generate a random username for the user'
+      label: 'Always attempt to use username provided by TUPAS service'
     disable_form:
       type: integer
       label: 'Disable registration form and generate accounts automatically'

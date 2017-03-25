@@ -73,7 +73,7 @@ class RegisterForm extends AccountForm {
     $form = parent::form($form, $form_state);
 
     // Disable name field if random username generation is enabled.
-    if ($this->config('tupas_registration.settings')->get('generate_random_username')) {
+    if ($this->config('tupas_registration.settings')->get('use_tupas_name')) {
       $form['account']['name']['#access'] = FALSE;
     }
     return $form;
