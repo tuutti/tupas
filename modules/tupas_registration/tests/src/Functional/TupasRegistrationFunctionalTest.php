@@ -32,14 +32,10 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalGet('/user/tupas/register');
     $this->assertSession()->statusCodeEquals(403);
 
-    $this->loginUsingTupas([
-      'B02K_CUSTNAME' => 'Testaa Portaalia',
-    ]);
+    $this->loginUsingTupas();
     // User should be redirected to /user/2 path after account has been
     // automatically created.
     $this->assertSession()->addressEquals('/user/2');
-    // Make sure automatic name mapping works.
-    $this->assertSession()->pageTextContains('Testaa Portaalia');
 
     // Logout and test login functionality.
     $this->drupalLogout();
@@ -73,9 +69,9 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->assertSession()->pageTextContains('Registration successful. You are now logged in.');
     $this->assertSession()->addressEquals('/user/3');
 
-    // Make sure random username generation works.
+    // Make sure username mapping works.
     $this->config('tupas_registration.settings')
-      ->set('generate_random_username', TRUE)
+      ->set('use_tupas_name', TRUE)
       ->save();
     // @todo Is there a better way to flush config cache?
     drupal_flush_all_caches();
@@ -92,10 +88,11 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalPostForm(NULL, [], 'Create new account');
     $this->assertSession()->pageTextContains('Registration successful. You are now logged in.');
     $this->assertSession()->addressEquals('/user/4');
-    // Make sure user has a random generated username.
+    // Make sure user has same username as the one provided by
+    // the tupas service.
     $title = $this->getSession()->getPage()->find('css', 'h1');
     $this->assertTrue(mb_strlen($title->getText()), 10);
-    $this->assertNotEquals($title->getText(), 'Anne Testaaja');
+    $this->assertEquals($title->getText(), 'Anne Testaaja');
   }
 
   /**
