@@ -2,6 +2,7 @@
 
 namespace Drupal\tupas_session\Controller;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\tupas\Entity\TupasBank;
@@ -177,10 +178,12 @@ class SessionController extends ControllerBase {
         ->dispatch(SessionEvents::CUSTOMER_ID_ALTER, new CustomerIdAlterEvent($hashed_id, [
           'raw' => $request->query->all(),
         ]));
+      // Name will be sent Latin1 encoded and urlencoded.
+      $name = Unicode::convertToUtf8(urldecode($request->query->get('B02K_CUSTNAME')), 'ISO-8859-1');
       // Start tupas session.
       $this->sessionManager->start($transaction_id, $dispatched_data->getCustomerId(), [
         'bank' => $bank->id(),
-        'name' => $request->query->get('B02K_CUSTNAME'),
+        'name' => $name,
       ]);
       // Allow redirect path to be customized.
       $redirect_data = new RedirectAlterEvent('<front>', $request->query->all(), $this->t('TUPAS authentication succesful.'));

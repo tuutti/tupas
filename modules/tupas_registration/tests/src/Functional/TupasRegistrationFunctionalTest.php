@@ -79,7 +79,8 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     $this->drupalLogout();
 
     $this->loginUsingTupas([
-      'B02K_CUSTNAME' => 'Anne Testaaja',
+      // Test special characters.
+      'B02K_CUSTNAME' => 'Anné Testääjå',
       'B02K_CUSTID' => '654321-211A',
     ]);
     // Make sure username is hidden.
@@ -92,7 +93,7 @@ class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
     // the tupas service.
     $title = $this->getSession()->getPage()->find('css', 'h1');
     $this->assertTrue(mb_strlen($title->getText()), 10);
-    $this->assertEquals($title->getText(), 'Anne Testaaja');
+    $this->assertEquals($title->getText(), 'Anné Testääjå');
   }
 
   /**
