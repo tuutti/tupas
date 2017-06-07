@@ -51,6 +51,9 @@ abstract class TupasSessionFunctionalBase extends BrowserTestBase {
       'B02K_CUSTTYPE' => '01',
     ];
     $return_values = array_merge($return_values, $overrides);
+    // Customer name will be in Latin1 charset and urlencoded by the
+    // tupas service.
+    $return_values['B02K_CUSTNAME'] = urlencode(mb_convert_encoding($return_values['B02K_CUSTNAME'], 'ISO-8859-1'));
 
     foreach ($return_values as $value) {
       $macstring[] = $value;
