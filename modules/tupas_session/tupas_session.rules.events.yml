@@ -1,3 +1,12 @@
 tupas_session.session_alter:
   label: 'Succesful tupas authentication'
   category: 'Tupas'
+
+tupas_session.login:
+  label: 'Succesful tupas login'
+  category: 'Tupas'
+
+tupas_session.register:
+  label: 'Succesful tupas registration'
+  category: 'Tupas'
+
