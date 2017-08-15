@@ -10,6 +10,7 @@ use Drupal\tupas_session\Event\SessionEvents;
 use Drupal\user\UserInterface;
 use Drupal\tupas_session\Event\SessionAuthenticationEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\Component\Datetime\TimeInterface;
 
 /**
  * Class TupasSessionManager.
@@ -47,6 +48,13 @@ class TupasSessionManager implements TupasSessionManagerInterface {
   protected $storage;
 
   /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -57,24 +65,25 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    *   Session manager service.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, TupasSessionStorageInterface $session_storage, SessionManagerInterface $session_manager, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(ConfigFactoryInterface $config_factory, TupasSessionStorageInterface $session_storage, SessionManagerInterface $session_manager, EventDispatcherInterface $event_dispatcher, TimeInterface $time) {
     $this->configFactory = $config_factory;
     $this->sessionManager = $session_manager;
     $this->storage = $session_storage;
     $this->eventDispatcher = $event_dispatcher;
+    $this->time = $time;
   }
 
   /**
    * Get request time.
    *
-   * @todo Replace with time service in 8.3.x.
-   *
    * @return int
    *   The request time.
    */
   public function getTime() {
-    return (int) $_SERVER['REQUEST_TIME'];
+    return $this->time->getCurrentTime();
   }
 
   /**

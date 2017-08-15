@@ -2,7 +2,9 @@
 
 namespace Drupal\tupas_registration\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -39,15 +41,17 @@ class RegisterForm extends AccountForm {
    *   The entity manager service.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager service.
-   * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
-   *   The entitity query service.
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
    * @param \Drupal\externalauth\ExternalAuthInterface $auth
    *   The external auth service.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth) {
-    parent::__construct($entity_manager, $language_manager, $entity_query);
+  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+    parent::__construct($entity_manager, $language_manager, $entity_type_bundle_info, $time);
 
     $this->sessionManager = $session_manager;
     $this->auth = $auth;
@@ -60,9 +64,10 @@ class RegisterForm extends AccountForm {
     return new static(
       $container->get('entity.manager'),
       $container->get('language_manager'),
-      $container->get('entity.query'),
       $container->get('tupas_session.session_manager'),
-      $container->get('externalauth.externalauth')
+      $container->get('externalauth.externalauth'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time')
     );
   }
 
