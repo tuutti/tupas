@@ -73,6 +73,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
     $this->sessionManager = $session_manager;
     $this->storage = $session_storage;
     $this->eventDispatcher = $event_dispatcher;
+    $this->time = $time;
   }
 
   /**
@@ -82,7 +83,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
    *   The request time.
    */
   public function getTime() {
-    return $this->time->getRequestTime();
+    return $this->time->getCurrentTime();
   }
 
   /**
