@@ -57,6 +57,13 @@ class TupasSessionManagerTest extends UnitTestCase {
   protected $session;
 
   /**
+   * The time service.
+   *
+   * @var \Drupal\Component\DateTime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -83,6 +90,8 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
+    $this->time = $this->getMock('\Drupal\Component\Datetime\TimeInterface');
+
     $this->eventDispatcher->expects($this->any())
       ->method('dispatch')
       ->will($this->returnValue($dispatched_event));
@@ -93,6 +102,7 @@ class TupasSessionManagerTest extends UnitTestCase {
         $this->storage,
         $this->sessionManager,
         $this->eventDispatcher,
+        $this->time,
       ])
       ->setMethods(['startNativeSession'])
       ->getMock();

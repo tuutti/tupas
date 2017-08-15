@@ -3,3 +3,5 @@ type: module
 description: Enables the TUPAS authentication functionality
 core: 8.x
 package: Tupas
+dependencies:
+  - system (>=8.3.0)
