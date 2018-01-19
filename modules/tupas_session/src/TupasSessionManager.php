@@ -129,7 +129,7 @@ class TupasSessionManager implements TupasSessionManagerInterface {
 
     // Allow session data to be altered.
     $session_data = new SessionData($transaction_id, $unique_id, $this->getTime(), $data);
-    /** @var SessionData $session */
+    /** @var \Drupal\tupas_session\Event\SessionData $session */
     $session = $this->eventDispatcher->dispatch(SessionEvents::SESSION_ALTER, $session_data);
 
     return $this->storage->save($session);
