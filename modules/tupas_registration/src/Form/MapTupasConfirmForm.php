@@ -58,7 +58,7 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return NULL;
+    return '';
   }
 
   /**

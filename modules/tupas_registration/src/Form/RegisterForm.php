@@ -2,10 +2,7 @@
 
 namespace Drupal\tupas_registration\Form;
 
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\tupas_session\TupasSessionManagerInterface;
 use Drupal\user\AccountForm;
@@ -33,37 +30,44 @@ class RegisterForm extends AccountForm {
   protected $auth;
 
   /**
-   * RegisterForm constructor.
-   *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager service.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   The language manager service.
-   * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
-   *   The entitity query service.
-   * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
-   *   The tupas session manager service.
-   * @param \Drupal\externalauth\ExternalAuthInterface $auth
-   *   The external auth service.
-   */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query, TupasSessionManagerInterface $session_manager, ExternalAuthInterface $auth) {
-    parent::__construct($entity_manager, $language_manager, $entity_query);
-
-    $this->sessionManager = $session_manager;
-    $this->auth = $auth;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity.manager'),
-      $container->get('language_manager'),
-      $container->get('entity.query'),
-      $container->get('tupas_session.session_manager'),
-      $container->get('externalauth.externalauth')
-    );
+    /** @var \Drupal\tupas_registration\Form\RegisterForm $instance */
+    $instance = parent::create($container);
+
+    // Use setters to inject custom services so we don't have to override the
+    // parent constructor.
+    return $instance->setExternalAuth($container->get('externalauth.externalauth'))
+      ->setSessionManager($container->get('tupas_session.session_manager'));
+  }
+
+  /**
+   * Sets the session manager.
+   *
+   * @param \Drupal\tupas_session\TupasSessionManagerInterface $sessionManager
+   *   The session manager.
+   *
+   * @return $this
+   *   The self.
+   */
+  public function setSessionManager(TupasSessionManagerInterface $sessionManager) {
+    $this->sessionManager = $sessionManager;
+    return $this;
+  }
+
+  /**
+   * Sets the external auth.
+   *
+   * @param \Drupal\externalauth\ExternalAuthInterface $externalAuth
+   *   The external auth.
+   *
+   * @return $this
+   *   The self.
+   */
+  public function setExternalAuth(ExternalAuthInterface $externalAuth) {
+    $this->auth = $externalAuth;
+    return $this;
   }
 
   /**
