@@ -46,7 +46,7 @@ class TupasTransactionManager implements TupasTransactionManagerInterface {
     // @todo This might cause some issues with logged in users.
     $this->sessionManager->regenerate();
 
-    $transaction_id = random_int(100000, 999999);
+    $transaction_id = (string) random_int(100000, 999999);
     // Store transaction id in temporary storage.
     $this->storage->set('transaction_id', $transaction_id);
 
