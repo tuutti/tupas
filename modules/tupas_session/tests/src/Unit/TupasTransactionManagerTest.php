@@ -51,7 +51,7 @@ class TupasTransactionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->storageFactory = $this->getMockBuilder('\Drupal\user\PrivateTempStoreFactory')
+    $this->storageFactory = $this->getMockBuilder('\Drupal\Core\TempStore\PrivateTempStoreFactory')
       ->disableOriginalConstructor()
       ->getMock();
 
