@@ -47,6 +47,13 @@ class SessionController extends ControllerBase {
   protected $transactionManager;
 
   /**
+   * The storage.
+   *
+   * @var \Drupal\tupas\TupasBankStorage
+   */
+  protected $storage;
+
+  /**
    * SessionController constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
@@ -60,6 +67,8 @@ class SessionController extends ControllerBase {
     $this->eventDispatcher = $event_dispatcher;
     $this->sessionManager = $session_manager;
     $this->transactionManager = $transaction_manager;
+
+    $this->storage = $this->entityTypeManager()->getStorage('tupas_bank');
   }
 
   /**
@@ -96,11 +105,9 @@ class SessionController extends ControllerBase {
    */
   public function front() {
     if ($this->sessionManager->getSession()) {
-      drupal_set_message($this->t('You already have an active TUPAS session.'), 'warning');
+      $this->messenger()->addWarning($this->t('You already have an active TUPAS session.'));
     }
-    $banks = $this->entityTypeManager()
-      ->getStorage('tupas_bank')
-      ->getEnabled();
+    $banks = $this->storage->getEnabled();
 
     $content['tupas_bank_items'] = [
       '#type' => 'container',
@@ -143,26 +150,30 @@ class SessionController extends ControllerBase {
    */
   public function returnTo(Request $request) {
     if (!$stamp = $request->query->get('B02K_TIMESTMP')) {
-      drupal_set_message($this->t('Missing required bank id argument.'), 'error');
+      $this->messenger()->addError($this->t('Missing required bank id argument.'));
 
       return $this->redirect('<front>');
     }
     $bank_number = (int) substr($stamp, 0, 3);
-    $bank = $this->entityTypeManager()
-      ->getStorage('tupas_bank')
+    $bank = $this->storage
       ->loadByBankNumber($bank_number);
 
     if (!$bank instanceof TupasBank) {
-      drupal_set_message($this->t('Validation failed.'), 'error');
+      $this->messenger()->addError($this->t('Validation failed.'));
 
       return $this->redirect('<front>');
     }
     $tupas = new Tupas($bank, $request->query->all());
     $transaction_id = (string) $this->transactionManager->get();
 
-    // Session not found / expired.
-    if (!$tupas->isValidTransaction($transaction_id)) {
-      drupal_set_message($this->t('Transaction not found or expired.'), 'error');
+    try {
+      // Session not found / expired.
+      if (!$tupas->isValidTransaction($transaction_id)) {
+        throw new \InvalidArgumentException('Invalid transaction.');
+      }
+    }
+    catch (\InvalidArgumentException $e) {
+      $this->messenger()->addError($this->t('Transaction not found or expired.'));
 
       return $this->redirect('tupas_session.front');
     }
@@ -173,7 +184,7 @@ class SessionController extends ControllerBase {
       $hashed_id = $bank->hashResponseId($request->query->get('B02K_CUSTID'));
 
       // Allow customer id to be altered.
-      /** @var CustomerIdAlterEvent $dispatched_data */
+      /** @var \Drupal\tupas_session\Event\CustomerIdAlterEvent $dispatched_data */
       $dispatched_data = $this->eventDispatcher
         ->dispatch(SessionEvents::CUSTOMER_ID_ALTER, new CustomerIdAlterEvent($hashed_id, [
           'raw' => $request->query->all(),
@@ -187,12 +198,12 @@ class SessionController extends ControllerBase {
       ]);
       // Allow redirect path to be customized.
       $redirect_data = new RedirectAlterEvent('<front>', $request->query->all(), $this->t('TUPAS authentication succesful.'));
-      /** @var RedirectAlterEvent $redirect */
+      /** @var \Drupal\tupas_session\Event\RedirectAlterEvent $redirect */
       $redirect = $this->eventDispatcher->dispatch(SessionEvents::REDIRECT_ALTER, $redirect_data);
 
       // Show message only if message is set.
       if ($message = $redirect->getMessage()) {
-        drupal_set_message($message);
+        $this->messenger()->addMessage($message);
       }
       // Delete used transaction after succesful tupas authentication.
       $this->transactionManager->delete();
@@ -200,7 +211,7 @@ class SessionController extends ControllerBase {
       return $this->redirect($redirect->getPath(), $redirect->getArguments());
     }
     catch (\Exception $e) {
-      drupal_set_message($this->t('TUPAS authentication failed.'), 'error');
+      $this->messenger()->addError($this->t('TUPAS authentication failed.'));
 
       return $this->redirect('<front>');
     }
@@ -213,7 +224,7 @@ class SessionController extends ControllerBase {
     // Attempt to delete transaction id.
     $this->transactionManager->delete();
 
-    drupal_set_message($this->t('TUPAS authentication was canceled by user.'), 'warning');
+    $this->messenger()->addWarning($this->t('TUPAS authentication was canceled by user.'));
 
     return $this->redirect('<front>');
   }
@@ -225,7 +236,7 @@ class SessionController extends ControllerBase {
     // Attempt to delete transaction id.
     $this->transactionManager->delete();
 
-    drupal_set_message($this->t('TUPAS authentication was rejected.'), 'warning');
+    $this->messenger()->addWarning($this->t('TUPAS authentication was rejected.'));
 
     return $this->redirect('<front>');
   }
