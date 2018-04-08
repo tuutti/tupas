@@ -67,7 +67,6 @@ class SessionController extends ControllerBase {
     $this->eventDispatcher = $event_dispatcher;
     $this->sessionManager = $session_manager;
     $this->transactionManager = $transaction_manager;
-
     $this->storage = $this->entityTypeManager()->getStorage('tupas_bank');
   }
 

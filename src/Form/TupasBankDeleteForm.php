@@ -38,13 +38,13 @@ class TupasBankDeleteForm extends EntityConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
 
-    drupal_set_message(
+    $this->messenger()->addMessage(
       $this->t('content @type: deleted @label.',
         [
           '@type' => $this->entity->bundle(),
           '@label' => $this->entity->label(),
         ]
-        )
+      )
     );
 
     $form_state->setRedirectUrl($this->getCancelUrl());

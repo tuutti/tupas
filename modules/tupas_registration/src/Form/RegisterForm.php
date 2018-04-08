@@ -132,13 +132,13 @@ class RegisterForm extends AccountForm {
     if ($account = $this->sessionManager->linkExisting($this->auth, $entity)) {
       $this->sessionManager->login($this->auth);
 
-      drupal_set_message($this->t('Registration successful. You are now logged in.'));
+      $this->messenger()->addMessage($this->t('Registration successful. You are now logged in.'));
     }
     else {
       // Delete account if registration failed.
       $entity->delete();
 
-      drupal_set_message($this->t('Registration failed due to an unknown reason.'), 'error');
+      $this->messenger()->addError($this->t('Registration failed due to an unknown reason.'));
     }
     $form_state->setRedirect('<front>');
   }
