@@ -5,7 +5,7 @@ services:
 
   tupas_session.event_subscriber:
     class: Drupal\tupas_session\EventSubscriber\TupasSessionEventSubscriber
-    arguments: ["@tupas_session.session_manager", "@current_user"]
+    arguments: ["@tupas_session.session_manager", "@current_user", "@messenger"]
     tags:
       - { name: event_subscriber }
 
@@ -15,7 +15,7 @@ services:
 
   # Override default transaction storage to lower tempstore expiration.
   tupas_transaction.storage:
-    class: Drupal\user\PrivateTempStoreFactory
+    class: Drupal\Core\TempStore\PrivateTempStoreFactory
     arguments: ['@keyvalue.expirable', '@lock', '@current_user', '@request_stack', 600]
     tags:
       - { name: backend_overridable }

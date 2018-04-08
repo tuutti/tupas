@@ -3,7 +3,7 @@
 namespace Drupal\tupas_session;
 
 use Drupal\Core\Session\SessionManagerInterface;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 
 /**
  * Class TupasTransactionManager.
@@ -31,7 +31,7 @@ class TupasTransactionManager implements TupasTransactionManagerInterface {
    *
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   The session manager.
-   * @param \Drupal\user\PrivateTempStoreFactory $storage
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $storage
    *   The private tempstore factory.
    */
   public function __construct(SessionManagerInterface $session_manager, PrivateTempStoreFactory $storage) {
@@ -46,7 +46,7 @@ class TupasTransactionManager implements TupasTransactionManagerInterface {
     // @todo This might cause some issues with logged in users.
     $this->sessionManager->regenerate();
 
-    $transaction_id = random_int(100000, 999999);
+    $transaction_id = (string) random_int(100000, 999999);
     // Store transaction id in temporary storage.
     $this->storage->set('transaction_id', $transaction_id);
 

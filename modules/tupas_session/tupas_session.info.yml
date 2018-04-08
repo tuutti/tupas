@@ -5,3 +5,4 @@ core: 8.x
 package: Tupas
 dependencies:
  - tupas
+ - system (>=8.5.0)

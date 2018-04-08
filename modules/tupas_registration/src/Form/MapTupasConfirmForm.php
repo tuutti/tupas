@@ -102,7 +102,7 @@ class MapTupasConfirmForm extends ConfirmFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    drupal_set_message($this->t('Account connected succesfully.'));
+    $this->messenger()->addMessage($this->t('Account connected succesfully.'));
     $session = $this->sessionManager->getSession();
     /** @var \Drupal\user\UserInterface $account */
     $account = User::load($this->currentUser()->id());

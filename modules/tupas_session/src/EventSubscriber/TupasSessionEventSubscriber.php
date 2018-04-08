@@ -2,6 +2,7 @@
 
 namespace Drupal\tupas_session\EventSubscriber;
 
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
@@ -35,16 +36,26 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   protected $sessionManager;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\tupas_session\TupasSessionManagerInterface $session_manager
    *   The tupas session manager service.
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
    *   The currenct user service.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
    */
-  public function __construct(TupasSessionManagerInterface $session_manager, AccountProxyInterface $current_user) {
+  public function __construct(TupasSessionManagerInterface $session_manager, AccountProxyInterface $current_user, MessengerInterface $messenger) {
     $this->sessionManager = $session_manager;
     $this->currentUser = $current_user;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -62,7 +73,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
   /**
    * This method is called whenever the kernel.request event is dispatched.
    *
-   * @param GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
    *   Event to dispatch.
    */
   public function handleTupasSession(GetResponseEvent $event) {
@@ -74,7 +85,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
       // Log the current user out if user has no active tupas session
       // and user has no permission to bypass this check.
       if ($this->sessionManager->getSetting('require_session') && !$this->currentUser->isAnonymous()) {
-        drupal_set_message($this->t('Current role does not allow users to log-in without an active TUPAS session.'), 'warning');
+        $this->messenger->addWarning($this->t('Current role does not allow users to log-in without an active TUPAS session.'));
 
         user_logout();
       }
@@ -96,7 +107,7 @@ class TupasSessionEventSubscriber implements EventSubscriberInterface {
     // Session has expired. Destroy the session.
     $this->sessionManager->destroy();
 
-    drupal_set_message($this->t('Your TUPAS authentication has expired.'), 'warning');
+    $this->messenger->addWarning($this->t('Your TUPAS authentication has expired.'));
 
     $url = Url::fromRoute('<front>');
     // Redirect to expired page.

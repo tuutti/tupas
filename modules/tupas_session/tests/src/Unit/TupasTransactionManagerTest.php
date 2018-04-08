@@ -51,7 +51,7 @@ class TupasTransactionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->storageFactory = $this->getMockBuilder('\Drupal\user\PrivateTempStoreFactory')
+    $this->storageFactory = $this->getMockBuilder('\Drupal\Core\TempStore\PrivateTempStoreFactory')
       ->disableOriginalConstructor()
       ->getMock();
 
@@ -91,8 +91,8 @@ class TupasTransactionManagerTest extends UnitTestCase {
       ->method('delete')
       ->will($this->returnValue(TRUE));
 
-    $this->assertTrue(mb_strlen($transaction_id) === 6 && is_int($transaction_id));
-    $this->assertTrue($transaction_id == $this->transactionManager->get());
+    $this->assertTrue(mb_strlen($transaction_id) === 6);
+    $this->assertTrue($transaction_id === $this->transactionManager->get());
 
     $this->transactionManager->delete();
 

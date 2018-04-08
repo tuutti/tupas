@@ -87,21 +87,21 @@ class RegistrationController extends SessionController {
    *   The request object.
    *
    * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
-   *    Formbuilder form object or redirect response on error.
+   *   Formbuilder form object or redirect response on error.
    */
   public function register(Request $request) {
     // Make sure user has active TUPAS session.
     if (!$session = $this->sessionManager->getSession()) {
-      drupal_set_message($this->t('TUPAS session not found.'), 'error');
+      $this->messenger()->addError($this->t('TUPAS session not found.'));
+
       // Return to tupas initialize page.
       return $this->redirect('tupas_session.front');
     }
-    $bank = $this->entityTypeManager()
-      ->getStorage('tupas_bank')
+    $bank = $this->storage
       ->load($session->getData('bank'));
 
     if (!$bank instanceof TupasBank) {
-      drupal_set_message($this->t('Validation failed.'), 'error');
+      $this->messenger()->addError($this->t('Validation failed.'));
 
       return $this->redirect('<front>');
     }
@@ -110,7 +110,7 @@ class RegistrationController extends SessionController {
     // Check if user has already connected their account.
     if ($this->auth->load($session->getUniqueId(), 'tupas_registration')) {
       if ($this->currentUser()->isAuthenticated()) {
-        drupal_set_message($this->t('You have already connected your account with TUPAS service.'), 'warning');
+        $this->messenger()->addWarning($this->t('You have already connected your account with TUPAS service.'));
 
         return $this->redirect('<front>');
       }
@@ -123,6 +123,7 @@ class RegistrationController extends SessionController {
     // Account found with legacy hash. Migrate to use a new hash.
     if ($account = $this->auth->load($legacy_hash, 'tupas_registration')) {
       $this->authmap->save($account, 'tupas_registration', $session->getUniqueId());
+
       $user_found = TRUE;
     }
     // Legacy/normal user found. Log the user in.
@@ -139,6 +140,7 @@ class RegistrationController extends SessionController {
     }
     // Attempt to use customer name and fallback to random name.
     $name = $this->usernameGenerator->getName($session->getData('name'));
+
     // Show custom registration form if user is not allowed to register without
     // filling the registration form.
     if (!$this->config('tupas_registration.settings')->get('disable_form')) {
@@ -150,12 +152,14 @@ class RegistrationController extends SessionController {
       return $this->entityFormBuilder()
         ->getForm($entity, 'tupas_registration');
     }
+
     if ($account = $this->sessionManager->loginRegister($this->auth)) {
       // Save user details.
       $account->setUsername($name)
         ->setPassword(user_password(20));
       $account->save();
     }
+
     return $this->redirect('<front>');
   }
 

@@ -110,13 +110,13 @@ class TupasBankForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label Tupas bank.', [
+        $this->messenger()->addMessage($this->t('Created the %label Tupas bank.', [
           '%label' => $tupas_bank->label(),
         ]));
         break;
 
       default:
-        drupal_set_message($this->t('Saved the %label Tupas bank.', [
+        $this->messenger()->addMessage($this->t('Saved the %label Tupas bank.', [
           '%label' => $tupas_bank->label(),
         ]));
     }
