@@ -10,6 +10,7 @@ use Drupal\user\Entity\Role;
  * Functional tests for tupas_registration.
  *
  * @group tupas
+ * @requires module externalauth
  */
 class TupasRegistrationFunctionalTest extends TupasSessionFunctionalBase {
 

@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  * Test basic tupas session functionality.
  *
  * @group tupas
+ * @requires module externalauth
  */
 class TupasRegistrationTest extends KernelTestBase {
 
