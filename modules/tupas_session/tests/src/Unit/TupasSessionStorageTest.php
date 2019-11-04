@@ -120,7 +120,8 @@ class TupasSessionStorageTest extends UnitTestCase {
     $request = Request::createFromGlobals();
     $this->requestStack->push($request);
 
-    $this->currentUser = $this->getMock('Drupal\Core\Session\AccountProxyInterface');
+    $this->currentUser = $this->getMockBuilder('Drupal\Core\Session\AccountProxyInterface')
+      ->getMock();
     $this->currentUser->expects($this->any())
       ->method('id')
       ->willReturn(1);
