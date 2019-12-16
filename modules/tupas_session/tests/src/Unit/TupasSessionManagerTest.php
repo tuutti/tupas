@@ -75,7 +75,8 @@ class TupasSessionManagerTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
 
-    $this->eventDispatcher = $this->getMock('\Symfony\Component\EventDispatcher\EventDispatcherInterface');
+    $this->eventDispatcher = $this->getMockBuilder('\Symfony\Component\EventDispatcher\EventDispatcherInterface')
+      ->getMock();
 
     $this->session = new SessionData(123456, $this->randomMachineName(), time(), []);
 

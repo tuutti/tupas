@@ -120,7 +120,7 @@ class TupasBankForm extends EntityForm {
           '%label' => $tupas_bank->label(),
         ]));
     }
-    $form_state->setRedirectUrl($tupas_bank->urlInfo('collection'));
+    $form_state->setRedirectUrl($tupas_bank->toUrl('collection'));
   }
 
 }

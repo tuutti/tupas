@@ -40,9 +40,11 @@ class UniqueUsernameTest extends UnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    $this->entityManager = $this->getMock('\Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->entityManager = $this->getMockBuilder('\Drupal\Core\Entity\EntityTypeManagerInterface')
+      ->getMock();
 
-    $this->entityStorage = $this->getMock('Drupal\Core\Entity\EntityStorageInterface');
+    $this->entityStorage = $this->getMockBuilder('Drupal\Core\Entity\EntityStorageInterface')
+      ->getMock();
     $this->entityManager->expects($this->any())
       ->method('getStorage')
       ->will($this->returnValue($this->entityStorage));

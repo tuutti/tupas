@@ -212,7 +212,7 @@ function tupas_session_update_8003() {
   /** @var \Drupal\tupas\Entity\TupasBank $bank */
   foreach ($banks as $bank) {
     if (!isset($map_table[$bank->id()])) {
-      drupal_set_message(t('Found bank without known bank number. Please update bank_number to %bank manually.', ['%bank' => $bank->label()]), 'error');
+      \Drupal::messenger()->addError(t('Found bank without known bank number. Please update bank_number to %bank manually.', ['%bank' => $bank->label()]));
     }
     $bank->set('bank_number', $map_table[$bank->id()]);
     $bank->save();
